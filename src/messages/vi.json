@@ -1,0 +1,33 @@
+{
+  "login": {
+    "title": "Đăng Nhập",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Nhập email của bạn",
+    "emailRequired": "Vui lòng nhập email của bạn!",
+    "emailInvalid": "Email không hợp lệ!",
+    "passwordLabel": "Mật khẩu",
+    "passwordPlaceholder": "Nhập mật khẩu của bạn",
+    "passwordRequired": "Vui lòng nhập mật khẩu của bạn!",
+    "passwordMinLength": "Mật khẩu phải có ít nhất 8 ký tự!",
+    "rememberMe": "Ghi nhớ đăng nhập",
+    "forgotPassword": "Quên mật khẩu?",
+    "submitButton": "Đăng Nhập",
+    "storeTitle": "CỬA HÀNG GAS",
+    "storeDescription": "Cung cấp các loại bình gas chất lượng cao, đảm bảo an toàn và chất lượng dịch vụ giao hàng nhanh chóng đến tận nhà.",
+    "loginSuccessTitle": "Đăng nhập thành công",
+    "loginFailedTitle": "Thất bại, sai email hoặc mật khẩu",
+    "loginFailedDesc": "Vui lòng kiểm tra lại thông tin đăng nhập.",
+    "errorTitle": "Lỗi hệ thống",
+    "errorDesc": "Đã xảy ra lỗi, vui lòng thử lại sau!",
+    "invalidCredentials": "Email hoặc mật khẩu không đúng"
+  },
+  "forgotPassword": {
+    "title": "Quên Mật Khẩu",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Nhập email của bạn",
+    "emailRequired": "Vui lòng nhập email của bạn!",
+    "emailInvalid": "Email không hợp lệ!",
+    "submitButton": "Gửi Yêu Cầu",
+    "backToLogin": "Quay lại Đăng Nhập"
+  }
+}

@@ -1,0 +1,3 @@
+interface TitleState {
+    title: string
+}
