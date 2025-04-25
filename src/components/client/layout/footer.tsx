@@ -4,18 +4,18 @@ import { IMAGES } from "@/constants/client/theme";
 
 export default function FooterSection() {
   return (
-    <div className="border-t border-[#E2E8F0] py-4">
+    <div className="border-t border-gray-800 py-4">
       <div className="max-w-7xl mx-auto px-4">
         <Row justify="space-between" align="middle">
           <Col>
-            <p className="text-[#335479] text-sm">
+            <p className="text-gray-800 text-sm">
               © 2025 The Maxima Experience. All rights reserved
             </p>
           </Col>
 
           <Col>
             <div className="flex items-center gap-2">
-              <span className="text-[#335479] text-sm">Language:</span>
+              <span className="text-gray-800 text-sm">Language:</span>
               <button className="w-6 h-6 rounded-full flex items-center justify-center">
                 <Image
                   src={IMAGES.LangViet}

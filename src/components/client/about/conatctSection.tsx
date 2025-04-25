@@ -5,7 +5,7 @@ import { YoutubeOutlined, FacebookOutlined } from "@ant-design/icons";
 
 export default function ContactSection() {
   return (
-    <div className="bg-[#003049] relative overflow-hidden text-white py-16">
+    <div className="bg-gradient-to-r from-[#1a1a1a] to-[#333333] relative overflow-hidden text-white py-16">
       {/* Background decorative images */}
       <div className="absolute top-0 left-0 z-0">
         <Image

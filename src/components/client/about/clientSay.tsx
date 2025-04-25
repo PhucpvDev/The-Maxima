@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Carousel } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { motion } from "framer-motion";
 import "antd/dist/reset.css";
+import { getClientSay } from "@/lib/directus/client_say";
 
 // Animation variants for the container
 const containerVariants = {
@@ -37,80 +38,74 @@ const childVariants = {
   },
 };
 
-// Animation variants for carousel cards (similar to table rows in previous examples)
+// Animation variants for carousel cards
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
-// Animation variants for buttons (reused from the original code)
+// Animation variants for buttons
 const buttonVariants = {
   hover: { scale: 1.1, transition: { duration: 0.3 } },
   tap: { scale: 0.9 },
 };
 
-const testimonials = [
-  {
-    link: (
-      <iframe
-        width="100%"
-        height="100%"
-        src="https://www.youtube.com/embed/NVzcKBNjn38?si=ZCQt1mzFff1z0VBL"
-        title="YouTube video player"
-        className="rounded-xl"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      ></iframe>
-    ),
-    quote: "“Invested 50,000 USDT, Profits reached more than 200%”",
-    author: "Tung Hua, Malaysia",
-  },
-  {
-    link: (
-      <iframe
-        width="100%"
-        height="100%"
-        src="https://www.youtube.com/embed/p23vKxuslNA?si=8jkY3iPILbTu0VBM"
-        title="YouTube video player"
-        className="rounded-xl"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      ></iframe>
-    ),
-    quote:
-      "“I invested 10,000 USDT, 4 months I earn about 12,000 USDT, started in...”",
-    author: "Iskandar, Singapore",
-  },
-  {
-    link: (
-      <iframe
-        width="100%"
-        height="100%"
-        src="https://www.youtube.com/embed/mwmUk9Fxmuc?si=XP4d0A24slYoOcuZ"
-        title="YouTube video player"
-        className="rounded-xl"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      ></iframe>
-    ),
-    quote: "“Join on 8th May 2024. Now monthly earning around 6 figures”",
-    author: "Jimmy, Malaysia",
-  },
-  {
-    link: (
-      <iframe
-        width="100%"
-        height="100%"
-        src="https://www.youtube.com/embed/49Vwgi4KQ9M?si=Y8dc6EApPlgjfsgH"
-        title="YouTube video player"
-        className="rounded-xl"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      ></iframe>
-    ),
-    quote: "“I’ll introduce to my friends, because the ROI is awesome”",
-    author: "Erica, Malaysia",
-  },
-];
-
 const Testimonials: React.FC = () => {
   const carouselRef = useRef<any>(null);
+  const [title, setTitle] = useState("OUR CLIENTS SAY");
+  const [testimonials, setTestimonials] = useState<{ video_url: string; description: string; location_name: string }[] | undefined>(undefined);
+  const [featuredVideo, setFeaturedVideo] = useState("https://www.youtube.com/embed/p23vKxuslNA?si=8jkY3iPILbTu0VBM");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getClientSay();
+        if (result && (Array.isArray(result) ? result.length > 0 : true)) {
+          // Handle both array response and direct object response
+          const data = Array.isArray(result) ? result[0] : result;
+          
+          if (data) {
+            // Set the title if available
+            if (data.title) {
+              setTitle(data.title);
+            }
+            
+            // Set featured video to video_url_2 as in the original component
+            if (data.video_url_2) {
+              setFeaturedVideo(data.video_url_2);
+            }
+            
+            // Create testimonials array from the API data
+            const apiTestimonials = [];
+            
+            for (let i = 1; i <= 4; i++) {
+              const videoUrlKey = `video_url_${i}`;
+              const descriptionKey = `description_${i}`;
+              const locationNameKey = `location_name_${i}`;
+              
+              if (data[videoUrlKey] && data[descriptionKey] && data[locationNameKey]) {
+                apiTestimonials.push({
+                  video_url: data[videoUrlKey],
+                  description: data[descriptionKey],
+                  location_name: data[locationNameKey],
+                });
+              }
+            }
+            
+            // Only update state if we have testimonials from the API
+            if (apiTestimonials.length > 0) {
+              setTestimonials(apiTestimonials);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching client testimonials:", error);
+        // Will use default data if fetch fails
+      }
+    };
+    
+    fetchData();
+  }, []);
 
   const handlePrev = () => {
     if (carouselRef.current) {
@@ -132,15 +127,12 @@ const Testimonials: React.FC = () => {
       whileInView="visible"
       viewport={{ once: true, amount: 0.2 }}
     >
-     
-
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <motion.p
-          className="text-4xl font-bold text-blue-900 mb-12"
+          className="text-4xl font-bold text-gray-800 mb-12"
           variants={childVariants}
         >
-          OUR CLIENTS SAY
+          {title}
         </motion.p>
 
         {/* Main Video Section */}
@@ -151,7 +143,7 @@ const Testimonials: React.FC = () => {
           <iframe
             width="100%"
             height="500px"
-            src="https://www.youtube.com/embed/p23vKxuslNA?si=8jkY3iPILbTu0VBM"
+            src={featuredVideo}
             title="YouTube video player"
             className="absolute top-0 left-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -201,7 +193,7 @@ const Testimonials: React.FC = () => {
               },
             ]}
           >
-            {testimonials.map((testimonial, index) => (
+            {testimonials?.map((testimonial, index) => (
               <div key={index} className="px-2">
                 <motion.div
                   variants={cardVariants}
@@ -211,13 +203,20 @@ const Testimonials: React.FC = () => {
                   className="flex flex-col rounded-xl h-full transition-shadow"
                 >
                   <div className="relative w-full aspect-video mb-4 rounded-lg overflow-hidden">
-                    {testimonial.link}
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      src={testimonial.video_url}
+                      title="YouTube video player"
+                      className="rounded-xl"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    ></iframe>
                   </div>
                   <p className="text-base text-gray-700 mb-2">
-                    {testimonial.quote}
+                    {testimonial.description}
                   </p>
-                  <p className="text-sm text-blue-900 font-semibold">
-                    {testimonial.author}
+                  <p className="text-sm text-gray-800 font-semibold">
+                    {testimonial.location_name}
                   </p>
                 </motion.div>
               </div>

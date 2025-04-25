@@ -2,8 +2,9 @@
 
 import { Table } from "antd";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { getTradersRanks, TradersRanksData } from "@/lib/directus/traders_ranks";
 
-// Animation variants for the container
 const containerVariants = {
   hidden: { opacity: 0, y: 50 },
   visible: {
@@ -18,7 +19,6 @@ const containerVariants = {
   },
 };
 
-// Animation variants for child elements
 const childVariants = {
   hidden: { opacity: 0, y: 100 },
   visible: {
@@ -34,54 +34,77 @@ const childVariants = {
   },
 };
 
-// Animation variants for table rows
 const rowVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
-
-const dataSource = [
-  { key: "1", rank: "Newbie Trader", capital: "$2,500", trades: 6, profits: "$300", referral: "$100" },
-  { key: "2", rank: "Rookie Trader", capital: "$2,500", trades: 6, profits: "$300", referral: "$100" },
-  { key: "3", rank: "Median Trader", capital: "$2,500", trades: 6, profits: "$300", referral: "$100" },
-  { key: "4", rank: "Rookie Trader", capital: "$2,500", trades: 6, profits: "$300", referral: "$100" },
-  { key: "5", rank: "Newbie Trader", capital: "$2,500", trades: 6, profits: "$300", referral: "$100" },
-];
 
 const columns = [
   {
     title: "Rank",
     dataIndex: "rank",
     key: "rank",
-    render: (text: string) => <span className="font-poppins font-semibold text-[#001737]">{text}</span>,
+    render: (text: string) => (
+      <span className="font-poppins font-semibold text-gray-800">{text}</span>
+    ),
   },
   {
     title: "Capital",
     dataIndex: "capital",
     key: "capital",
-    render: (text: string) => <span className="font-poppins text-[#6B7280]">{text}</span>,
+    render: (text: string) => (
+      <span className="font-poppins text-[#6B7280]">{text}</span>
+    ),
   },
   {
     title: "Trade Per Day",
     dataIndex: "trades",
     key: "trades",
-    render: (text: number) => <span className="font-poppins text-[#6B7280]">{text}</span>,
+    render: (text: number) => (
+      <span className="font-poppins text-[#6B7280]">{text}</span>
+    ),
   },
   {
     title: "Monthly Profits",
     dataIndex: "profits",
     key: "profits",
-    render: (text: string) => <span className="font-poppins text-[#6B7280]">{text}</span>,
+    render: (text: string) => (
+      <span className="font-poppins text-[#6B7280]">{text}</span>
+    ),
   },
   {
     title: "Referral Earning",
     dataIndex: "referral",
     key: "referral",
-    render: (text: string) => <span className="font-poppins text-[#6B7280]">{text}</span>,
+    render: (text: string) => (
+      <span className="font-poppins text-[#6B7280]">{text}</span>
+    ),
   },
 ];
 
 export default function TradersRanksSection() {
+  const [data, setData] = useState<TradersRanksData | null>(null);
+
+  // Lấy dữ liệu từ Directus khi component được mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getTradersRanks();
+        const fetchedData: TradersRanksData = result[0]; // Lấy mục đầu tiên
+        setData(fetchedData);
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu Traders Ranks:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (!data) {
+    return <div className="text-center py-10">Đang tải...</div>;
+  }
+
+  const { title, description, rankings } = data;
+
   return (
     <motion.div
       className="py-8 md:py-12 max-w-7xl mx-auto px-4 sm:px-8 lg:px-16"
@@ -91,17 +114,17 @@ export default function TradersRanksSection() {
       viewport={{ once: true, amount: 0.2 }}
     >
       <motion.p
-        className="text-xl sm:text-2xl md:text-3xl font-bold text-[#001737] font-poppins"
+        className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 font-poppins"
         variants={childVariants}
       >
-        TRADERS RANKS
+        {title}
       </motion.p>
 
       <motion.p
         className="text-[#6B7280] text-sm sm:text-base font-poppins"
         variants={childVariants}
       >
-        Here are five rankings for traders based on their approximate monthly income.
+        {description}
       </motion.p>
 
       <motion.div
@@ -109,12 +132,12 @@ export default function TradersRanksSection() {
         variants={childVariants}
       >
         <Table
-          dataSource={dataSource}
+          dataSource={rankings}
           columns={columns}
           pagination={false}
           bordered={false}
           rowClassName={(record, index) => (index % 2 === 1 ? "bg-[#F7FAFC]" : "")}
-          className="[&_.ant-table-thead_th]:bg-[#F7FAFC] [&_.ant-table-thead_th]:text-[#001737] [&_.ant-table-thead_th]:font-poppins [&_.ant-table-thead_th]:font-semibold [&_.ant-table-thead_th]:text-xs [&_.ant-table-thead_th]:sm:text-sm [&_.ant-table-thead_th]:md:text-base [&_.ant-table-cell]:px-2 [&_.ant-table-cell]:sm:px-4 [&_.ant-table-cell]:py-2 [&_.ant-table-cell]:sm:py-3"
+          className="[&_.ant-table-thead_th]:bg-[#F7FAFC] [&_.ant-table-thead_th]:text-gray-800 [&_.ant-table-thead_th]:font-poppins [&_.ant-table-thead_th]:font-semibold [&_.ant-table-thead_th]:text-xs [&_.ant-table-thead_th]:sm:text-sm [&_.ant-table-thead_th]:md:text-base [&_.ant-table-cell]:px-2 [&_.ant-table-cell]:sm:px-4 [&_.ant-table-cell]:py-2 [&_.ant-table-cell]:sm:py-3"
           components={{
             body: {
               row: ({ children, ...props }) => (
@@ -132,52 +155,6 @@ export default function TradersRanksSection() {
           }}
         />
       </motion.div>
-
-      <motion.div
-        className="flex justify-between items-center mt-6 text-sm font-poppins"
-        variants={childVariants}
-      >
-        <a href="#" className="text-[#6B7280] hover:text-[#3B82F6] transition-colors">
-          Come black
-        </a>
-        <div className="flex space-x-2">
-          {[1, 2, 3, 4].map((num) => (
-            <a
-              key={num}
-              className={`px-2 py-1 rounded-md transition-all ${
-                num === 3
-                  ? "bg-[#3B82F6] text-white font-semibold"
-                  : "text-[#6B7280] hover:bg-[#3B82F6] hover:text-white"
-              }`}
-              href="#"
-            >
-              {num}
-            </a>
-          ))}
-        </div>
-        <a href="#" className="text-[#3B82F6] hover:text-[#001737] transition-colors">
-          See more
-        </a>
-      </motion.div>
-
-      {/* Global styles for Poppins font and table customization */}
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-        .font-poppins {
-          font-family: 'Poppins', Arial, Helvetica, sans-serif;
-        }
-        .ant-table-thead > tr > th {
-          background: #f7fafc !important;
-          color: #001737 !important;
-          font-weight: 600 !important;
-        }
-        .ant-table-tbody > tr > td {
-          color: #6b7280 !important;
-        }
-        .ant-table-tbody > tr:hover > td {
-          background: #e5e7eb !important;
-        }
-      `}</style>
     </motion.div>
   );
 }

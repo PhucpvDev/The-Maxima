@@ -55,7 +55,7 @@ export default function Home() {
   return (
     <>
       <div className="min-h-screen bg-[#003055] text-white font-roboto relative">
-        {/* <Image
+        <Image
           src={IMAGES.Banner1}
           alt="Banner Background"
           fill
@@ -65,13 +65,13 @@ export default function Home() {
           }}
           className="md:object-center object-[75%_50%]"
           priority
-        /> */}
+        />
         <div className="absolute inset-0 bg-black/20 z-0"></div>
 
         <div className="relative z-50">
           <header
             className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-              isScrolled ? "bg-[#122148] shadow-md" : "bg-transparent"
+              isScrolled ? "bg-black shadow-md" : "bg-transparent"
             }`}
           >
             <div className="flex justify-between items-center px-4 py-4 mx-auto max-w-7xl">
@@ -102,15 +102,6 @@ export default function Home() {
                 className="md:hidden"
                 width="80%"
                 closeIcon={<CloseOutlined style={{ color: "#fff" }} />}
-                headerStyle={{
-                  background: "#122148",
-                  borderBottom: "1px solid rgba(255,255,255,0.1)",
-                  padding: "16px",
-                }}
-                bodyStyle={{
-                  padding: 0,
-                  background: "#122148",
-                }}
                 title={
                   <div className="flex items-center">
                     <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-2">
@@ -193,7 +184,7 @@ export default function Home() {
                   <a
                     key={item.key}
                     href="#"
-                    className={`px-4 py-2 text-base font-medium ${
+                    className={`px-5 py-2 text-base font-medium ${
                       current === item.key
                         ? "text-white bg-white/15 rounded-full"
                         : "text-white/80"
@@ -245,20 +236,20 @@ export default function Home() {
 
           <main className="px-4 py-10 pt-28 md:pt-32 max-w-7xl mx-auto">
             <div className="md:mb-7 md:text-left">
-              <h1 className="text-[25px] sm:text-3xl md:text-[55px] font-bold mb-6 leading-tight tracking-wide">
-                STABLE PROFIT MODEL 2.0
+              <h1 className="text-[25px] sm:text-3xl md:text-[55px] uppercase font-bold mb-6 leading-tight tracking-wide">
+                Unlock Peak Profit Model
                 <br />
-                BASED ON SYNTHESIS
+                2.0 Breakthrough with
                 <br />
-                PRINCIPLES
+                Futures Trading
               </h1>
 
               <h1 className="text-xl sm:text-xl md:text-3xl font-bold mb-2">
-                To Be Better Than We Were Yesterday
+                To Be Smarter, We’ve Predicted Your Success
               </h1>
 
               <p className="text-xl sm:text-lg md:text-xl mb-8 font-bold">
-                Big Data, Smart Trading, It's All About Probability!
+                Rate — How Much Is It?
               </p>
 
               <button className="bg-orange-400 hover:bg-orange-500 text-white font-medium px-8 sm:px-16 py-3 rounded-full sm:w-auto">
@@ -273,7 +264,7 @@ export default function Home() {
                 <div className="flex items-center">
                   <div className="bg-orange-100 p-4 rounded-full mr-4 shadow-xl">
                     <Image
-                      src={IMAGES.Percent}
+                      src={IMAGES.Percent.src}
                       alt="Percent Icon"
                       width={32}
                       height={32}

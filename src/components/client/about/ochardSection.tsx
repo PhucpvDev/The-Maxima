@@ -1,7 +1,11 @@
+"use client";
+
 import { Row, Col } from "antd";
 import Image from "next/image";
 import { IMAGES } from "@/constants/client/theme";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { getAppleOrchard, AppleOrchardData } from "@/lib/directus/apple_orchard";
 
 // Animation variants for the container
 const containerVariants = {
@@ -35,6 +39,31 @@ const childVariants = {
 };
 
 export default function AppleOrchardSection() {
+  const [data, setData] = useState<AppleOrchardData | null>(null);
+
+  // Lấy dữ liệu từ Directus khi component được mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getAppleOrchard();
+        const fetchedData: AppleOrchardData = result[0]; // Lấy mục đầu tiên
+        setData(fetchedData);
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu Apple Orchard:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (!data) {
+    return <div className="text-center py-16">Đang tải...</div>;
+  }
+
+  const { title, subtitle, description, image } = data;
+
+  // Tách description thành các đoạn nếu có ký tự xuống dòng (\n\n)
+  const descriptionParagraphs = description.split('\n\n');
+
   return (
     <motion.section
       className="mb-16 bg-[#F4F8FB] relative overflow-hidden"
@@ -55,7 +84,7 @@ export default function AppleOrchardSection() {
       </div>
       <div className="absolute right-0 z-0 top-20">
         <Image
-          src={IMAGES.BgFooter2}
+          src={IMAGES.BgFooter2.src}
           alt="Decorative Background 2"
           width={900}
           height={300}
@@ -68,33 +97,24 @@ export default function AppleOrchardSection() {
         <Row gutter={[32, 32]} className="items-center">
           <Col xs={24} lg={14}>
             <motion.p
-              className="text-3xl font-bold text-[#002146] mb-4"
+              className="text-3xl font-bold text-gray-800 mb-4"
               variants={childVariants}
             >
-              APPLE ORCHARD
+              {title}
             </motion.p>
             <motion.p
-              className="text-xl text-[#335479] font-semibold mb-6"
+              className="text-xl text-gray-800 font-semibold mb-6"
               variants={childVariants}
             >
-              Revolutionizing Decentralized Trading
+              {subtitle}
             </motion.p>
             <motion.div
-              className="space-y-5 text-base text-[#335479]"
+              className="space-y-5 text-base text-gray-800"
               variants={childVariants}
             >
-              <p>
-                Apple Orchard is the world’s first decentralized trading DAO that
-                combines cutting-edge technology with user-centric innovation.
-                Featuring a unique dashboard and back-office system, it provides
-                unparalleled transparency and control for traders and IBs.
-              </p>
-              <p>
-                With a comprehensive, gamified IB incentive tracking system,
-                Apple Orchard transforms statistics into an engaging Game-Fi
-                experience, empowering users to thrive in a decentralized
-                ecosystem.
-              </p>
+              {descriptionParagraphs.map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
             </motion.div>
           </Col>
 
@@ -103,13 +123,19 @@ export default function AppleOrchardSection() {
               className="relative w-54 aspect-[8/16] ml-15 md:ml-20"
               variants={childVariants}
             >
-              <Image
-                src={IMAGES.Banner4}
-                alt="Apple Orchard UI Preview"
-                fill
-                className="rounded-2xl object-cover shadow-lg"
-                priority
-              />
+              {image ? (
+                <Image
+                  src={`https://the-maxima.directus.app/assets/${image}`}
+                  alt={title}
+                  fill
+                  className="rounded-2xl object-cover shadow-lg"
+                  priority
+                />
+              ) : (
+                <div className="bg-gray-200 rounded-2xl h-full flex items-center justify-center">
+                  <p className="text-gray-500">Không có hình ảnh</p>
+                </div>
+              )}
             </motion.div>
           </Col>
         </Row>

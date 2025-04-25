@@ -1,7 +1,13 @@
-'use client'
+// Remove 'use client'
+import { getAbout1 } from '@/lib/directus/about_1';
 
-export default function PostPage() {
+export default async function PostPage() {
+  const data = await getAbout1();
+  console.log("data======", data);
+
   return (
-    <div>Nội dung bài viết</div>
-  )
+    <div>
+      
+    </div>
+  );
 }

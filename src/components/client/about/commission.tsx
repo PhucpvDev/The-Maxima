@@ -2,6 +2,8 @@
 
 import { Table } from "antd";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { getCommission, TransformedCommissionData } from "@/lib/directus/commission";
 
 // Animation variants for the container
 const containerVariants = {
@@ -40,40 +42,64 @@ const rowVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
-const dataSource = [
-  { key: "1", rank: "Direct Referral", commission: "$3", profits: "12%", apple: "$1 per lot" },
-  { key: "2", rank: "I.B", commission: "$2", profits: "14%", apple: "$1 per lot" },
-  { key: "3", rank: "M.I.B", commission: "$1", profits: "16%", apple: "$1 per lot" },
-];
-
 const columns = [
   {
     title: "Rank",
     dataIndex: "rank",
     key: "rank",
-    render: (text: string) => <span className="font-poppins font-semibold text-[#001737]">{text}</span>,
+    render: (text: string) => (
+      <span className="font-poppins font-semibold text-[#001737]">{text}</span>
+    ),
   },
   {
     title: "Commission Per Lot",
     dataIndex: "commission",
     key: "commission",
-    render: (text: string) => <span className="font-poppins text-[#6B7280]">{text}</span>,
+    render: (text: string) => (
+      <span className="font-poppins text-[#6B7280]">{text}</span>
+    ),
   },
   {
     title: "Profits Sharing",
     dataIndex: "profits",
     key: "profits",
-    render: (text: string) => <span className="font-poppins text-[#6B7280]">{text}</span>,
+    render: (text: string) => (
+      <span className="font-poppins text-[#6B7280]">{text}</span>
+    ),
   },
   {
     title: "Apple Orchard",
     dataIndex: "apple",
     key: "apple",
-    render: (text: string) => <span className="font-poppins text-[#6B7280]">{text}</span>,
+    render: (text: string) => (
+      <span className="font-poppins text-[#6B7280]">{text}</span>
+    ),
   },
 ];
 
 export default function Commission() {
+  const [data, setData] = useState<TransformedCommissionData | null>(null);
+
+  // Lấy dữ liệu từ Directus khi component được mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getCommission();
+        const fetchedData: TransformedCommissionData = result[0]; // Lấy mục đầu tiên
+        setData(fetchedData);
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu Commission:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (!data) {
+    return <div className="text-center py-10">Đang tải...</div>;
+  }
+
+  const { title, description, commissions } = data;
+
   return (
     <motion.div
       className="py-8 md:py-12 max-w-7xl mx-auto px-4 sm:px-8 lg:px-16"
@@ -86,14 +112,14 @@ export default function Commission() {
         className="text-xl sm:text-2xl md:text-3xl font-bold text-[#001737] mb-4 font-poppins"
         variants={childVariants}
       >
-        IB, MIB Commission
+        {title}
       </motion.p>
 
       <motion.p
         className="text-[#6B7280] text-sm sm:text-base mb-8 font-poppins"
         variants={childVariants}
       >
-        You earn USDT based on the trading volume you contribute to the community.
+        {description}
       </motion.p>
 
       <motion.div
@@ -101,7 +127,7 @@ export default function Commission() {
         variants={childVariants}
       >
         <Table
-          dataSource={dataSource}
+          dataSource={commissions}
           columns={columns}
           pagination={false}
           bordered={false}
@@ -124,52 +150,6 @@ export default function Commission() {
           }}
         />
       </motion.div>
-
-      <motion.div
-        className="flex justify-between items-center mt-6 text-sm font-poppins"
-        variants={childVariants}
-      >
-        <a href="#" className="text-[#6B7280] hover:text-[#3B82F6] transition-colors">
-          Come back
-        </a>
-        <div className="flex space-x-2">
-          {[1, 2, 3, 4].map((num) => (
-            <a
-              key={num}
-              className={`px-2 py-1 rounded-md transition-all ${
-                num === 3
-                  ? "bg-[#3B82F6] text-white font-semibold"
-                  : "text-[#6B7280] hover:bg-[#3B82F6] hover:text-white"
-              }`}
-              href="#"
-            >
-              {num}
-            </a>
-          ))}
-        </div>
-        <a href="#" className="text-[#3B82F6] hover:text-[#001737] transition-colors">
-          See more
-        </a>
-      </motion.div>
-
-      {/* Global styles for Poppins font and table customization */}
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-        .font-poppins {
-          font-family: 'Poppins', Arial, Helvetica, sans-serif;
-        }
-        .ant-table-thead > tr > th {
-          background: #f7fafc !important;
-          color: #001737 !important;
-          font-weight: 600 !important;
-        }
-        .ant-table-tbody > tr > td {
-          color: #6b7280 !important;
-        }
-        .ant-table-tbody > tr:hover > td {
-          background: #e5e7eb !important;
-        }
-      `}</style>
     </motion.div>
   );
 }

@@ -1,14 +1,32 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Carousel } from "antd";
 import Image from "next/image";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { IMAGES } from "@/constants/client/theme";
 import { motion } from "framer-motion";
+import { getTestimonials, TransformedTestimonialData, TestimonialItem } from "@/lib/directus/testimonials";
 
 const MaximaTestimonials: React.FC = () => {
   const carouselRef = useRef<any>(null);
+  const [testimonialData, setTestimonialData] = useState<TransformedTestimonialData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getTestimonials();
+        setTestimonialData(result[0]); // Get the first item
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching testimonials:", error);
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
 
   const handlePrev = () => {
     carouselRef.current?.prev();
@@ -18,7 +36,6 @@ const MaximaTestimonials: React.FC = () => {
     carouselRef.current?.next();
   };
 
-  // Animation variants for the container
   const containerVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: {
@@ -33,7 +50,6 @@ const MaximaTestimonials: React.FC = () => {
     },
   };
 
-  // Animation variants for child elements
   const childVariants = {
     hidden: { opacity: 0, y: 100 },
     visible: {
@@ -49,26 +65,14 @@ const MaximaTestimonials: React.FC = () => {
     },
   };
 
-  const testimonials = [
-    {
-      text: "The fast-paced environment at The Maxima requires constant adaptation, which makes every workday exciting. It’s a place where each day brings new joy, new connections, and new challenges.",
-      avatar: IMAGES.Banner4,
-      name: "Loan Pham",
-      position: "Tester",
-    },
-    {
-      text: "The Maxima feels like a family in the best sense. Colleagues support and uplift one another, sharing knowledge and overcoming challenges together. This sense of community makes me love what I do.",
-      avatar: IMAGES.Banner4,
-      name: "Loan Pham",
-      position: "Tester",
-    },
-    {
-      text: "After more than a decade at The Maxima, I still feel the same excitement as my first day. The work here is uniquely fulfilling, bringing daily joy to everyone, whether in tech or beyond.",
-      avatar: IMAGES.Banner4,
-      name: "Loan Pham",
-      position: "Tester",
-    },
-  ];
+  // Use data from API or fallback to hardcoded data
+  const testimonials = testimonialData?.testimonials;
+  const title = testimonialData?.title || "Share from \"The Maxima\"";
+  const description = testimonialData?.description || "The dynamic environment at The Maxima always has good values that bring joyful and happy working days to Maxima people.";
+
+  if (loading) {
+    return <div className="w-full h-80 flex items-center justify-center">Loading testimonials...</div>;
+  }
 
   return (
     <motion.div
@@ -90,20 +94,17 @@ const MaximaTestimonials: React.FC = () => {
           className="text-white text-4xl font-bold mb-4"
           variants={childVariants}
         >
-          Share from "The Maxima"
+          {title}
         </motion.h2>
         <motion.p
           className="text-white text-center mx-auto max-w-2xl md:p-0 p-2"
           variants={childVariants}
         >
-          The dynamic environment at The Maxima always has good values that
-          bring joyful and happy working days to Maxima people.
+          {description}
         </motion.p>
       </div>
 
-      {/* Testimonials Carousel */}
       <div className="max-w-6xl mx-auto relative pb-12">
-        {/* Custom navigation buttons */}
         <button
           onClick={handlePrev}
           className="absolute left-0 top-1/4 -translate-y-1/2 z-10 bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg -ml-5"
@@ -138,7 +139,7 @@ const MaximaTestimonials: React.FC = () => {
             },
           ]}
         >
-          {testimonials.map((item, index) => (
+          {testimonials?.map((item, index) => (
             <div key={index} className="px-4">
               <motion.div
                 className="relative group overflow-visible"
@@ -168,7 +169,7 @@ const MaximaTestimonials: React.FC = () => {
                   <div className="relative w-full flex flex-col items-center group-hover:-translate-y-12 transition-all duration-300 ease-out">
                     <div className="w-20 h-20 z-10 rounded-full overflow-hidden border-4 border-white shadow-md mb-15 group-hover:mb-0">
                       <Image
-                        src={item.avatar}
+                        src={`https://the-maxima.directus.app/assets/${item.avatar}`}
                         alt={item.name || "Testimonial avatar"}
                         width={80}
                         height={80}

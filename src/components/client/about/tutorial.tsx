@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { getTutorial } from "@/lib/directus/tutorial";
 
-// Animation variants for containers
 const containerVariants = {
   hidden: { opacity: 0, y: 50 },
   visible: {
@@ -18,7 +18,6 @@ const containerVariants = {
   },
 };
 
-// Animation variants for child elements
 const childVariants = {
   hidden: { opacity: 0, y: 100 },
   visible: {
@@ -34,7 +33,6 @@ const childVariants = {
   },
 };
 
-// Animation variants for cards (includes hover)
 const cardVariants = {
   hidden: { opacity: 0, y: 50 },
   visible: {
@@ -50,26 +48,60 @@ const cardVariants = {
   hover: { scale: 1.03, transition: { duration: 0.3 } },
 };
 
+
 const Tutorial: React.FC = () => {
+  interface TutorialData {
+    title?: string;
+    step_1?: string;
+    description_1?: string;
+    video_url_1?: string;
+    step_2?: string;
+    description_2?: string;
+    video_url_2?: string;
+    step_3?: string;
+    description_3?: string;
+    video_url_3?: string;
+  }
+
+  const [tutorialData, setTutorialData] = useState<TutorialData | undefined>(undefined);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getTutorial();
+        // Check if the result is an array and has data
+        if (Array.isArray(result) && result.length > 0) {
+          setTutorialData(result[0]);
+        } else if (result && !Array.isArray(result)) {
+          // If result is an object, not an array
+          setTutorialData(result);
+        }
+      } catch (error) {
+        console.error("Error fetching tutorial data:", error);
+        // Will continue using default data if fetch fails
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div className="bg-[#F7FAFC] md:py-16 py-8 px-4 sm:px-6 lg:px-8 text-center">
-      {/* Header */}
       <motion.div
-        className="mb-12"
+        className=""
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
       >
-        <motion.h2
-          className="text-3xl sm:text-4xl font-bold text-[#001737] font-poppins"
+        <motion.p
+          className="text-3xl sm:text-4xl font-bold text-gray-800 font-poppins"
           variants={childVariants}
         >
-          TUTORIAL
-        </motion.h2>
+          {tutorialData?.title}
+        </motion.p>
       </motion.div>
 
-      {/* Card Grid */}
       <motion.div
         className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8"
         variants={containerVariants}
@@ -77,7 +109,6 @@ const Tutorial: React.FC = () => {
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
       >
-        {/* Step 1 */}
         <motion.div
           variants={cardVariants}
           initial="hidden"
@@ -87,16 +118,16 @@ const Tutorial: React.FC = () => {
           className="p-6 flex flex-col"
         >
           <motion.p
-            className="text-lg font-semibold text-[#001737] font-poppins"
+            className="text-lg font-semibold text-gray-800 font-poppins"
             variants={childVariants}
           >
-            STEP 1
+            {tutorialData?.step_1}
           </motion.p>
           <motion.p
-            className="text-base text-[#6B7280] font-medium pb-3 font-poppins"
+            className="text-base text-gray-700 font-medium pb-3 font-poppins"
             variants={childVariants}
           >
-            Register & Download
+            {tutorialData?.description_1}
           </motion.p>
           <motion.div
             className="relative w-full aspect-video rounded-xl overflow-hidden"
@@ -106,14 +137,13 @@ const Tutorial: React.FC = () => {
               width="100%"
               height="100%"
               className="absolute top-0 left-0"
-              src="https://www.youtube.com/embed/29oOROTFF4o?si=XBPqFN88iDLBuIZ5"
+              src={tutorialData?.video_url_1}
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             ></iframe>
           </motion.div>
         </motion.div>
 
-        {/* Step 2 */}
         <motion.div
           variants={cardVariants}
           initial="hidden"
@@ -123,16 +153,16 @@ const Tutorial: React.FC = () => {
           className="p-6 flex flex-col"
         >
           <motion.p
-            className="text-lg font-semibold text-[#001737] font-poppins"
+            className="text-lg font-semibold text-gray-800 font-poppins"
             variants={childVariants}
           >
-            STEP 2
+            {tutorialData?.step_2}
           </motion.p>
           <motion.p
-            className="text-base text-[#6B7280] font-medium pb-3 font-poppins"
+            className="text-base text-gray-700 font-medium pb-3 font-poppins"
             variants={childVariants}
           >
-            Deposit USDT
+            {tutorialData?.description_2}
           </motion.p>
           <motion.div
             className="relative w-full aspect-video rounded-xl overflow-hidden"
@@ -142,14 +172,13 @@ const Tutorial: React.FC = () => {
               width="100%"
               height="100%"
               className="absolute top-0 left-0"
-              src="https://www.youtube.com/embed/2v0vxLcpICE?si=i-18Y9nNeg9hvHh8"
+              src={tutorialData?.video_url_2}
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             ></iframe>
           </motion.div>
         </motion.div>
 
-        {/* Step 3 */}
         <motion.div
           variants={cardVariants}
           initial="hidden"
@@ -159,16 +188,16 @@ const Tutorial: React.FC = () => {
           className="p-6 flex flex-col"
         >
           <motion.p
-            className="text-lg font-semibold text-[#001737] font-poppins"
+            className="text-lg font-semibold text-gray-800 font-poppins"
             variants={childVariants}
           >
-            STEP 3
+            {tutorialData?.step_3}
           </motion.p>
           <motion.p
-            className="text-base text-[#6B7280] font-medium pb-3 font-poppins"
+            className="text-base text-gray-700 font-medium pb-3 font-poppins"
             variants={childVariants}
           >
-            Set Up & Start Trade
+            {tutorialData?.description_3}
           </motion.p>
           <motion.div
             className="relative w-full aspect-video rounded-xl overflow-hidden"
@@ -178,7 +207,7 @@ const Tutorial: React.FC = () => {
               width="100%"
               height="100%"
               className="absolute top-0 left-0"
-              src="https://www.youtube.com/embed/m77ktn2aE0U?si=LK1DMeGJPDWUpxqE"
+              src={tutorialData?.video_url_3}
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             ></iframe>
@@ -186,7 +215,6 @@ const Tutorial: React.FC = () => {
         </motion.div>
       </motion.div>
 
-      {/* Global styles for Poppins font */}
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
         .font-poppins {
