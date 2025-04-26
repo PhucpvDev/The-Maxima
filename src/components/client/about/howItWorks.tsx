@@ -45,7 +45,7 @@ const stepVariants = {
 const customDot: StepsProps["progressDot"] = (dot, { title, index }) => (
   <Popover
     content={
-      <span className="font-poppins text-[#6B7280]">
+      <span className="font-poppins text-lg text-gray-700">
         Step {index + 1}: {title}
       </span>
     }
@@ -72,28 +72,28 @@ const HowItWorks: React.FC = () => {
   }, []);
 
   if (!data) {
-    return <div className="text-center py-10">Đang tải...</div>;
+    return <div className="text-center py-12 text-xl font-poppins text-gray-700">Đang tải...</div>;
   }
 
   const { title, subtitle, steps, conclusion } = data;
 
   return (
-    <div className="bg-[#F7FAFC] md:py-16 py-10 px-4 text-center">
+    <div className="bg-gradient-to-b from-[#F7FAFC] to-[#E5E7EB] md:py-20 py-12 px-6 text-center font-poppins">
       <motion.div
-        className="mb-12"
+        className="mb-16"
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
       >
         <motion.h2
-          className="text-4xl font-bold text-gray-800 font-poppins"
+          className="text-3xl md:text-5xl font-bold text-gray-900"
           variants={childVariants}
         >
           {title}
         </motion.h2>
         <motion.p
-          className="text-2xl text-gray-800 font-semibold font-poppins pt-5"
+          className="text-2xl md:text-3xl font-semibold text-gray-700 mt-6 italic"
           variants={childVariants}
         >
           {subtitle}
@@ -101,7 +101,7 @@ const HowItWorks: React.FC = () => {
       </motion.div>
 
       <motion.div
-        className="max-w-7xl mx-auto mt-16"
+        className="max-w-7xl mx-auto mt-20"
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
@@ -112,7 +112,7 @@ const HowItWorks: React.FC = () => {
           current={-1}
           direction="horizontal"
           responsive
-          className="[&_.ant-steps-item-title]:font-bold [&_.ant-steps-item-title]:text-sm [&_.ant-steps-item-title]:text-[#001737] [&_.ant-steps-item-title]:font-poppins [&_.ant-steps-item-description]:text-xs [&_.ant-steps-item-description]:text-[#6B7280] [&_.ant-steps-item-description]:whitespace-pre-line [&_.ant-steps-item-description]:font-poppins"
+          className="[&_.ant-steps-item-title]:font-bold [&_.ant-steps-item-title]:text-lg [&_.ant-steps-item-title]:text-gray-900 [&_.ant-steps-item-title]:font-poppins [&_.ant-steps-item-description]:text-base [&_.ant-steps-item-description]:text-gray-600 [&_.ant-steps-item-description]:whitespace-pre-line [&_.ant-steps-item-description]:font-poppins"
           items={steps.map((step, index) => ({
             title: (
               <motion.div
@@ -121,6 +121,7 @@ const HowItWorks: React.FC = () => {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
+                className="text-gray-800 font-poppins text-lg"
               >
                 {step.title}
               </motion.div>
@@ -132,6 +133,7 @@ const HowItWorks: React.FC = () => {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
+                className="text-gray-500 font-poppins text-base"
               >
                 {step.description}
               </motion.div>
@@ -141,20 +143,20 @@ const HowItWorks: React.FC = () => {
       </motion.div>
 
       <motion.div
-        className="max-w-7xl mx-auto mb-12 mt-16"
+        className="max-w-7xl mx-auto mb-16 mt-20"
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
       >
         <motion.div
-          className="border-2 border-yellow-600 rounded-lg py-4"
+          className="border-3 border-gray-600 bg-white rounded-xl py-8 shadow-xl"
           variants={childVariants}
         >
           {conclusion.split("\n\n").map((line, index) => (
             <p
               key={index}
-              className="text-base font-bold text-gray-800 uppercase font-poppins mt-2 first:mt-0"
+              className="text-xl font-bold text-gray-900 uppercase font-poppins mt-4 first:mt-0"
             >
               {line}
             </p>
@@ -168,18 +170,19 @@ const HowItWorks: React.FC = () => {
           font-family: 'Poppins', Arial, Helvetica, sans-serif;
         }
         .ant-steps .ant-steps-item-icon .ant-steps-icon {
-          background: #3b82f6 !important;
+          background: #1E40AF !important;
           color: #ffffff !important;
+          font-size: 18px !important;
         }
         .ant-steps .ant-steps-item-finish .ant-steps-item-icon {
-          border-color: #3b82f6 !important;
+          border-color: #1E40AF !important;
         }
         .ant-steps .ant-steps-item-process .ant-steps-item-icon {
-          border-color: #3b82f6 !important;
+          border-color: #1E40AF !important;
         }
         .ant-steps .ant-steps-item-tail::after {
-          background: #3b82f6 !important;
-          opacity: 0.3;
+          background: #1E40AF !important;
+          opacity: 0.5;
         }
       `}</style>
     </div>

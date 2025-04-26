@@ -119,6 +119,10 @@ const Testimonials: React.FC = () => {
     }
   };
 
+  if (!testimonials) {
+    return <div className="text-center py-16 text-2xl font-poppins">Đang tải...</div>;
+  }
+
   return (
     <motion.div
       className="bg-gray-50 py-16 px-4 sm:px-6 lg:px-8"
@@ -129,7 +133,7 @@ const Testimonials: React.FC = () => {
     >
       <div className="max-w-6xl mx-auto">
         <motion.p
-          className="text-4xl font-bold text-gray-800 mb-12"
+          className="text-4xl font-bold text-gray-800 mb-12 font-poppins"
           variants={childVariants}
         >
           {title}
@@ -161,7 +165,7 @@ const Testimonials: React.FC = () => {
             onClick={handlePrev}
             className="flex items-center justify-center w-10 h-10 border border-blue-700 text-white rounded-full shadow-md hover:bg-blue-800 transition-colors"
           >
-            <LeftOutlined className="text-lg" />
+            <LeftOutlined className="text-xl" />
           </motion.button>
           <motion.button
             variants={buttonVariants}
@@ -170,7 +174,7 @@ const Testimonials: React.FC = () => {
             onClick={handleNext}
             className="flex items-center justify-center w-10 h-10 border border-blue-700 text-white rounded-full shadow-md hover:bg-blue-800 transition-colors"
           >
-            <RightOutlined className="text-lg" />
+            <RightOutlined className="text-xl" />
           </motion.button>
         </motion.div>
 
@@ -212,10 +216,10 @@ const Testimonials: React.FC = () => {
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     ></iframe>
                   </div>
-                  <p className="text-base text-gray-700 mb-2">
+                  <p className="text-lg text-gray-700 mb-2 font-poppins">
                     {testimonial.description}
                   </p>
-                  <p className="text-sm text-gray-800 font-semibold">
+                  <p className="text-base text-gray-800 font-semibold font-poppins">
                     {testimonial.location_name}
                   </p>
                 </motion.div>

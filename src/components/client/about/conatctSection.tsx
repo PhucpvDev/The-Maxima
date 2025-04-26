@@ -5,7 +5,7 @@ import { YoutubeOutlined, FacebookOutlined } from "@ant-design/icons";
 
 export default function ContactSection() {
   return (
-    <div className="bg-gradient-to-r from-[#1a1a1a] to-[#333333] relative overflow-hidden text-white py-16">
+    <div className="bg-gradient-to-r from-[#1a1a1a] to-[#101215] relative overflow-hidden text-white py-16">
       {/* Background decorative images */}
       <div className="absolute top-0 left-0 z-0">
         <Image
@@ -37,27 +37,24 @@ export default function ContactSection() {
                 width={50}
                 height={50}
               />
-              <span className="ml-3 text-2xl font-semibold">Maxima</span>
+              <span className="ml-3 text-3xl font-bold">Maxima</span> {/* Increased font size and weight */}
             </div>
 
-            <h3 className="text-xl font-semibold mb-3">
-              The Maxima Experience
-            </h3>
-            <div className="space-y-1 text-sm leading-relaxed">
+            <h3 className="text-2xl font-bold mb-3">The Maxima Experience</h3> {/* Increased font size and weight */}
+            <div className="space-y-1 text-base leading-relaxed"> {/* Increased font size */}
               <p>Head office: 1B Malaysia</p>
               <p>Hotline: 0243 990 4991</p>
               <p>Email: themaxima@gmail.com</p>
             </div>
 
             <div className="flex items-center gap-4 mt-6">
-              <span>Follow us on:</span>
-              <FacebookOutlined style={{ fontSize: "20px" }} />
-              <YoutubeOutlined style={{ fontSize: "20px" }} />
-              {/* Tiktok icon có thể dùng svg hoặc ant icon nếu có */}
+              <span className="text-lg font-medium">Follow us on:</span> {/* Increased font size */}
+              <FacebookOutlined style={{ fontSize: "24px" }} /> {/* Increased icon size */}
+              <YoutubeOutlined style={{ fontSize: "24px" }} /> {/* Increased icon size */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
+                width="24"
+                height="24"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -68,26 +65,24 @@ export default function ContactSection() {
 
           {/* Right Content */}
           <div className="md:mt-12">
-            <h3 className="text-2xl font-semibold mb-3">Get in Touch</h3>
-            <p className="text-xl mb-3">
-              Training Center in Kuala Lumpur, Malaysia
-            </p>
-            <p className="mb-5">Send us your feedback if needed!</p>
+            <h3 className="text-3xl font-bold mb-3">Get in Touch</h3> {/* Increased font size and weight */}
+            <p className="text-2xl mb-3">Training Center in Kuala Lumpur, Malaysia</p> {/* Increased font size */}
+            <p className="mb-5 text-lg">Send us your feedback if needed!</p> {/* Increased font size */}
 
             <div className="flex bg-white rounded-full overflow-hidden mb-5 max-w-md">
               <Input
                 placeholder="Email..."
-                className="border-0 focus:shadow-none focus:border-0 text-black rounded-none px-4 py-2"
+                className="border-0 focus:shadow-none focus:border-0 text-black rounded-none px-4 py-2 text-lg" // Increased font size
               />
-              <div className="text-black font-medium ">
-                <button className="bg-gray-200 gap-2 hover:bg-gray-300 flex items-center  text-white font-medium px-8 sm:px-6 py-2 rounded-full w-full sm:w-auto">
+              <div className="text-black font-medium">
+                <button className="bg-gray-200 gap-2 hover:bg-gray-300 flex items-center text-black font-semibold px-8 sm:px-6 py-2 rounded-full w-full sm:w-auto text-lg">
                   Send
                 </button>
               </div>
             </div>
 
             <div className="text-black font-medium">
-              <button className="bg-white gap-2  flex items-center  text-white font-medium px-8 sm:px-6 py-2 rounded-full w-full sm:w-auto">
+              <button className="bg-white gap-2 flex items-center text-black font-semibold px-8 sm:px-6 py-2 rounded-full w-full sm:w-auto text-lg">
                 <DownloadIcon />
                 Download now
               </button>
@@ -107,7 +102,7 @@ function DownloadIcon() {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      className="w-5 h-5"
+      className="w-6 h-6" // Increased icon size
     >
       <path
         strokeLinecap="round"

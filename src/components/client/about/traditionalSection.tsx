@@ -72,7 +72,7 @@ export default function MaximaVsTraditionalSection() {
   }, []);
 
   if (!data) {
-    return <div className="text-center py-16">Đang tải...</div>;
+    return <div className="text-center py-16 text-2xl">Đang tải...</div>;
   }
 
   const {
@@ -124,13 +124,13 @@ export default function MaximaVsTraditionalSection() {
               className="bg-white rounded-xl shadow-lg p-8"
             >
               <motion.h3
-                className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 font-poppins"
+                className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4 font-poppins"
                 variants={childVariants}
               >
                 {traditional_title}
               </motion.h3>
               <motion.p
-                className="text-gray-800 mb-6 text-lg font-poppins font-medium"
+                className="text-gray-800 mb-6 text-xl font-poppins font-medium"
                 variants={childVariants}
               >
                 {traditional_subtitle}
@@ -143,15 +143,15 @@ export default function MaximaVsTraditionalSection() {
                     className="motion-item"
                   >
                     <div className="flex items-baseline mb-2">
-                      <span className="text-[#3B82F6] mr-3 text-lg">•</span>
-                      <span className="font-semibold text-lg text-gray-800 font-poppins">
+                      <span className="text-[#3B82F6] mr-3 text-xl">•</span>
+                      <span className="font-semibold text-xl text-gray-800 font-poppins">
                         {item.title}
                       </span>
                     </div>
                     <ul className="ml-8 mt-2 list-none">
                       <li className="flex items-baseline">
-                        <span className="text-[#3B82F6] mr-3">•</span>
-                        <span className="text-gray-800 font-poppins">
+                        <span className="text-[#3B82F6] mr-3 text-lg">•</span>
+                        <span className="text-gray-800 font-poppins text-lg">
                           {item.desc}
                         </span>
                       </li>
@@ -173,13 +173,13 @@ export default function MaximaVsTraditionalSection() {
               className="bg-white rounded-xl shadow-lg p-8"
             >
               <motion.h3
-                className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 font-poppins"
+                className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4 font-poppins"
                 variants={childVariants}
               >
                 {maxima_title}
               </motion.h3>
               <motion.p
-                className="text-gray-800 mb-6 text-lg font-poppins font-medium"
+                className="text-gray-800 mb-6 text-xl font-poppins font-medium"
                 variants={childVariants}
               >
                 {maxima_subtitle}
@@ -192,15 +192,15 @@ export default function MaximaVsTraditionalSection() {
                     className="motion-item"
                   >
                     <div className="flex items-baseline mb-2">
-                      <span className="text-[#3B82F6] mr-3 text-lg">•</span>
-                      <span className="font-semibold text-lg text-gray-800 font-poppins">
+                      <span className="text-[#3B82F6] mr-3 text-xl">•</span>
+                      <span className="font-semibold text-xl text-gray-800 font-poppins">
                         {item.title}
                       </span>
                     </div>
                     <ul className="ml-8 mt-2 list-none">
                       <li className="flex items-baseline">
-                        <span className="text-[#3B82F6] mr-3">•</span>
-                        <span className="text-gray-800 font-poppins">
+                        <span className="text-[#3B82F6] mr-3 text-lg">•</span>
+                        <span className="text-gray-800 font-poppins text-lg">
                           {item.desc}
                         </span>
                       </li>

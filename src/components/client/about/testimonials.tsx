@@ -91,13 +91,13 @@ const MaximaTestimonials: React.FC = () => {
 
       <div className="max-w-4xl mx-auto text-center mb-12 -mt-70">
         <motion.h2
-          className="text-white text-4xl font-bold mb-4"
+          className="text-white text-5xl font-bold mb-4" // Changed from text-4xl to text-5xl
           variants={childVariants}
         >
           {title}
         </motion.h2>
         <motion.p
-          className="text-white text-center mx-auto max-w-2xl md:p-0 p-2"
+          className="text-white text-xl text-center mx-auto max-w-2xl md:p-0 p-2" // Changed to text-xl
           variants={childVariants}
         >
           {description}
@@ -145,21 +145,10 @@ const MaximaTestimonials: React.FC = () => {
                 className="relative group overflow-visible"
                 variants={childVariants}
               >
-                {/* Quote mark */}
-                <div className="absolute -top-2 left-6 z-10 text-5xl text-orange-400">
-                  <Image
-                    src={IMAGES.Note}
-                    alt="Maxima Platform"
-                    width={40}
-                    height={500}
-                    priority
-                    className="object-cover"
-                  />
-                </div>
 
                 {/* Testimonial card */}
                 <div className="bg-white rounded-lg shadow-lg p-6 min-h-[250px] group-hover:rounded-b-none transition-all duration-300">
-                  <div className="min-h-36 text-gray-800 text-base leading-relaxed">
+                  <div className="min-h-36 text-gray-800 text-lg leading-relaxed"> {/* Changed from text-base to text-lg */}
                     {item.text}
                   </div>
                 </div>
@@ -178,10 +167,12 @@ const MaximaTestimonials: React.FC = () => {
                     </div>
                     {item.name && (
                       <div className="absolute top-5 group-hover:rounded-t-none opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out bg-white rounded-lg shadow-md px-4 py-6 text-center w-full">
-                        <p className="font-medium text-gray-800 pt-11">
+                        <p className="font-medium text-xl text-gray-800 pt-11"> {/* Changed from text-xl to text-2xl */}
                           {item.name}
                         </p>
-                        <p className="text-blue-500">{item.position}</p>
+                        <p className="text-blue-500 text-lg"> {/* Added text-lg */}
+                          {item.position}
+                        </p>
                       </div>
                     )}
                   </div>

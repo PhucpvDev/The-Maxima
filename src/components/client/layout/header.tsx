@@ -236,7 +236,7 @@ export default function Home() {
 
           <main className="px-4 py-10 pt-28 md:pt-32 max-w-7xl mx-auto">
             <div className="md:mb-7 md:text-left">
-              <h1 className="text-[25px] sm:text-3xl md:text-[55px] uppercase font-bold mb-6 leading-tight tracking-wide">
+              <h1 className="text-[30px] sm:text-3xl md:text-[55px] uppercase font-bold mb-6 leading-tight tracking-wide">
                 Unlock Peak Profit Model
                 <br />
                 2.0 Breakthrough with

@@ -48,7 +48,6 @@ const cardVariants = {
   hover: { scale: 1.03, transition: { duration: 0.3 } },
 };
 
-
 const Tutorial: React.FC = () => {
   interface TutorialData {
     title?: string;
@@ -69,16 +68,13 @@ const Tutorial: React.FC = () => {
     const fetchData = async () => {
       try {
         const result = await getTutorial();
-        // Check if the result is an array and has data
         if (Array.isArray(result) && result.length > 0) {
           setTutorialData(result[0]);
         } else if (result && !Array.isArray(result)) {
-          // If result is an object, not an array
           setTutorialData(result);
         }
       } catch (error) {
         console.error("Error fetching tutorial data:", error);
-        // Will continue using default data if fetch fails
       }
     };
 
@@ -95,7 +91,7 @@ const Tutorial: React.FC = () => {
         viewport={{ once: true, amount: 0.2 }}
       >
         <motion.p
-          className="text-3xl sm:text-4xl font-bold text-gray-800 font-poppins"
+          className="text-4xl sm:text-4xl font-bold text-gray-800 font-poppins"
           variants={childVariants}
         >
           {tutorialData?.title}
@@ -118,13 +114,13 @@ const Tutorial: React.FC = () => {
           className="p-6 flex flex-col"
         >
           <motion.p
-            className="text-lg font-semibold text-gray-800 font-poppins"
+            className="text-xl font-semibold text-gray-800 font-poppins" // Increased from lg to xl
             variants={childVariants}
           >
             {tutorialData?.step_1}
           </motion.p>
           <motion.p
-            className="text-base text-gray-700 font-medium pb-3 font-poppins"
+            className="text-lg text-gray-700 font-medium pb-3 font-poppins" // Increased from base to lg
             variants={childVariants}
           >
             {tutorialData?.description_1}
@@ -153,13 +149,13 @@ const Tutorial: React.FC = () => {
           className="p-6 flex flex-col"
         >
           <motion.p
-            className="text-lg font-semibold text-gray-800 font-poppins"
+            className="text-xl font-semibold text-gray-800 font-poppins" // Increased from lg to xl
             variants={childVariants}
           >
             {tutorialData?.step_2}
           </motion.p>
           <motion.p
-            className="text-base text-gray-700 font-medium pb-3 font-poppins"
+            className="text-lg text-gray-700 font-medium pb-3 font-poppins" // Increased from base to lg
             variants={childVariants}
           >
             {tutorialData?.description_2}
@@ -188,13 +184,13 @@ const Tutorial: React.FC = () => {
           className="p-6 flex flex-col"
         >
           <motion.p
-            className="text-lg font-semibold text-gray-800 font-poppins"
+            className="text-xl font-semibold text-gray-800 font-poppins" // Increased from lg to xl
             variants={childVariants}
           >
             {tutorialData?.step_3}
           </motion.p>
           <motion.p
-            className="text-base text-gray-700 font-medium pb-3 font-poppins"
+            className="text-lg text-gray-700 font-medium pb-3 font-poppins" // Increased from base to lg
             variants={childVariants}
           >
             {tutorialData?.description_3}

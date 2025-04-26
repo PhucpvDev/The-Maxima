@@ -1,9 +1,13 @@
-'use client'
+// Remove 'use client'
+import { getAbout1 } from '@/lib/directus/about_1';
 
-import Post from '@/components/client/posts/post'
+export default async function PostPage() {
+  const data = await getAbout1();
+  console.log("data======", data);
 
-export default function Posts () {
-    return (
-        <Post />
-    )
+  return (
+    <div>
+      
+    </div>
+  );
 }

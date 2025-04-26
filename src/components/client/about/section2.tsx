@@ -37,7 +37,22 @@ export default function AboutSection({ data: initialData }: AboutSectionProps) {
           setData({
             hero_title: fetchedData.hero_title || "",
             hero_cover: fetchedData.hero_cover || "",
-            hero_content2: fetchedData.hero_content2 || "",
+            hero_content2: fetchedData.hero_content2 || `Maxima introduces a decentralized platform, empowering users to join a community where profits are shared, moving beyond traditional trading models to ensure mutual success for all.
+
+• Traders achieve optimized profits
+• IBs gain steady profits
+• Maxima ensures sustainable growth
+
+Maxima was launched as an AI-driven platform with expert traders, built on a decentralized system. It aligns the goals of traders, IBs, and the platform by optimizing profits through innovative strategies, ensuring everyone benefits together.
+
+Here's how it operates:
+
+• Traders use advanced strategies to optimize profits, ensuring consistent returns even in challenging market conditions.
+• IBs earn steady profits as traders remain active in the Maxima community.
+• Maxima benefits from stable growth through its decentralized platform and community-driven model.
+
+Profit Sharing for Everyone
+Maxima's goal is clear — to unite traders, IBs, and the platform in a shared mission: sustainable profits. Through a decentralized community, Maxima ensures everyone thrives together with optimized returns.`,
           });
         } catch (error) {
           console.error("Error fetching home data:", error);
@@ -180,15 +195,15 @@ export default function AboutSection({ data: initialData }: AboutSectionProps) {
           <Col xs={24} lg={12}>
             <motion.div variants={childVariants}>
               <motion.h2
-                className="text-2xl md:text-3xl font-bold text-gray-800 mb-6 -mt-20 relative"
+                className="text-2xl md:text-4xl font-bold text-gray-800 mb-6 -mt-20 relative"
                 variants={childVariants}
               >
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-800 to-gray-700">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-blue-600 drop-shadow-md">
                   {hero_title || "MAXIMA DAO"}
                 </span>
               </motion.h2>
               <motion.div
-                className="space-y-4 text-base md:text-base text-gray-800 leading-relaxed"
+                className="space-y-4 text-base md:text-lg text-gray-800 leading-relaxed"
                 variants={childVariants}
               >
                 {mainContentLines.length > 0 ? (
@@ -251,7 +266,7 @@ export default function AboutSection({ data: initialData }: AboutSectionProps) {
                 variants={childVariants}
               >
                 <motion.button
-                  className="px-6 py-2 rounded-full text-sm md:text-base font-medium transition-all duration-300 ease-in-out bg-gradient-to-r from-[#1a1a1a] to-[#333333] text-white hover:shadow-lg hover:translate-y-[-2px] focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
+                  className="px-8 py-3 rounded-full text-sm md:text-base font-medium transition-all duration-300 ease-in-out bg-gradient-to-r from-[#1a1a1a] to-[#333333] text-white hover:shadow-lg hover:translate-y-[-2px] focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
                   onClick={() => setShowMore(!showMore)}
                   whileTap={{ scale: 0.97 }}
                 >

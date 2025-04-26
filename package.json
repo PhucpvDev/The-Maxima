@@ -40,7 +40,7 @@
     "@types/jsonwebtoken": "^9.0.9",
     "@types/jwt-decode": "^2.2.1",
     "@types/node": "^20",
-    "@types/react": "^19",
+    "@types/react": "^19.1.2",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.2.2",

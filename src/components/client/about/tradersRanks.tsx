@@ -45,7 +45,9 @@ const columns = [
     dataIndex: "rank",
     key: "rank",
     render: (text: string) => (
-      <span className="font-poppins font-semibold text-gray-800">{text}</span>
+      <span className="font-poppins font-semibold text-gray-800 text-sm sm:text-base md:text-lg">
+        {text}
+      </span>
     ),
   },
   {
@@ -53,7 +55,9 @@ const columns = [
     dataIndex: "capital",
     key: "capital",
     render: (text: string) => (
-      <span className="font-poppins text-[#6B7280]">{text}</span>
+      <span className="font-poppins text-[#6B7280] text-sm sm:text-base md:text-lg">
+        {text}
+      </span>
     ),
   },
   {
@@ -61,7 +65,9 @@ const columns = [
     dataIndex: "trades",
     key: "trades",
     render: (text: number) => (
-      <span className="font-poppins text-[#6B7280]">{text}</span>
+      <span className="font-poppins text-[#6B7280] text-sm sm:text-base md:text-lg">
+        {text}
+      </span>
     ),
   },
   {
@@ -69,7 +75,9 @@ const columns = [
     dataIndex: "profits",
     key: "profits",
     render: (text: string) => (
-      <span className="font-poppins text-[#6B7280]">{text}</span>
+      <span className="font-poppins text-[#6B7280] text-sm sm:text-base md:text-lg">
+        {text}
+      </span>
     ),
   },
   {
@@ -77,7 +85,9 @@ const columns = [
     dataIndex: "referral",
     key: "referral",
     render: (text: string) => (
-      <span className="font-poppins text-[#6B7280]">{text}</span>
+      <span className="font-poppins text-[#6B7280] text-sm sm:text-base md:text-lg">
+        {text}
+      </span>
     ),
   },
 ];
@@ -100,7 +110,7 @@ export default function TradersRanksSection() {
   }, []);
 
   if (!data) {
-    return <div className="text-center py-10">Đang tải...</div>;
+    return <div className="text-center py-10 text-2xl font-poppins">Đang tải...</div>;
   }
 
   const { title, description, rankings } = data;
@@ -114,14 +124,14 @@ export default function TradersRanksSection() {
       viewport={{ once: true, amount: 0.2 }}
     >
       <motion.p
-        className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 font-poppins"
+        className="text-2xl sm:text-3xl md:text-3xl font-bold text-gray-800 font-poppins"
         variants={childVariants}
       >
         {title}
       </motion.p>
 
       <motion.p
-        className="text-[#6B7280] text-sm sm:text-base font-poppins"
+        className="text-[#6B7280] text-base sm:text-lg font-poppins"
         variants={childVariants}
       >
         {description}
@@ -137,7 +147,7 @@ export default function TradersRanksSection() {
           pagination={false}
           bordered={false}
           rowClassName={(record, index) => (index % 2 === 1 ? "bg-[#F7FAFC]" : "")}
-          className="[&_.ant-table-thead_th]:bg-[#F7FAFC] [&_.ant-table-thead_th]:text-gray-800 [&_.ant-table-thead_th]:font-poppins [&_.ant-table-thead_th]:font-semibold [&_.ant-table-thead_th]:text-xs [&_.ant-table-thead_th]:sm:text-sm [&_.ant-table-thead_th]:md:text-base [&_.ant-table-cell]:px-2 [&_.ant-table-cell]:sm:px-4 [&_.ant-table-cell]:py-2 [&_.ant-table-cell]:sm:py-3"
+          className="[&_.ant-table-thead_th]:bg-[#F7FAFC] [&_.ant-table-thead_th]:text-gray-800 [&_.ant-table-thead_th]:font-poppins [&_.ant-table-thead_th]:font-semibold [&_.ant-table-thead_th]:text-sm [&_.ant-table-thead_th]:sm:text-base [&_.ant-table-thead_th]:md:text-lg [&_.ant-table-cell]:px-2 [&_.ant-table-cell]:sm:px-4 [&_.ant-table-cell]:py-2 [&_.ant-table-cell]:sm:py-3"
           components={{
             body: {
               row: ({ children, ...props }) => (

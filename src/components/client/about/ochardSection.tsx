@@ -56,7 +56,7 @@ export default function AppleOrchardSection() {
   }, []);
 
   if (!data) {
-    return <div className="text-center py-16">Đang tải...</div>;
+    return <div className="text-center py-16 text-2xl">Đang tải...</div>;
   }
 
   const { title, subtitle, description, image } = data;
@@ -97,19 +97,19 @@ export default function AppleOrchardSection() {
         <Row gutter={[32, 32]} className="items-center">
           <Col xs={24} lg={14}>
             <motion.p
-              className="text-3xl font-bold text-gray-800 mb-4"
+              className="text-4xl font-bold text-gray-800 mb-4 font-poppins"
               variants={childVariants}
             >
               {title}
             </motion.p>
             <motion.p
-              className="text-xl text-gray-800 font-semibold mb-6"
+              className="text-2xl text-gray-800 font-semibold mb-6 font-poppins"
               variants={childVariants}
             >
               {subtitle}
             </motion.p>
             <motion.div
-              className="space-y-5 text-base text-gray-800"
+              className="space-y-5 text-lg text-gray-800 font-poppins"
               variants={childVariants}
             >
               {descriptionParagraphs.map((paragraph, index) => (
@@ -133,7 +133,7 @@ export default function AppleOrchardSection() {
                 />
               ) : (
                 <div className="bg-gray-200 rounded-2xl h-full flex items-center justify-center">
-                  <p className="text-gray-500">Không có hình ảnh</p>
+                  <p className="text-gray-500 text-lg">Không có hình ảnh</p>
                 </div>
               )}
             </motion.div>

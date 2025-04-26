@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Collapse } from "antd";
-import { DownOutlined } from "@ant-design/icons";
+import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
 import { getFaqs } from "@/lib/directus/faqs";
 
 const { Panel } = Collapse;
@@ -14,8 +14,8 @@ export default function FAQSection() {
   }
 
   const [faqData, setFaqData] = useState<FaqItem[]>([]);
-  const [title, setTitle] = useState("Frequently Asked Questions");
-  
+  const [title, setTitle] = useState("Giải đáp một số thắc mắc trước khi mua phần mềm");
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -30,31 +30,41 @@ export default function FAQSection() {
         }
       } catch (error) {
         console.error("Error fetching FAQs:", error);
-        // Will use fallback data if fetch fails
       }
     };
-    
+
     fetchData();
   }, []);
 
   return (
-    <div className="bg-white py-12 px-4 md:px-16 text-center">
-      <p className="text-2xl md:text-3xl font-bold text-gray-800 mb-8 uppercase">{title}</p>
-      
-      <div className="max-w-6xl mx-auto text-left">
-        <Collapse
-          accordion
-          expandIcon={({ isActive }) => (
-            <DownOutlined rotate={isActive ? 180 : 0} />
-          )}
-          className="site-collapse-custom-collapse rounded-lg overflow-hidden"
-        >
-          {faqData.map((item, index) => (
-            <Panel header={item.question} key={index} className="text-base text-gray-700">
-              <p>{item.answer}</p>
-            </Panel>
-          ))}
-        </Collapse>
+    <div className="py-12 px-4 md:px-16 bg-gradient-to-r from-white to-[#DDEFFF]">
+      <div className="max-w-7xl p-8 mx-auto flex flex-col md:flex-row gap-8">
+        {/* Tiêu đề bên trái */}
+        <div className="md:w-1/3 text-left">
+          <p className="text-4xl font-bold text-[#1A1A1A] uppercase tracking-wider leading-tight">
+            {title}
+          </p>
+        </div>
+
+        {/* Câu hỏi bên phải */}
+        <div className="md:w-2/3 text-left">
+          <Collapse
+            accordion
+            expandIcon={({ isActive }) => (isActive ? <MinusOutlined /> : <PlusOutlined />)}
+            className="site-collapse-custom-collapse rounded-lg overflow-hidden"
+            expandIconPosition="start"
+          >
+            {faqData.map((item, index) => (
+              <Panel
+                header={item.question}
+                key={index}
+                className="text-xl text-[#1A1A1A] font-medium border-b border-gray-300"
+              >
+                <p className="text-lg text-[#666666]">{item.answer}</p>
+              </Panel>
+            ))}
+          </Collapse>
+        </div>
       </div>
     </div>
   );
