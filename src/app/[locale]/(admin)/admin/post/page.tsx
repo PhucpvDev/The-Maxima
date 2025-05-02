@@ -1,13 +1,12 @@
-// Remove 'use client'
-import { getAbout1 } from '@/lib/directus/about_1';
+'use client'
 
-export default async function PostPage() {
-  const data = await getAbout1();
-  console.log("data======", data);
+import { usePageTitle } from '@/hooks/usePageTitle'
+import ListPost from '@/components/admin/post/listPost'
 
+export default function PostPage() {
+  usePageTitle('Danh sách bài viết')
+  
   return (
-    <div>
-      
-    </div>
-  );
+    <ListPost />
+  )
 }

@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { StoreProvider } from '@/redux/storeProvider'
 import '@/assets/scss/main.scss'
 
-const locales = ['en', 'vi']
+const locales = ['en', 'vi', 'zh']
 
 export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }))

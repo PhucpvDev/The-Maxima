@@ -1,6 +1,6 @@
 'use client'
 
-import { MoonOutlined, SunOutlined} from '@ant-design/icons'
+import { MoonOutlined, SunOutlined } from '@ant-design/icons'
 import { Button, Tooltip, Switch, Input } from 'antd'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Menu02Icon, Menu01Icon } from '@hugeicons/core-free-icons'
@@ -9,6 +9,7 @@ import { RootState } from '@/redux/store'
 import { toggleTheme } from '@/redux/theme/themeSlice'
 import type { GetProps } from 'antd'
 import MainHeaderUser from '@/components/admin/layout/mainHeaderUser'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 type SearchProps = GetProps<typeof Input.Search>
 
 export default function MainHeader({ collapsed, setCollapsed }: MainHeaderProps) {
@@ -33,7 +34,7 @@ export default function MainHeader({ collapsed, setCollapsed }: MainHeaderProps)
             </div>
 
             <div className="flex items-center gap-2 ml-auto">
-                <MainHeaderUser />
+
                 <Tooltip title="Theme">
                     <Switch
                         className="hidden sm:inline py-1"
@@ -43,6 +44,8 @@ export default function MainHeader({ collapsed, setCollapsed }: MainHeaderProps)
                         onClick={() => dispatch(toggleTheme())}
                     />
                 </Tooltip>
+                <LanguageSwitcher />
+                <MainHeaderUser />
             </div>
         </header>
     )

@@ -1,10 +1,13 @@
-"use client"; // Mark as Client Component
+"use client";
 
 import { IMAGES } from "@/constants/client/theme";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { getWhyJoin, RawWhyJoinMaximaData } from "@/lib/directus/whyjoin";
+import { useLocale } from "next-intl";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { ConfigProvider, theme as antdTheme } from "antd";
 
 // Import Google Fonts for a modern, attractive font
 const fontStyle = `
@@ -13,7 +16,28 @@ const fontStyle = `
   </style>
 `;
 
-// Define TypeScript interfaces for the transformed data
+interface Translation {
+  id: number;
+  why_join_maxima_id: number;
+  languages_code: string;
+  title: string;
+  subtitle: string;
+  conclusion_title: string;
+  conclusion_description: string;
+  conclusion_button?: string;
+  conclusion_image: string;
+  conclusion_title_2: string;
+  conclusion_description_2: string;
+  conclusion_button_2?: string;
+  conclusion_image_2: string;
+  conclusion_title_3: string;
+  conclusion_description_3: string;
+  conclusion_image_3: string;
+  conclusion_title_4: string;
+  conclusion_description_4: string;
+  conclusion_image_4: string;
+}
+
 interface Section {
   section_title: string;
   description: string;
@@ -27,65 +51,157 @@ interface WhyJoinMaximaData {
   sections: Section[];
 }
 
+interface RawWhyJoinMaximaData {
+  id: number;
+  status: string;
+  title: string;
+  subtitle: string;
+  conclusion_title: string;
+  conclusion_description: string;
+  conclusion_button?: string;
+  conclusion_image: string;
+  conclusion_title_2: string;
+  conclusion_description_2: string;
+  conclusion_button_2?: string;
+  conclusion_image_2: string;
+  conclusion_title_3: string;
+  conclusion_description_3: string;
+  conclusion_image_3: string;
+  conclusion_title_4: string;
+  conclusion_description_4: string;
+  conclusion_image_4: string;
+  translations: Translation[];
+}
+
+async function getWhyJoin(locale: string): Promise<WhyJoinMaximaData> {
+  try {
+    const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
+    const response = await fetch(
+      `http://the-maxima.directus.app/items/why_join_maxima?lang=${lang}&fields=*,translations.*`,
+      {
+        headers: {
+          Accept: "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch data");
+    }
+
+    const result = await response.json();
+    const data: RawWhyJoinMaximaData = Array.isArray(result.data) ? result.data[0] : result.data;
+
+    const translation = data.translations.find(
+      (t: Translation) => t.languages_code === lang
+    );
+
+    const source = translation || data;
+
+    return {
+      title: source.title || "Benefits of Joining Maxima Trading",
+      subtitle: source.subtitle || "“WIN-WIN-WIN Strategy”",
+      sections: [
+        {
+          section_title: source.conclusion_title || "TRADER's WIN",
+          description:
+            source.conclusion_description ||
+            "Regardless of market directions, traders earn using a proven strategy that guarantees consistent profits",
+          button_text: source.conclusion_button || "Register",
+          image: source.conclusion_image || "",
+        },
+        {
+          section_title: source.conclusion_title_2 || "IB's WIN",
+          description:
+            source.conclusion_description_2 ||
+            "Traders' profits are secure and there is no risk of trading loss – resulting in increased customer retention, generating long term IB commissions",
+          button_text: source.conclusion_button_2 || "Explore IB",
+          image: source.conclusion_image_2 || "",
+        },
+        {
+          section_title: source.conclusion_title_3 || "MAXIMA WIN",
+          description:
+            source.conclusion_description_3 ||
+            "With the proven strategy, Maxima achieves consistent profits, ensuring a stable growth removing the need of constantly acquiring new clients",
+          button_text: undefined,
+          image: source.conclusion_image_3 || "",
+        },
+        {
+          section_title: source.conclusion_title_4 || "So you should choose Maxima",
+          description:
+            source.conclusion_description_4 ||
+            "We value our words. Our words are backed up by concrete actions.",
+          button_text: undefined,
+          image: source.conclusion_image_4 || "",
+        },
+      ],
+    };
+  } catch (error) {
+    console.error("Error fetching Why Join Maxima data:", error);
+    return {
+      title: "Benefits of Joining Maxima Trading",
+      subtitle: "“WIN-WIN-WIN Strategy”",
+      sections: [
+        {
+          section_title: "TRADER's WIN",
+          description:
+            "Regardless of market directions, traders earn using a proven strategy that guarantees consistent profits",
+          button_text: "Register",
+          image: "",
+        },
+        {
+          section_title: "IB's WIN",
+          description:
+            "Traders' profits are secure and there is no risk of trading loss – resulting in increased customer retention, generating long term IB commissions",
+          button_text: "Explore IB",
+          image: "",
+        },
+        {
+          section_title: "MAXIMA WIN",
+          description:
+            "With the proven strategy, Maxima achieves consistent profits, ensuring a stable growth removing the need of constantly acquiring new clients",
+          button_text: undefined,
+          image: "",
+        },
+        {
+          section_title: "So you should choose Maxima",
+          description:
+            "We value our words. Our words are backed up by concrete actions.",
+          button_text: undefined,
+          image: "",
+        },
+      ],
+    };
+  }
+}
+
 export default function WhyJoinMaxima() {
+  const locale = useLocale();
+  const { mytheme } = useSelector((state: RootState) => state.theme);
   const [data, setData] = useState<WhyJoinMaximaData | null>(null);
 
-  // Fetch data on mount
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const result = await getWhyJoin(); // result is now guaranteed to be RawWhyJoinMaximaData[]
-        const rawData: RawWhyJoinMaximaData = result[0]; // Take the first item
-
-        // Transform the raw data into the sections array
-        const transformedData: WhyJoinMaximaData = {
-          title: rawData.title || "WHY JOIN MAXIMA?",
-          subtitle: rawData.subtitle || "“WIN-WIN-WIN Strategy”",
-          sections: [
-            {
-              section_title: rawData.conclusion_title || "TRADER's WIN",
-              description:
-                rawData.conclusion_description ||
-                "Regardless of market directions, traders earn using a proven strategy that guarantees consistent profits",
-              button_text: rawData.conclusion_button || "Register",
-              image: rawData.conclusion_image || "",
-            },
-            {
-              section_title: rawData.conclusion_title_2 || "IB's WIN",
-              description:
-                rawData.conclusion_description_2 ||
-                "Traders' profits are secure and there is no risk of trading loss – resulting in increased customer retention, generating long term IB commissions",
-              button_text: rawData.conclusion_button_2 || "Explore IB",
-              image: rawData.conclusion_image_2 || "",
-            },
-            {
-              section_title: rawData.conclusion_title_3 || "MAXIMA WIN",
-              description:
-                rawData.conclusion_description_3 ||
-                "With the proven strategy, Maxima achieves consistent profits, ensuring a stable growth removing the need of constantly acquiring new clients",
-              button_text: undefined, // No button for this section
-              image: rawData.conclusion_image_3 || "",
-            },
-            {
-              section_title:
-                rawData.conclusion_title_4 || "So you should choose Maxima",
-              description:
-                rawData.conclusion_description_4 ||
-                "We value our words. Our words are backed up by concrete actions.",
-              button_text: undefined, // No button for this section
-              image: rawData.conclusion_image_4 || "",
-            },
-          ],
-        };
-        setData(transformedData);
-      } catch (error) {
-        console.error("Error fetching Why Join Maxima data:", error);
-      }
+      const result = await getWhyJoin(locale);
+      setData(result);
     };
     fetchData();
-  }, []);
+  }, [locale]);
 
-  // Animation variants for the container
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", mytheme);
+  }, [mytheme]);
+
+  const getCSSVariable = (variable: string) =>
+    getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
+
+  const themeConfig = {
+    token: {
+      colorPrimary: getCSSVariable("--yellow-500") || "#FFC800",
+    },
+    algorithm: mytheme === "dark" ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+  };
+
   const containerVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: {
@@ -100,7 +216,6 @@ export default function WhyJoinMaxima() {
     },
   };
 
-  // Animation variants for child elements
   const childVariants = {
     hidden: { opacity: 0, y: 100 },
     visible: {
@@ -117,16 +232,21 @@ export default function WhyJoinMaxima() {
   };
 
   if (!data) {
-    return null; // Optionally, you can add a loading placeholder here
+    return null;
   }
 
   const { title, subtitle, sections } = data;
 
   return (
-    <>
+    <ConfigProvider theme={themeConfig}>
       <div dangerouslySetInnerHTML={{ __html: fontStyle }} />
-      <div className="bg-[#f0f8ff] py-12 font-poppins"> {/* Added font-poppins */}
-        {/* Tiêu đề */}
+      <div
+        className={`py-12 font-poppins ${
+          mytheme === "light"
+            ? "bg-[#f0f8ff]"
+            : "bg-gradient-to-b from-[#1a1a1a] to-[#2a2a2a]"
+        }`}
+      >
         <motion.div
           className="text-center mb-14"
           variants={containerVariants}
@@ -135,13 +255,17 @@ export default function WhyJoinMaxima() {
           viewport={{ once: true, amount: 0.2 }}
         >
           <motion.p
-            className="text-2xl md:text-4xl font-bold text-gray-800 uppercase"
+            className={`text-2xl md:text-4xl font-bold uppercase ${
+              mytheme === "light" ? "text-gray-800" : "text-yellow-600"
+            }`}
             variants={childVariants}
           >
             {title}
           </motion.p>
           <motion.p
-            className="text-2xl md:text-3xl font-semibold text-gray-700 mt-3 italic" // Thêm italic
+            className={`text-2xl md:text-3xl font-semibold mt-3 italic ${
+              mytheme === "light" ? "text-gray-700" : "text-gray-300"
+            }`}
             variants={childVariants}
           >
             {subtitle}
@@ -155,32 +279,45 @@ export default function WhyJoinMaxima() {
               index === 0
                 ? IMAGES.Whyjoin1
                 : index === 1
-                  ? IMAGES.Whyjoin2
-                  : index === 2
-                    ? IMAGES.Whyjoin3
-                    : IMAGES.Whyjoin4;
+                ? IMAGES.Whyjoin2
+                : index === 2
+                ? IMAGES.Whyjoin3
+                : IMAGES.Whyjoin4;
 
             return (
               <motion.div
                 key={index}
-                className={`flex flex-col ${isReverse ? "md:flex-row-reverse" : "md:flex-row"
-                  } items-center gap-8`}
+                className={`flex flex-col ${
+                  isReverse ? "md:flex-row-reverse" : "md:flex-row"
+                } items-center gap-8`}
                 variants={containerVariants}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.2 }}
               >
                 <motion.div className="md:w-1/2" variants={childVariants}>
-                  <p className="md:text-3xl text-2xl font-bold text-gray-700 mb-3">
+                  <p
+                    className={`md:text-3xl text-2xl font-bold mb-3 ${
+                      mytheme === "light" ? "text-gray-700" : "text-gray-200"
+                    }`}
+                  >
                     {section.section_title}
                   </p>
-                  <p className="text-lg text-gray-700 mb-4">
+                  <p
+                    className={`text-lg ${
+                      mytheme === "light" ? "text-gray-700" : "text-gray-300"
+                    } mb-4`}
+                  >
                     {section.description}
                   </p>
                   {section.button_text && (
-                    <div className="text-white font-medium">
+                    <div className="font-medium text-white">
                       <motion.button
-                        className="bg-orange-400 hover:bg-orange-500 text-white font-semibold px-8 sm:px-16 py-3 rounded-full w-full sm:w-auto text-lg" // Increased font size and padding
+                        className={`px-8 sm:px-16 py-3 rounded-full text-lg font-semibold transition-all duration-300 ${
+                          mytheme === "light"
+                            ? "bg-orange-400 hover:bg-orange-500 text-white"
+                            : "bg-orange-400 hover:bg-orange-500 text-white"
+                        }`}
                         variants={childVariants}
                       >
                         {section.button_text}
@@ -188,7 +325,13 @@ export default function WhyJoinMaxima() {
                     </div>
                   )}
                 </motion.div>
-                <motion.div className="md:w-1/2" variants={childVariants}>
+                <motion.div
+                  className="md:w-1/2 relative"
+                  variants={childVariants}
+                >
+                  <div
+                    className={`absolute inset-0 rounded-lg`}
+                  ></div>
                   <Image
                     src={
                       section.image
@@ -206,7 +349,7 @@ export default function WhyJoinMaxima() {
                           ? `https://the-maxima.directus.app/assets/${section.image}`
                           : fallbackImage.src
                       );
-                      e.currentTarget.src = fallbackImage.src; // Fallback on error
+                      e.currentTarget.src = fallbackImage.src;
                     }}
                   />
                 </motion.div>
@@ -215,6 +358,6 @@ export default function WhyJoinMaxima() {
           })}
         </div>
       </div>
-    </>
+    </ConfigProvider>
   );
 }

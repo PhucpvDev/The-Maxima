@@ -63,14 +63,14 @@ export default function BreadcrumbWithTitle() {
   return (
     <div className="p-3">
       <div className="flex justify-between items-center">
-        <div>
+        {/* <div>
           <Title
             level={5}
             className={`m-0 ${mytheme === 'dark' ? 'text-white' : 'text-gray-800'}`}
           >
             {displayTitle}
           </Title>
-        </div>
+        </div> */}
       </div>
       <Breadcrumb items={antdBreadcrumbItems}/>
     </div>

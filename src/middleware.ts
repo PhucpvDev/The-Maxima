@@ -8,7 +8,7 @@ const requestCounts = new Map<string, { count: number; timestamp: number }>()
 export async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl
 
-    if (pathname === '/' || !pathname.match(/^\/(en|vi)(\/|$)/)) {
+    if (pathname === '/' || !pathname.match(/^\/(en|vi|zh)(\/|$)/)) {
         const defaultLocale = routing.defaultLocale 
         const url = new URL(`/${defaultLocale}${pathname === '/' ? '' : pathname}`, req.url)
         return NextResponse.redirect(url)
@@ -60,14 +60,14 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
     matcher: [
-        '/:locale(en|vi)/dashboard/:path*',
-        '/:locale(en|vi)/profile/:path*',
-        '/:locale(en|vi)/api/protected-route/:path*',
-        '/:locale(en|vi)/dashboard',
-        '/:locale(en|vi)/profile',
-        '/:locale(en|vi)/api/protected-route',
-        '/:locale(en|vi)/auth/login',
-        '/:locale(en|vi)/api/login',
+        '/:locale(en|vi|zh)/dashboard/:path*',
+        '/:locale(en|vi|zh)/profile/:path*',
+        '/:locale(en|vi|zh)/api/protected-route/:path*',
+        '/:locale(en|vi|zh)/dashboard',
+        '/:locale(en|vi|zh)/profile',
+        '/:locale(en|vi|zh)/api/protected-route',
+        '/:locale(en|vi|zh)/auth/login',
+        '/:locale(en|vi|zh)/api/login',
         '/',
         '/((?!_next|api|static|public|favicon.ico).*)'
     ],

@@ -1,6 +1,6 @@
 "use client";
 
-import LanguageSwitcher from "@/components/LanguageSwitcher";
+
 import Header from "@/components/client/layout/header";
 import Footer from "@/components/client/layout/footer";
 import Section1 from "@/components/client/about/section1";
@@ -17,7 +17,8 @@ import ClientSay from "@/components/client/about/clientSay";
 import MoreUserSection from "@/components/client/about/moreUserSection";
 import Testimonials from "@/components/client/about/testimonials";
 import FAQSection from "@/components/client/about/faqSection";
-import ConatctSection from "@/components/client/about/conatctSection";
+import ConatctSection from "@/components/client/about/contactSection";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function MainPage() {
   return (

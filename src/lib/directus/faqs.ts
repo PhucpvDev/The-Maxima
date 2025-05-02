@@ -1,32 +1,46 @@
-import { directus } from '@/lib/directus';
-import { readItems } from '@directus/sdk';
+export interface FaqTranslation {
+  id: number;
+  faqs_id: number;
+  languages_code: string;
+  title: string;
+  question: string;
+  answer: string;
+  question_2: string;
+  answer_2: string;
+  question_3: string;
+  answer_3: string;
+  question_4: string;
+  answer_4: string;
+  question_5: string;
+  answer_5: string;
+  question_6: string;
+  answer_6: string;
+}
 
-// Define the raw data structure from Directus
 export interface RawFaqData {
   id: number;
   status: string;
   title: string;
   question: string;
-  question_2: string;
-  question_3: string;
-  question_4: string;
-  question_5: string;
-  question_6: string;
   answer: string;
+  question_2: string;
   answer_2: string;
+  question_3: string;
   answer_3: string;
+  question_4: string;
   answer_4: string;
+  question_5: string;
   answer_5: string;
+  question_6: string;
   answer_6: string;
+  translations: FaqTranslation[];
 }
 
-// Define the structure for FAQ items
 export interface FaqItem {
   question: string;
   answer: string;
 }
 
-// Define the transformed data structure
 export interface TransformedFaqData {
   id: number;
   status: string;
@@ -35,22 +49,30 @@ export interface TransformedFaqData {
 }
 
 // Function to transform data
-function transformFaqData(data: RawFaqData): TransformedFaqData {
+function transformFaqData(data: RawFaqData, locale: string): TransformedFaqData {
+  const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
+  const translation = data.translations.find((t) => t.languages_code === lang);
+
+  const source = translation || data;
+
+  const question_5 = lang === "en-US" ? data.question_5 : source.question_5;
+
   const faqs: FaqItem[] = [];
 
-  // Create faqs array from individual fields
   for (let i = 1; i <= 6; i++) {
     const questionKey = i === 1 ? 'question' : `question_${i}`;
     const answerKey = i === 1 ? 'answer' : `answer_${i}`;
 
-    // Only add if both question and answer exist
-    const question = data[questionKey as keyof RawFaqData] as string;
-    const answer = data[answerKey as keyof RawFaqData] as string;
-    
+    const question =
+      questionKey === 'question_5' && lang === "en-US"
+        ? question_5
+        : (source[questionKey as keyof typeof source] as string);
+    const answer = source[answerKey as keyof typeof source] as string;
+
     if (question && answer) {
       faqs.push({
         question,
-        answer
+        answer,
       });
     }
   }
@@ -58,18 +80,65 @@ function transformFaqData(data: RawFaqData): TransformedFaqData {
   return {
     id: data.id,
     status: data.status,
-    title: data.title,
-    faqs
+    title: source.title || "Frequently Asked Questions",
+    faqs,
   };
 }
 
-// Export the function to get FAQs
-export async function getFaqs(): Promise<TransformedFaqData[]> {
-  const rawData = await directus.request(readItems('faqs')) as RawFaqData[];
-  
-  // Normalize data: if rawData is an object, wrap it in an array
-  const dataArray = Array.isArray(rawData) ? rawData : [rawData];
-  
-  // Transform the data
-  return dataArray.map((item: RawFaqData) => transformFaqData(item));
+export async function getFaqs(locale: string): Promise<TransformedFaqData[]> {
+  try {
+    const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
+    const response = await fetch(
+      `https://the-maxima.directus.app/items/faqs?lang=${lang}&fields=*,translations.*`,
+      {
+        headers: {
+          Accept: "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch FAQs");
+    }
+
+    const result = await response.json();
+    const rawData: RawFaqData = Array.isArray(result.data) ? result.data[0] : result.data;
+
+    return [transformFaqData(rawData, locale)];
+  } catch (error) {
+    console.error("Error fetching FAQs:", error);
+    return [
+      {
+        id: 1,
+        status: "draft",
+        title: "Frequently Asked Questions",
+        faqs: [
+          {
+            question: "How do users withdraw their profits?",
+            answer: "Users can withdraw profits via their account dashboard using supported payment methods.",
+          },
+          {
+            question: "What makes Maxima different from traditional brokers?",
+            answer: "Maxima uses modern technology and a client-first approach, offering transparency and flexibility.",
+          },
+          {
+            question: "Is it safe to trade in Maxima platform?",
+            answer: "Yes, Maxima applies encryption, multi-factor authentication, and secure financial protocols.",
+          },
+          {
+            question: "How does Maxima stand out compared to conventional brokerage firms?",
+            answer: "Maxima offers lower fees, faster execution, and a more intuitive user experience.",
+          },
+          {
+            question: "In what ways is Maxima's approach unique from traditional brokers?",
+            answer: "Maxima focuses on technology-driven solutions and user-friendly platforms over outdated manual processes.",
+          },
+          {
+            question: "What are the key differences between Maxima and typical brokerage services?",
+            answer: "Lower fees, improved security, and real-time analytics are Maxima's standout features.",
+          },
+        ],
+      },
+    ];
+  }
 }

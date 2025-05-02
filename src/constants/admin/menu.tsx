@@ -11,4 +11,8 @@ export const items: MenuItem[] = [
         key: 'admin/post',
         label: 'Bài viết',
     },
+    {
+        key: 'admin/user',
+        label: 'Nhân viên',
+    },
 ]
