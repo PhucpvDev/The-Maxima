@@ -1,61 +1,100 @@
 'use client'
 
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Form, Input, Button } from 'antd'
 import { MailOutlined } from '@ant-design/icons'
-import { useTranslations } from 'next-intl'
-import { IMAGES } from '@/constants/admin/theme'
+import { IMAGES } from '@/constants/client/theme'
 import { Link } from '@/i18n/routing'
 import { useState, useEffect } from 'react'
+import { useCustomNotification } from '@/components/admin/notification/customNotification'
 import Image from 'next/image'
+
 
 export default function ForgotPassword() {
   const t = useTranslations('forgotPassword')
   const locale = useLocale()
   const [isMounted, setIsMounted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const { showNotification, contextHolder } = useCustomNotification()
 
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
+  const onFinish = async (values: { email: string }) => {
+    setLoading(true)
+    try {
+      const response = await fetch('http://localhost:3001/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: values.email, locale: locale }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || t('requestFailed'))
+      }
+
+      const data = await response.json()
+      showNotification({
+        message: data.message || t('requestSuccess'),
+        showProgress: true,
+      })
+    } catch (error: any) {
+      console.error('Error sending forgot password request:', error)
+      showNotification({
+        message: error.message || t('requestFailed'),
+        showProgress: true,
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
 
   if (!isMounted) return null
 
   return (
     <div className="flex min-h-screen font-roboto">
+      {contextHolder}
       <div className="hidden md:flex md:w-1/2 bg-white flex-col items-center justify-center p-8">
-        <div className="mb-6 flex items-center gap-3">
+        <div className="mb-8 flex items-center gap-4 transform transition-transform hover:scale-105">
           <Image
-            src={IMAGES.LogoGas}
+            src={IMAGES.Logo11}
             alt="Logo Gas"
-            width={48}
-            height={48}
-            priority // Giữ priority cho logo nhỏ
+            width={56}
+            height={56}
+            priority
+            className="rounded-lg"
           />
-          <h2 className="text-2xl font-bold text-gray-800">
-            {locale === 'vi' ? 'CỬA HÀNG GAS' : 'GAS STORE'}
+          <h2 className="text-3xl font-extrabold text-gray-900 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-500">
+            The Maxima
           </h2>
         </div>
         <p className="text-center text-gray-700 text-lg mb-8 max-w-lg">
           {locale === 'vi'
-            ? 'Cung cấp các loại bình gas chất lượng cao, đảm bảo an toàn và chất lượng dịch vụ giao hàng nhanh chóng đến tận nhà.'
-            : 'Providing high-quality gas cylinders, ensuring safety and fast delivery service right to your door.'}
+            ? 'Quản lý kinh doanh đầu tư tiền ảo với Maxima của bạn một cách dễ dàng và hiệu quả.'
+            : 'Manage your crypto investment business with Maxima easily and efficiently.'}
         </p>
         <Image
-          src={IMAGES.GaoGas}
+          src={IMAGES.Banner3}
           alt="Illustration of people with charts"
-          width={500}
-          height={300}
-          className="w-full max-w-2xl object-cover"
-          // Không dùng priority để tối ưu tải
+          width={400}
+          height={250}
+          className="w-full max-w-lg object-cover rounded-xl shadow-sm transform transition-transform hover:scale-102"
         />
       </div>
 
-      <div
-        className="w-full md:w-1/2 -mt-56 flex items-center justify-center min-h-screen relative"
-        style={{ backgroundImage: `url(${IMAGES.Istock})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-      >
+      <div className="w-full md:w-1/2 -mt-56 flex items-center justify-center min-h-screen relative">
+        <Image
+          src={IMAGES.Istock}
+          alt="Banner Background"
+          fill
+          style={{ objectFit: 'cover', objectPosition: 'center' }}
+          className="md:object-center object-[75%_50%]"
+          priority
+        />
         <div className="absolute inset-0 bg-white/85"></div>
         <div className="w-full max-w-md p-6 flex flex-col items-center justify-center z-10">
           <div className="w-full">
@@ -66,10 +105,11 @@ export default function ForgotPassword() {
             </div>
             <Form
               name="forgot_password"
-              style={{ maxWidth: 600 }} 
+              style={{ maxWidth: 600 }}
               layout="vertical"
               size="large"
               requiredMark={false}
+              onFinish={onFinish}
             >
               <Form.Item
                 label={<span className="text-gray-700 font-medium">{t('emailLabel')}</span>}
@@ -93,7 +133,7 @@ export default function ForgotPassword() {
                   danger
                   htmlType="submit"
                   className="w-full h-12 font-medium tracking-wide"
-                  loading={loading} 
+                  loading={loading}
                 >
                   {t('submitButton')}
                 </Button>

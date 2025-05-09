@@ -26,14 +26,10 @@ export default function Login() {
   const onFinish = async (values: { email: string; password: string; remember: boolean }) => {
     setLoading(true);
     try {
-      console.log('Submitting login with:', values.email);
-
       const response = await post('/api/auth/login', {
         email: values.email,
         password: values.password,
       }, { useToken: false });
-
-      console.log('Login response received:', response);
 
       if (response && response.access_token) {
         Cookies.set('token', response.access_token, {

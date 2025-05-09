@@ -93,7 +93,7 @@ export async function getContact(locale: string): Promise<TransformedContactData
     // Map locale to language code
     const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
     const response = await fetch(
-      `https://the-maxima.directus.app/items/contact_section?lang=${lang}&fields=*,translations.*`,
+      `https://maximagoldhedging.com/items/contact_section?lang=${lang}&fields=*,translations.*`,
       {
         headers: {
           Accept: "application/json",

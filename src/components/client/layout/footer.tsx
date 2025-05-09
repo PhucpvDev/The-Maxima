@@ -1,13 +1,13 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { Row, Col } from "antd";
-import { useLocale } from "next-intl";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-import { ConfigProvider, theme as antdTheme } from "antd";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { getFooter, TransformedFooterData } from "@/lib/directus/footer";
+import { useState, useEffect } from "react"
+import { Row, Col } from "antd"
+import { useLocale } from "next-intl"
+import { useSelector } from "react-redux"
+import { RootState } from "@/redux/store"
+import { ConfigProvider, theme as antdTheme } from "antd"
+import LanguageSwitcher from "@/components/LanguageSwitcher"
+import { getFooter, TransformedFooterData } from "@/lib/directus/footer"
 
 export default function FooterSection() {
   const locale = useLocale();
@@ -39,7 +39,7 @@ export default function FooterSection() {
 
   const themeConfig = {
     token: {
-      colorPrimary: getCSSVariable("--yellow-500") || "#FFC800",
+      colorPrimary: "#FFC800",
     },
     algorithm: mytheme === "dark" ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
   };

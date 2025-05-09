@@ -8,8 +8,8 @@ import { useLocale } from "next-intl";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { ConfigProvider, theme as antdTheme } from "antd";
+import Cookies from "js-cookie"; 
 
-// Import Google Fonts for a modern, attractive font
 const fontStyle = `
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
@@ -77,7 +77,7 @@ async function getWhyJoin(locale: string): Promise<WhyJoinMaximaData> {
   try {
     const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
     const response = await fetch(
-      `http://the-maxima.directus.app/items/why_join_maxima?lang=${lang}&fields=*,translations.*`,
+      `https://maximagoldhedging.com/items/why_join_maxima?lang=${lang}&fields=*,translations.*`,
       {
         headers: {
           Accept: "application/json",
@@ -197,10 +197,15 @@ export default function WhyJoinMaxima() {
 
   const themeConfig = {
     token: {
-      colorPrimary: getCSSVariable("--yellow-500") || "#FFC800",
+      colorPrimary: "#FFC800",
     },
     algorithm: mytheme === "dark" ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
   };
+
+  const affCodeFromCookie = Cookies.get("aff_code");
+  const registrationUrl = affCodeFromCookie
+    ? `https://agreement.maximadao.com/#/register?code=${encodeURIComponent(affCodeFromCookie)}`
+    : `https://agreement.maximadao.com/#/register`;
 
   const containerVariants = {
     hidden: { opacity: 0, y: 50 },
@@ -240,12 +245,11 @@ export default function WhyJoinMaxima() {
   return (
     <ConfigProvider theme={themeConfig}>
       <div dangerouslySetInnerHTML={{ __html: fontStyle }} />
-      <div
-        className={`py-12 font-poppins ${
-          mytheme === "light"
-            ? "bg-[#f0f8ff]"
-            : "bg-gradient-to-b from-[#1a1a1a] to-[#2a2a2a]"
-        }`}
+      <div id="how"
+        className={`relative overflow-hidden py-16 md:py-20 ${mytheme === "light"
+            ? "bg-gradient-to-b from-slate-50 to-gray-100"
+            : "bg-gradient-to-b from-gray-900 to-gray-950"
+          }`}
       >
         <motion.div
           className="text-center mb-14"
@@ -255,17 +259,15 @@ export default function WhyJoinMaxima() {
           viewport={{ once: true, amount: 0.2 }}
         >
           <motion.p
-            className={`text-2xl md:text-4xl font-bold uppercase ${
-              mytheme === "light" ? "text-gray-800" : "text-yellow-600"
-            }`}
+            className={`text-2xl md:text-4xl font-bold uppercase ${mytheme === "light" ? "text-gray-800" : "text-white"
+              }`}
             variants={childVariants}
           >
             {title}
           </motion.p>
           <motion.p
-            className={`text-2xl md:text-3xl font-semibold mt-3 italic ${
-              mytheme === "light" ? "text-gray-700" : "text-gray-300"
-            }`}
+            className={`text-2xl md:text-3xl font-semibold mt-3 italic ${mytheme === "light" ? "text-gray-700" : "text-gray-400"
+              }`}
             variants={childVariants}
           >
             {subtitle}
@@ -279,17 +281,16 @@ export default function WhyJoinMaxima() {
               index === 0
                 ? IMAGES.Whyjoin1
                 : index === 1
-                ? IMAGES.Whyjoin2
-                : index === 2
-                ? IMAGES.Whyjoin3
-                : IMAGES.Whyjoin4;
+                  ? IMAGES.Whyjoin2
+                  : index === 2
+                    ? IMAGES.Whyjoin3
+                    : IMAGES.Whyjoin4;
 
             return (
               <motion.div
                 key={index}
-                className={`flex flex-col ${
-                  isReverse ? "md:flex-row-reverse" : "md:flex-row"
-                } items-center gap-8`}
+                className={`flex flex-col ${isReverse ? "md:flex-row-reverse" : "md:flex-row"
+                  } items-center gap-8`}
                 variants={containerVariants}
                 initial="hidden"
                 whileInView="visible"
@@ -297,31 +298,29 @@ export default function WhyJoinMaxima() {
               >
                 <motion.div className="md:w-1/2" variants={childVariants}>
                   <p
-                    className={`md:text-3xl text-2xl font-bold mb-3 ${
-                      mytheme === "light" ? "text-gray-700" : "text-gray-200"
-                    }`}
+                    className={`md:text-3xl text-2xl font-bold mb-3 ${mytheme === "light" ? "text-gray-700" : "text-gray-200"
+                      }`}
                   >
                     {section.section_title}
                   </p>
                   <p
-                    className={`text-lg ${
-                      mytheme === "light" ? "text-gray-700" : "text-gray-300"
-                    } mb-4`}
+                    className={`text-lg ${mytheme === "light" ? "text-gray-700" : "text-gray-300"
+                      } mb-4`}
                   >
                     {section.description}
                   </p>
                   {section.button_text && (
-                    <div className="font-medium text-white">
-                      <motion.button
-                        className={`px-8 sm:px-16 py-3 rounded-full text-lg font-semibold transition-all duration-300 ${
-                          mytheme === "light"
+                    <div className="font-medium text-white pt-2">
+                      <motion.a
+                        href={registrationUrl}
+                        className={`px-8 sm:px-16 py-1.5 rounded-full text-lg font-semibold transition-all duration-300 inline-block ${mytheme === "light"
                             ? "bg-orange-400 hover:bg-orange-500 text-white"
                             : "bg-orange-400 hover:bg-orange-500 text-white"
-                        }`}
+                          }`}
                         variants={childVariants}
                       >
                         {section.button_text}
-                      </motion.button>
+                      </motion.a>
                     </div>
                   )}
                 </motion.div>
@@ -334,23 +333,12 @@ export default function WhyJoinMaxima() {
                   ></div>
                   <Image
                     src={
-                      section.image
-                        ? `https://the-maxima.directus.app/assets/${section.image}`
-                        : fallbackImage.src
+                      `https://maximagoldhedging.com/assets/${section.image}` || fallbackImage.src
                     }
                     alt={section.section_title}
                     width={280}
                     height={300}
                     className="mx-auto"
-                    onError={(e) => {
-                      console.error(
-                        "Failed to load image:",
-                        section.image
-                          ? `https://the-maxima.directus.app/assets/${section.image}`
-                          : fallbackImage.src
-                      );
-                      e.currentTarget.src = fallbackImage.src;
-                    }}
                   />
                 </motion.div>
               </motion.div>

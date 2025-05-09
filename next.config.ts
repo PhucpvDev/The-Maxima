@@ -5,8 +5,9 @@ const nextConfig = {
     images: {
         remotePatterns: [{
             protocol: 'https',
-            hostname: 'the-maxima.directus.app', 
+            hostname: 'maximagoldhedging.com', 
         }],
+        unoptimized: true,
       },
 }
 

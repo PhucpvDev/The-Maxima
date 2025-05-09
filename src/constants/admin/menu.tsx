@@ -8,11 +8,15 @@ export const items: MenuItem[] = [
         label: 'Bảng điều khiển',
     },
     {
-        key: 'admin/post',
-        label: 'Bài viết',
-    },
-    {
         key: 'admin/user',
         label: 'Nhân viên',
+    },
+    {
+        key: 'admin/contact',
+        label: 'Liên hệ',
+    },
+    {
+        key: 'admin/affiliate',
+        label: 'Affiliate',
     },
 ]

@@ -4,26 +4,42 @@ import { ConfigProvider, theme as antdTheme } from 'antd';
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
-import { NextIntlClientProvider } from 'next-intl';
+import { NextIntlClientProvider, useLocale } from 'next-intl';
 import '@/assets/scss/main.scss';
 
 interface ClientLayoutProps {
   children: React.ReactNode;
-  locale: string;
-  messages: any; // Thay bằng type cụ thể nếu cần
 }
 
-export default function ClientLayout({ children, locale, messages }: ClientLayoutProps) {
+export default function ClientLayout({ children }: ClientLayoutProps) {
   const [isClient, setIsClient] = useState(false);
-  const [themeConfig, setThemeConfig] = useState<any>(null); // State để lưu themeConfig
+  const [themeConfig, setThemeConfig] = useState<any>(null);
+  const [messages, setMessages] = useState<any>({});
   const { mytheme } = useSelector((state: RootState) => state.theme);
-
-  // Thiết lập theme và client-side rendering
+  
+  // Get locale from next-intl's hook
+  const locale = useLocale();
+  
+  // Fetch messages for the current locale
+  useEffect(() => {
+    const loadMessages = async () => {
+      try {
+        const loadedMessages = (await import(`@/messages/${locale}.json`)).default;
+        setMessages(loadedMessages);
+      } catch (error) {
+        console.error(`Could not load messages for locale: ${locale}`, error);
+      }
+    };
+    
+    loadMessages();
+  }, [locale]);
+  
+  // Setup theme and client-side rendering
   useEffect(() => {
     setIsClient(true);
     document.documentElement.setAttribute('data-theme', mytheme === 'light' ? 'light' : 'dark');
 
-    // Cấu hình theme cho Ant Design
+    // Configure Ant Design theme
     const getCSSVariable = (variable: string) =>
       getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
 
@@ -44,13 +60,9 @@ export default function ClientLayout({ children, locale, messages }: ClientLayou
 
   return (
     <ConfigProvider theme={themeConfig}>
-      <html lang={locale}>
-        <body>
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            {children}
-          </NextIntlClientProvider>
-        </body>
-      </html>
+      <NextIntlClientProvider locale={locale} messages={messages}>
+        {children}
+      </NextIntlClientProvider>
     </ConfigProvider>
   );
 }

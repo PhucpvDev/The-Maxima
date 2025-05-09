@@ -59,7 +59,7 @@ function transformFaqData(data: RawFaqData, locale: string): TransformedFaqData 
 
   const faqs: FaqItem[] = [];
 
-  for (let i = 1; i <= 6; i++) {
+  for (let i = 1; i <= 10; i++) {
     const questionKey = i === 1 ? 'question' : `question_${i}`;
     const answerKey = i === 1 ? 'answer' : `answer_${i}`;
 
@@ -89,14 +89,13 @@ export async function getFaqs(locale: string): Promise<TransformedFaqData[]> {
   try {
     const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
     const response = await fetch(
-      `https://the-maxima.directus.app/items/faqs?lang=${lang}&fields=*,translations.*`,
+      `https://maximagoldhedging.com/items/faqs?lang=${lang}&fields=*,translations.*`,
       {
         headers: {
           Accept: "application/json",
         },
       }
     );
-
     if (!response.ok) {
       throw new Error("Failed to fetch FAQs");
     }

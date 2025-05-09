@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux'
 import { RootState } from '@/redux/store'
 import { IMAGES } from '@/constants/client/theme'
 import { motion } from 'framer-motion'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams, useRouter } from 'next/navigation'
 import Sidebar from '@/components/admin/layout/sidebar'
 import MainHeader from '@/components/admin/layout/mainHeader'
 import MainBreadcrumb from '@/components/admin/layout/mainBreadcrumb'
@@ -14,6 +14,7 @@ import Image from 'next/image'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import { useTranslations } from 'next-intl'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function DashboardLayout({
   children,
@@ -28,6 +29,8 @@ export default function DashboardLayout({
   const [colorPrimary, setColorPrimary] = useState('#FFC800')
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const { isAuthenticated, logout } = useAuth()
 
   useEffect(() => {
     NProgress.configure({ showSpinner: false })
@@ -55,6 +58,15 @@ export default function DashboardLayout({
       setColorPrimary(color)
     }
   }, [])
+
+  // Kiểm tra đăng nhập và làm mới token
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/auth/login') // Chuyển hướng nếu không đăng nhập
+    } else {
+      // Add token refresh logic here if needed
+    }
+  }, [isAuthenticated, router])
 
   const themeConfig = {
     token: {

@@ -1,13 +1,16 @@
-// Remove 'use client'
-import { getAbout1 } from '@/lib/directus/about_1';
+"use client";
 
-export default async function PostPage() {
-  const data = await getAbout1();
-  console.log("data======", data);
+import Posts from "@/components/client/posts/post";
+import Header from "@/components/client/layout/header";
+import Footer from "@/components/client/layout/footer";
 
+export default function PostPage() {
   return (
-    <div>
-      cccc
-    </div>
-  );
+    <>
+      <Header />
+      <Posts />
+      <Footer />
+    </>
+
+  )
 }

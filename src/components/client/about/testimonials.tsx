@@ -1,43 +1,12 @@
-"use client";
+"use client"
 
-import React, { useRef, useState, useEffect } from "react";
-import { Carousel } from "antd";
-import Image from "next/image";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import { motion } from "framer-motion";
-import { useLocale } from "next-intl";
-import { IMAGES } from "@/constants/client/theme";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-
-const containerVariants = {
-  hidden: { opacity: 0, y: 50 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.7,
-      ease: [0.6, 0.01, 0.05, 0.95],
-      when: "beforeChildren",
-      staggerChildren: 0.3,
-    },
-  },
-};
-
-const childVariants = {
-  hidden: { opacity: 0, y: 100 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      type: "spring",
-      stiffness: 120,
-      damping: 18,
-      ease: [0.6, 0.01, 0.05, 0.95],
-    },
-  },
-};
+import React, { useState, useEffect, useRef } from "react"
+import Image from "next/image"
+import { motion } from "framer-motion"
+import { useLocale } from "next-intl"
+import { IMAGES } from "@/constants/client/theme"
+import { useSelector } from "react-redux"
+import { RootState } from "@/redux/store"
 
 interface TestimonialItem {
   text: string;
@@ -96,7 +65,7 @@ async function getTestimonials(locale: string): Promise<TransformedTestimonialDa
   try {
     const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
     const response = await fetch(
-      `https://the-maxima.directus.app/items/testimonials_section?lang=${lang}&fields=*,translations.*`,
+      `https://maximagoldhedging.com/items/testimonials_section?lang=${lang}&fields=*,translations.*`,
       {
         headers: {
           Accept: "application/json",
@@ -153,7 +122,7 @@ async function getTestimonials(locale: string): Promise<TransformedTestimonialDa
         "The dynamic environment at The Maxima always has good values that bring joyful and happy working days to Maxima people.",
       testimonials: [
         {
-          text: "The fast-paced environment at The Maxima requires constant adaptation, which makes every workday exciting. It’s a place where each day brings new joy, new connections, and new challenges.",
+          text: "The fast-paced environment at The Maxima requires constant adaptation, which makes every workday exciting. It's a place where each day brings new joy, new connections, and new challenges.",
           name: "Ahmad Faizal",
           position: "Blockchain Developer",
           avatar: "d07ebb08-07a2-4237-b8f1-7191a44196ab",
@@ -175,12 +144,61 @@ async function getTestimonials(locale: string): Promise<TransformedTestimonialDa
   }
 }
 
+const fadeIn = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1, 
+    transition: { 
+      duration: 0.6,
+      ease: "easeOut"
+    } 
+  }
+};
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { 
+      duration: 0.6, 
+      ease: [0.22, 1, 0.36, 1] 
+    }
+  }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.1
+    }
+  }
+};
+
+const testimonialCardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { duration: 0.5, ease: "easeOut" } 
+  },
+  hover: {
+    y: -5,
+    boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
+    transition: { duration: 0.3 }
+  }
+};
+
 const MaximaTestimonials: React.FC = () => {
   const locale = useLocale();
   const { mytheme } = useSelector((state: RootState) => state.theme);
-  const carouselRef = useRef<any>(null);
   const [testimonialData, setTestimonialData] = useState<TransformedTestimonialData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const slidesRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -200,186 +218,303 @@ const MaximaTestimonials: React.FC = () => {
     document.documentElement.setAttribute("data-theme", mytheme);
   }, [mytheme]);
 
-  const handlePrev = () => {
-    carouselRef.current?.prev();
+  const goToSlide = (index: number) => {
+    setActiveIndex(index);
   };
 
-  const handleNext = () => {
-    carouselRef.current?.next();
+  const nextSlide = () => {
+    if (testimonialData) {
+      setActiveIndex((prevIndex) => (prevIndex + 1) % testimonialData.testimonials.length);
+    }
   };
+
+  const prevSlide = () => {
+    if (testimonialData) {
+      setActiveIndex((prevIndex) => 
+        prevIndex === 0 ? testimonialData.testimonials.length - 1 : prevIndex - 1
+      );
+    }
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!document.hidden) {
+        nextSlide();
+      }
+    }, 6000);
+    
+    return () => clearInterval(interval);
+  }, [testimonialData]);
 
   if (loading) {
     return (
-      <div
-        className={`w-full h-80 flex items-center justify-center text-2xl ${
-          mytheme === "light" ? "text-gray-700" : "text-white"
-        }`}
-      >
-        {locale === "vi" ? "Đang tải..." : locale === "zh" ? "加载中..." : "Loading..."}
+      <div className={`flex items-center justify-center py-20 ${
+        mytheme === "light" ? "text-gray-800" : "text-gray-200"
+      }`}>
+        <div className="loader w-12 h-12 border-4 border-t-yellow-500 rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  const testimonials = testimonialData?.testimonials;
+  const testimonials = testimonialData?.testimonials || [];
   const title = testimonialData?.title || "Share from \"The Maxima\"";
-  const description =
-    testimonialData?.description ||
+  const description = testimonialData?.description || 
     "The dynamic environment at The Maxima always has good values that bring joyful and happy working days to Maxima people.";
 
   return (
-    <motion.div
-      className={`relative w-full overflow-hidden ${
-        mytheme === "light"
-          ? "bg-gradient-to-r"
-          : "bg-gradient-to-r from-[#1a1a1a] to-[#2a2a2a] pt-90"
-      }`}
-      variants={containerVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
-    >
-      {mytheme === "light" && (
-        <Image
-          src={IMAGES.Banner5}
-          alt="Banner Background"
-          priority
-          className="w-full md:h-full h-80"
-        />
-      )}
-
-      <div className="max-w-4xl mx-auto text-center mb-12 -mt-70">
-        <motion.h2
-          className={`text-5xl font-bold mb-4 ${
-            mytheme === "light" ? "text-white" : "text-yellow-600"
-          }`}
-          variants={childVariants}
-        >
-          {title}
-        </motion.h2>
-        <motion.p
-          className={`text-xl text-center mx-auto max-w-2xl md:p-0 p-2 ${
-            mytheme === "light" ? "text-white" : "text-white"
-          }`}
-          variants={childVariants}
-        >
-          {description}
-        </motion.p>
+    <section className={`py-24 relative overflow-hidden font-inter ${
+      mytheme === "light" 
+        ? "bg-gradient-to-br from-blue-50 to-white" 
+        : "bg-gradient-to-br from-gray-900 to-gray-950"
+    }`}>
+      <div className="absolute inset-0 overflow-hidden">
+        {mytheme === "light" && (
+          <div className="absolute inset-0 z-0 opacity-30">
+            <Image
+              src={IMAGES.Banner5}
+              alt="Background Pattern"
+              fill
+              style={{ objectFit: "cover" }}
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-50/90 to-white/90"></div>
+          </div>
+        )}
+        
+        <div className={`absolute inset-0 opacity-5 ${
+          mytheme === "light" ? "bg-gray-900" : "bg-white"
+        }`} style={{
+          backgroundImage: `radial-gradient(circle, ${mytheme === "light" ? "#1a202c" : "#ffffff"} 1px, transparent 1px)`,
+          backgroundSize: "30px 30px"
+        }}></div>
+        
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-yellow-500 rounded-full opacity-10 blur-3xl"></div>
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-blue-600 rounded-full opacity-10 blur-3xl"></div>
       </div>
 
-      <div className="max-w-6xl mx-auto relative pb-12">
-        <button
-          onClick={handlePrev}
-          className={`absolute left-0 top-1/4 -translate-y-1/2 z-10 rounded-full w-10 h-10 flex items-center justify-center shadow-lg -ml-5 ${
-            mytheme === "light" ? "bg-white" : "bg-[#1a1a1a]"
-          }`}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4 relative z-10">
+        <motion.div 
+          className="text-center mb-16"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeInUp}
         >
-          <LeftOutlined
-            style={{ color: mytheme === "light" ? "#1e3a8a" : "#FFC800" }}
-          />
-        </button>
+          <div className="flex flex-col items-center">
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 ${
+              mytheme === "light" ? "bg-yellow-100" : "bg-yellow-900/30"
+            }`}>
+              <span className="material-symbols-outlined text-3xl text-yellow-600">forum</span>
+            </div>
+            
+            <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${
+              mytheme === "light" ? "text-gray-900" : "text-white"
+            }`}>
+              {title}
+            </h2>
+            
+            <div className="w-24 h-1 bg-yellow-500 mx-auto mb-4"></div>
+            
+            <p className={`text-lg max-w-3xl mx-auto ${
+              mytheme === "light" ? "text-gray-600" : "text-gray-300"
+            }`}>
+              {description}
+            </p>
+          </div>
+        </motion.div>
 
-        <button
-          onClick={handleNext}
-          className={`absolute right-0 top-1/4 -translate-y-1/2 z-10 rounded-full w-10 h-10 flex items-center justify-center shadow-lg -mr-5 ${
-            mytheme === "light" ? "bg-white" : "bg-[#1a1a1a]"
-          }`}
-        >
-          <RightOutlined
-            style={{ color: mytheme === "light" ? "#1e3a8a" : "#FFC800" }}
-          />
-        </button>
-
-        <Carousel
-          ref={carouselRef}
-          arrows={false}
-          dots={false}
-          slidesToShow={3}
-          responsive={[
-            {
-              breakpoint: 1024,
-              settings: { slidesToShow: 2 },
-            },
-            {
-              breakpoint: 640,
-              settings: { slidesToShow: 1 },
-            },
-          ]}
-        >
-          {testimonials?.map((item, index) => (
-            <div key={index} className="px-4">
+        <div className="hidden md:block">
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+          >
+            {testimonials.map((item, index) => (
               <motion.div
-                className="relative group overflow-visible"
-                variants={childVariants}
+                key={index}
+                className={`rounded-xl overflow-hidden shadow-lg transform transition-all duration-300 flex flex-col min-h-[300px] ${
+                  mytheme === "light"
+                    ? "bg-white hover:shadow-xl"
+                    : "bg-gray-800 hover:shadow-xl hover:shadow-black/30"
+                }`}
+                variants={testimonialCardVariants}
+                whileHover="hover"
               >
-                {/* Testimonial card */}
-                <div
-                  className={`rounded-lg shadow-lg p-6 min-h-[250px] group-hover:rounded-b-none transition-all duration-300 ${
-                    mytheme === "light"
-                      ? "bg-white"
-                      : "bg-[#1a1a1a] border border-yellow-800"
-                  }`}
-                >
-                  <div
-                    className={`min-h-36 text-lg leading-relaxed ${
-                      mytheme === "light" ? "text-gray-800" : "text-white"
-                    }`}
-                  >
-                    {item.text}
-                  </div>
+                <div className={`absolute top-4 right-4 ${
+                  mytheme === "light" ? "text-yellow-200" : "text-gray-700"
+                }`}>
+                  <span className="material-symbols-outlined text-5xl">format_quote</span>
                 </div>
-
-                {/* Avatar and Hover Info */}
-                <div className="flex flex-col items-center mt-4 relative pb-10 ">
-                  <div className="relative w-full flex flex-col items-center group-hover:-translate-y-12 transition-all duration-300 ease-out">
-                    <div
-                      className={`w-20 h-20 z-10 rounded-full overflow-hidden border-4 shadow-md mb-15 group-hover:mb-0 ${
-                        mytheme === "light"
-                          ? "border-white"
-                          : "border-yellow-800"
-                      }`}
-                    >
-                      <Image
-                        src={`https://the-maxima.directus.app/assets/${item.avatar}`}
-                        alt={item.name || "Testimonial avatar"}
-                        width={80}
-                        height={80}
-                        className="object-cover"
-                      />
-                    </div>
-                    {item.name && (
-                      <div
-                        className={`absolute top-5 group-hover:rounded-t-none opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out rounded-lg shadow-md px-4 py-6 text-center w-full ${
-                          mytheme === "light" ? "bg-white" : "bg-[#1a1a1a] border border border-yellow-800"
-                        }`}
-                      >
-                        <p
-                          className={`font-medium text-xl pt-11 ${
-                            mytheme === "light"
-                              ? "text-gray-800"
-                              : "text-white"
-                          }`}
-                        >
-                          {item.name}
-                        </p>
-                        <p
-                          className={`text-lg ${
-                            mytheme === "light"
-                              ? "text-blue-500"
-                              : "text-white"
-                          }`}
-                        >
-                          {item.position}
-                        </p>
-                      </div>
-                    )}
+                
+                <div className="p-8 pt-12 pb-6 flex-grow">
+                  <p className={`text-lg leading-relaxed mb-6 ${
+                    mytheme === "light" ? "text-gray-700" : "text-gray-300"
+                  }`}>
+                    "{item.text}"
+                  </p>
+                </div>
+                
+                <div className={`px-8 py-5 flex items-center mt-auto ${
+                  mytheme === "light" ? "bg-gray-50" : "bg-gray-900/50"
+                }`}>
+                  <div className="w-12 h-12 rounded-full overflow-hidden mr-4 shadow-md">
+                    <Image
+                      src={`https://maximagoldhedging.com/assets/${item.avatar}`}
+                      alt={item.name}
+                      width={48}
+                      height={48}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                  <div>
+                    <h3 className={`font-semibold ${
+                      mytheme === "light" ? "text-gray-900" : "text-white"
+                    }`}>
+                      {item.name}
+                    </h3>
+                    <p className={`text-sm ${
+                      mytheme === "light" ? "text-gray-500" : "text-gray-400"
+                    }`}>
+                      {item.position}
+                    </p>
                   </div>
                 </div>
               </motion.div>
+            ))}
+          </motion.div>
+        </div>
+
+        <div className="md:hidden">
+          <div className="relative">
+            <div className="overflow-hidden rounded-xl">
+              <div 
+                className="flex transition-all duration-500 ease-in-out"
+                style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+              >
+                {testimonials.map((item, index) => (
+                  <div 
+                    key={index}
+                    ref={el => slidesRef.current[index] = el}
+                    className="min-w-full"
+                  >
+                    <div className={`rounded-xl overflow-hidden shadow-lg m-2 flex flex-col h-full ${
+                      mytheme === "light"
+                        ? "bg-white"
+                        : "bg-gray-800"
+                    }`}>
+                      <div className={`absolute top-4 right-4 ${
+                        mytheme === "light" ? "text-yellow-200" : "text-gray-700"
+                      }`}>
+                        <span className="material-symbols-outlined text-4xl">format_quote</span>
+                      </div>
+                      
+                      <div className="p-6 pt-10 pb-4 flex-grow">
+                        <p className={`text-base leading-relaxed mb-6 ${
+                          mytheme === "light" ? "text-gray-700" : "text-gray-300"
+                        }`}>
+                          "{item.text}"
+                        </p>
+                      </div>
+                      
+                      <div className={`px-6 py-4 flex items-center mt-auto ${
+                        mytheme === "light" ? "bg-gray-50" : "bg-gray-900/50"
+                      }`}>
+                        <div className="w-10 h-10 rounded-full overflow-hidden mr-3 shadow-md">
+                          <Image
+                            src={`https://maximagoldhedging.com/assets/${item.avatar}`}
+                            alt={item.name}
+                            width={40}
+                            height={40}
+                            className="object-cover w-full h-full"
+                          />
+                        </div>
+                        <div>
+                          <h3 className={`font-semibold text-sm ${
+                            mytheme === "light" ? "text-gray-900" : "text-white"
+                          }`}>
+                            {item.name}
+                          </h3>
+                          <p className={`text-xs ${
+                            mytheme === "light" ? "text-gray-500" : "text-gray-400"
+                          }`}>
+                            {item.position}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
-        </Carousel>
+            
+            <div className="flex justify-between items-center mt-6 md:px-0 px-2">
+              <div className="flex space-x-2 md:gap-0 gap-4 text-white">
+                <button 
+                  onClick={prevSlide} 
+                  className={`p-2 rounded-lg ${
+                    mytheme === "light"
+                      ? "bg-white text-gray-800 hover:bg-gray-100"
+                      : "bg-gray-800 text-white hover:bg-gray-700"
+                  } shadow-md transition-colors`}
+                  aria-label="Previous testimonial"
+                >
+                  <span className="material-symbols-outlined">arrow_back</span>
+                </button>
+                <button 
+                  onClick={nextSlide} 
+                  className={`p-2 rounded-lg ${
+                    mytheme === "light"
+                      ? "bg-white text-gray-800 hover:bg-gray-100"
+                      : "bg-gray-800 text-white hover:bg-gray-700"
+                  } shadow-md transition-colors`}
+                  aria-label="Next testimonial"
+                >
+                  <span className="material-symbols-outlined">arrow_forward</span>
+                </button>
+              </div>
+              
+              <div className="flex space-x-2">
+                {testimonials.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      activeIndex === index
+                        ? mytheme === "light"
+                          ? "bg-yellow-500 w-6"
+                          : "bg-yellow-600 w-6"
+                        : mytheme === "light"
+                          ? "bg-gray-300"
+                          : "bg-gray-700"
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </motion.div>
+      
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0');
+        
+        .font-inter {
+          font-family: 'Inter', Arial, sans-serif;
+        }
+        
+        /* Animation for the loader */
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+          animation: spin 1s linear infinite;
+        }
+      `}</style>
+    </section>
   );
 };
 

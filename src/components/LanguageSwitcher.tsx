@@ -1,17 +1,17 @@
-'use client';
+'use client'
 
-import { useLocale } from 'next-intl';
-import { usePathname, useRouter } from 'next/navigation';
-import { IMAGES } from '@/constants/client/theme';
-import { Tooltip, Switch, Select } from 'antd';
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
+import { useLocale } from 'next-intl'
+import { usePathname, useRouter } from 'next/navigation'
+import { IMAGES } from '@/constants/client/theme'
+import { Tooltip, Switch, Select } from 'antd'
+import { useEffect, useState } from 'react'
+import Image from 'next/image'
 
 export default function LanguageSwitcher() {
-  const locale = useLocale();
-  const router = useRouter();
-  const pathname = usePathname();
-  const [isClient, setIsClient] = useState(false);
+  const locale = useLocale()
+  const router = useRouter()
+  const pathname = usePathname()
+  const [isClient, setIsClient] = useState(false)
 
   const languages = [
     { code: 'en', name: 'EN', flag: IMAGES.flagEn || '/flags/gb.png' },

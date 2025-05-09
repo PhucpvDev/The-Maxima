@@ -39,7 +39,7 @@ export async function getFooter(locale: string): Promise<TransformedFooterData> 
     try {
         const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
         const response = await fetch(
-            `https://the-maxima.directus.app/items/footer?lang=${lang}&fields=*,translations.*`,
+            `https://maximagoldhedging.com/items/footer?lang=${lang}&fields=*,translations.*`,
             {
                 headers: {
                     Accept: "application/json",

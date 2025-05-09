@@ -1,57 +1,11 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
-import { Carousel } from "antd";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import { motion } from "framer-motion";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-import { ConfigProvider, theme as antdTheme } from "antd";
-import "antd/dist/reset.css";
-import { useLocale } from "next-intl";
-
-// Animation variants for the container
-const containerVariants = {
-  hidden: { opacity: 0, y: 50 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.7,
-      ease: [0.6, 0.01, 0.05, 0.95],
-      when: "beforeChildren",
-      staggerChildren: 0.3,
-    },
-  },
-};
-
-// Animation variants for child elements
-const childVariants = {
-  hidden: { opacity: 0, y: 100 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      type: "spring",
-      stiffness: 120,
-      damping: 18,
-      ease: [0.6, 0.01, 0.05, 0.95],
-    },
-  },
-};
-
-// Animation variants for carousel cards
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-};
-
-// Animation variants for buttons
-const buttonVariants = {
-  hover: { scale: 1.1, transition: { duration: 0.3 } },
-  tap: { scale: 0.9 },
-};
+import React, { useRef, useEffect, useState } from "react"
+import { motion } from "framer-motion"
+import { useSelector } from "react-redux"
+import { RootState } from "@/redux/store"
+import { ConfigProvider, theme as antdTheme } from "antd"
+import { useLocale } from "next-intl"
 
 interface Testimonial {
   video_url: string;
@@ -105,10 +59,9 @@ interface RawClientSayData {
 
 async function getClientSay(locale: string): Promise<ClientSayData> {
   try {
-    // Map locale to language code
     const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
     const response = await fetch(
-      `https://the-maxima.directus.app/items/client_say?lang=${lang}&fields=*,translations.*`,
+      `https://maximagoldhedging.com/items/client_say?lang=${lang}&fields=*,translations.*`,
       {
         headers: {
           Accept: "application/json",
@@ -123,15 +76,12 @@ async function getClientSay(locale: string): Promise<ClientSayData> {
     const result = await response.json();
     const data: RawClientSayData = Array.isArray(result.data) ? result.data[0] : result.data;
 
-    // Find the translation matching the locale
     const translation = data.translations.find(
       (t: Translation) => t.languages_code === lang
     );
 
-    // Use translation if found, otherwise fall back to default fields
     const source = translation || data;
 
-    // Correct vi-VN misalignment by remapping indices
     const indices = lang === "vi-VN" ? [4, 1, 2, 3] : [1, 2, 3, 4];
 
     const testimonials: Testimonial[] = indices.map((index, i) => ({
@@ -147,7 +97,6 @@ async function getClientSay(locale: string): Promise<ClientSayData> {
     };
   } catch (error) {
     console.error("Error fetching Client Say data:", error);
-    // Return fallback data
     return {
       title: "OUR CLIENTS SAY",
       featuredVideo: "https://www.youtube.com/embed/p23vKxuslNA?si=8jkY3iPILbTu0VBM",
@@ -169,7 +118,7 @@ async function getClientSay(locale: string): Promise<ClientSayData> {
         },
         {
           video_url: "https://www.youtube.com/embed/49Vwgi4KQ9M?si=Y8dc6EApPlgjfsgH",
-          description: "I’ll introduce to my friends, because the ROI is awesome",
+          description: "I'll introduce to my friends, because the ROI is awesome",
           location_name: "Erica, Malaysia",
         },
       ],
@@ -177,11 +126,46 @@ async function getClientSay(locale: string): Promise<ClientSayData> {
   }
 }
 
-const Testimonials: React.FC = () => {
+const fadeIn = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1, 
+    transition: { 
+      duration: 0.6,
+      ease: "easeOut"
+    } 
+  }
+};
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { 
+      duration: 0.6, 
+      ease: [0.22, 1, 0.36, 1] 
+    }
+  }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.1
+    }
+  }
+};
+
+const TestimonialsSection: React.FC = () => {
   const locale = useLocale();
   const { mytheme } = useSelector((state: RootState) => state.theme);
-  const carouselRef = useRef<any>(null);
   const [data, setData] = useState<ClientSayData | null>(null);
+  const [activeSlide, setActiveSlide] = useState<number>(0);
+  const videosRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -204,192 +188,218 @@ const Testimonials: React.FC = () => {
 
   const themeConfig = {
     token: {
-      colorPrimary: getCSSVariable("--yellow-500") || "#FFC800",
+      colorPrimary: "#FFC800",
+      borderRadius: 8,
     },
     algorithm: mytheme === "dark" ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
   };
 
-  const handlePrev = () => {
-    if (carouselRef.current) {
-      carouselRef.current.prev();
-    }
-  };
-
-  const handleNext = () => {
-    if (carouselRef.current) {
-      carouselRef.current.next();
-    }
-  };
-
   if (!data) {
     return (
-      <div
-        className={`text-center py-16 text-2xl font-poppins ${
-          mytheme === "light" ? "text-gray-700" : "text-gray-300"
-        }`}
-      >
-        Loading...
+      <div className={`flex items-center justify-center py-20 ${
+        mytheme === "light" ? "text-gray-800" : "text-gray-200"
+      }`}>
+        <div className="loader w-12 h-12 border-4 border-t-yellow-500 rounded-full animate-spin"></div>
       </div>
     );
   }
 
   const { title, featuredVideo, testimonials } = data;
 
+  const goToSlide = (index: number) => {
+    setActiveSlide(index);
+  };
+
+  const nextSlide = () => {
+    setActiveSlide((prev) => (prev + 1) % testimonials.length);
+  };
+
+  const prevSlide = () => {
+    setActiveSlide((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  };
+
   return (
     <ConfigProvider theme={themeConfig}>
-      <motion.div
-        className={`py-16 px-4 sm:px-6 lg:px-8 ${
-          mytheme === "light"
-            ? "bg-gray-50"
-            : "bg-gradient-to-b from-[#1a1a1a] to-[#2a2a2a]"
-        }`}
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
-      >
-        <div className="max-w-6xl mx-auto">
-          <motion.p
-            className={`text-4xl font-bold mb-12 font-poppins ${
-              mytheme === "light" ? "text-gray-800" : "text-yellow-600"
-            }`}
-            variants={childVariants}
-          >
-            {title}
-          </motion.p>
-
-          {/* Main Video Section */}
-          <motion.div
-            className={`relative w-full md:h-[500px] h-[350px] aspect-video mb-12 rounded-xl overflow-hidden shadow-xl ${
-              mytheme === "light" ? "bg-white" : "bg-black/50"
-            }`}
-            variants={childVariants}
-          >
-            <iframe
-              width="100%"
-              height="100%"
-              src={featuredVideo}
-              title="Featured Testimonial Video"
-              className="absolute top-0 left-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            ></iframe>
-          </motion.div>
-
-          <motion.div
-            className={`relative mb-8 flex justify-end gap-4 ${
-              mytheme === "light"
-                  ? "text-gray-600"
-                  : "text-white"
-              }
-            }`}
-            variants={childVariants}
-          >
-            <motion.button
-              variants={buttonVariants}
-              whileHover="hover"
-              whileTap="tap"
-              onClick={handlePrev}
-              className={`flex items-center justify-center w-10 h-10 rounded-full shadow-md transition-colors ${
-                mytheme === "light"
-                  ? "border border-blue-700 text-blue-700 hover:bg-blue-800 hover:text-white"
-                  : "border border-gray-300 text-gray-300 hover:bg-gray-600 hover:text-white"
-              }`}
-              aria-label="Previous testimonial"
-            >
-              <LeftOutlined className="text-xl" />
-            </motion.button>
-            <motion.button
-              variants={buttonVariants}
-              whileHover="hover"
-              whileTap="tap"
-              onClick={handleNext}
-              className={`flex items-center justify-center w-10 h-10 rounded-full shadow-md transition-colors ${
-                mytheme === "light"
-                  ? "border border-blue-700 text-blue-700 hover:bg-blue-800 hover:text-white"
-                  : "border border-gray-300 text-gray-300 hover:bg-gray-600 hover:text-white"
-              }`}
-              aria-label="Next testimonial"
-            >
-              <RightOutlined className="text-xl " />
-            </motion.button>
-          </motion.div>
-
-          <div className="relative">
-            <Carousel
-              ref={carouselRef}
-              arrows={false}
-              dots={true}
-              infinite={true}
-              slidesToShow={3}
-              slidesToScroll={3}
-              responsive={[
-                {
-                  breakpoint: 1024,
-                  settings: { slidesToShow: 2, slidesToScroll: 2 },
-                },
-                {
-                  breakpoint: 640,
-                  settings: { slidesToShow: 1, slidesToScroll: 1 },
-                },
-              ]}
-            >
-              {testimonials.map((testimonial, index) => (
-                <div key={index} className="px-2">
-                  <motion.div
-                    variants={cardVariants}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true }}
-               
-                  >
-                    <div className="relative w-full aspect-video mb-4 rounded-lg overflow-hidden">
-                      <iframe
-                        width="100%"
-                        height="100%"
-                        src={testimonial.video_url}
-                        title={`Testimonial Video ${index + 1}`}
-                        className="rounded-xl"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                      ></iframe>
-                    </div>
-                    <p
-                      className={`text-lg mb-2 font-poppins ${
-                        mytheme === "light" ? "text-gray-700" : "text-gray-300"
-                      }`}
-                    >
-                      {testimonial.description}
-                    </p>
-                    <p
-                      className={`text-base font-semibold font-poppins ${
-                        mytheme === "light" ? "text-gray-800" : "text-gray-200"
-                      }`}
-                    >
-                      {testimonial.location_name}
-                    </p>
-                  </motion.div>
-                </div>
-              ))}
-            </Carousel>
-          </div>
+      <section className={`py-24 relative overflow-hidden font-inter ${
+        mytheme === "light" 
+          ? "bg-gradient-to-b from-gray-50 to-white" 
+          : "bg-gradient-to-b from-gray-900 to-gray-950"
+      }`}>
+        <div className="absolute inset-0 overflow-hidden">
+          <div className={`absolute inset-0 opacity-5 ${
+            mytheme === "light" ? "bg-gray-900" : "bg-white"
+          }`} style={{
+            backgroundImage: `radial-gradient(circle, ${mytheme === "light" ? "#1a202c" : "#ffffff"} 1px, transparent 1px)`,
+            backgroundSize: "30px 30px"
+          }}></div>
+          <div className="absolute -top-32 -left-32 w-96 h-96 bg-yellow-500 rounded-full opacity-10 blur-3xl"></div>
+          <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-blue-600 rounded-full opacity-10 blur-3xl"></div>
         </div>
 
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4 relative z-10">
+          <motion.div 
+            className="text-center mb-16"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+          >
+            <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${
+              mytheme === "light" ? "text-gray-900" : "text-white"
+            }`}>
+              {title}
+            </h2>
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="h-px w-16 bg-yellow-500"></div>
+              <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
+              <div className="h-px w-16 bg-yellow-500"></div>
+            </div>
+          </motion.div>
+
+          <motion.div 
+            className="mb-20"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeIn}
+          >
+            <div className="relative">
+              <div className={`relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl ${
+                mytheme === "light" ? "shadow-gray-200/80" : "shadow-black/50"
+              }`}>
+                <iframe
+                  src={testimonials[activeSlide].video_url}
+                  title="Featured Testimonial"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="absolute top-0 left-0 w-full h-full"
+                ></iframe>
+
+                <div className="absolute top-1/2 left-4 right-4 flex justify-between items-center transform -translate-y-1/2 z-10">
+                  <button 
+                    onClick={prevSlide} 
+                    className={`p-2 md:p-3 rounded-full bg-black/30 backdrop-blur-md text-white hover:bg-black/50 transform transition-all ${
+                      mytheme === "light" ? "hover:shadow-lg" : "hover:shadow-black/30"
+                    }`}
+                    aria-label="Previous testimonial"
+                  >
+                    <span className="material-symbols-outlined text-white">arrow_back</span>
+                  </button>
+                  <button 
+                    onClick={nextSlide} 
+                    className={`p-2 md:p-3 rounded-full bg-black/30 backdrop-blur-md text-white hover:bg-black/50 transform transition-all ${
+                      mytheme === "light" ? "hover:shadow-lg" : "hover:shadow-black/30"
+                    }`}
+                    aria-label="Next testimonial"
+                  >
+                    <span className="material-symbols-outlined text-white">arrow_forward</span>
+                  </button>
+                </div>
+              </div>
+              <div className="flex justify-center mt-6 gap-2">
+                {testimonials.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      activeSlide === index
+                        ? "w-12 bg-yellow-500"
+                        : "w-8 bg-gray-300 dark:bg-gray-700"
+                    }`}
+                    aria-label={`Go to testimonial ${index + 1}`}
+                  ></button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-4 gap-6"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+          >
+            {testimonials.map((testimonial, index) => (
+              <motion.div
+                key={index}
+                variants={fadeInUp}
+                className={`rounded-xl overflow-hidden cursor-pointer transform transition-all duration-300 ${
+                  activeSlide === index
+                    ? mytheme === "light"
+                      ? "ring-2 ring-yellow-500 scale-105 shadow-xl"
+                      : "ring-2 ring-yellow-500 scale-105 shadow-xl shadow-black/30"
+                    : mytheme === "light"
+                      ? "hover:shadow-lg"
+                      : "hover:shadow-lg hover:shadow-black/20"
+                }`}
+                onClick={() => goToSlide(index)}
+              >
+                <div 
+                  ref={(el) => (videosRef.current[index] = el)}
+                  className="relative aspect-video"
+                >
+                  <div className={`absolute inset-0 ${
+                    activeSlide === index ? "bg-black/0" : "bg-black/40 pointer-events-none"
+                  } transition-colors duration-300`}></div>
+                  <iframe
+                    src={`${testimonial.video_url}?controls=0&showinfo=0&rel=0&modestbranding=1`}
+                    title={`Testimonial video ${index + 1}`}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+                <div className={`p-4   ${
+                  activeSlide === index
+                    ? mytheme === "light" 
+                      ? "bg-yellow-50" 
+                      : "bg-yellow-900/20"
+                    : mytheme === "light"
+                      ? "bg-white"
+                      : "bg-gray-900"
+                }`}>
+                  <p className={`text-sm line-clamp-2 ${
+                    mytheme === "light" ? "text-gray-700" : "text-gray-300"
+                  }`}>
+                    {testimonial.description}
+                  </p>
+                  <p className={`text-xs font-medium mt-2 ${
+                    mytheme === "light" ? "text-gray-900" : "text-white"
+                  }`}>
+                    {testimonial.location_name}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+        
         <style jsx global>{`
-          @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-          .font-poppins {
-            font-family: 'Poppins', Arial, Helvetica, sans-serif;
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0');
+          
+          .font-inter {
+            font-family: 'Inter', Arial, sans-serif;
           }
-          .ant-carousel .slick-dots li button {
-            background: #d1d5db !important;
+          
+          @keyframes spin {
+            to { transform: rotate(360deg); }
           }
-          .ant-carousel .slick-dots li.slick-active button {
-            background: #FFC800 !important;
+          .animate-spin {
+            animation: spin 1s linear infinite;
+          }
+          
+          .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
           }
         `}</style>
-      </motion.div>
+      </section>
     </ConfigProvider>
   );
 };
 
-export default Testimonials;
+export default TestimonialsSection;

@@ -1,41 +1,105 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Button, Drawer, ConfigProvider, theme as antdTheme } from "antd";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "@/redux/store";
-import { toggleTheme } from "@/redux/theme/themeSlice";
-import { IMAGES } from "@/constants/client/theme";
-import Image from "next/image";
+import { useState, useEffect } from 'react';
+import { Button, Drawer, ConfigProvider, theme as antdTheme } from 'antd';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '@/redux/store';
+import { toggleTheme } from '@/redux/theme/themeSlice';
+import { IMAGES } from '@/constants/client/theme';
+import Image from 'next/image';
 import {
   MenuOutlined,
   SunOutlined,
   MoonOutlined,
   CloseOutlined,
-} from "@ant-design/icons";
-import { useLocale } from "next-intl";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { getHeader, TransformedHeaderData } from "@/lib/directus/header";
+} from '@ant-design/icons';
+import { useLocale } from 'next-intl';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { getHeader, TransformedHeaderData } from '@/lib/directus/header';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import Cookies from 'js-cookie';
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.3,
+    },
+  },
+};
+
+const buttonVariants = {
+  rest: { scale: 1 },
+  hover: { scale: 1.05, transition: { duration: 0.2, ease: 'easeInOut' } },
+  tap: { scale: 0.98, transition: { duration: 0.2, ease: 'easeInOut' } },
+};
 
 export default function Home() {
   const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch();
   const { mytheme } = useSelector((state: RootState) => state.theme);
   const [headerData, setHeaderData] = useState<TransformedHeaderData | null>(null);
-  const [current, setCurrent] = useState("home");
+  const [current, setCurrent] = useState('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [affCode, setAffCode] = useState<string | null>(null);
+  const [shouldCallAffiliatesClick, setShouldCallAffiliatesClick] = useState(false);
 
+  const generateTokenAff = () => {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 15);
+    return `${timestamp}-${random}`;
+  };
+
+  // Extract and store affiliate code from URL, generate token_aff if needed
+  useEffect(() => {
+    const aff = searchParams.get('aff');
+    const existingAffCode = Cookies.get('aff_code');
+
+    if (aff) {
+      if (aff !== existingAffCode) {
+        Cookies.set('aff_code', aff, { expires: 7 });
+        const newTokenAff = generateTokenAff();
+        Cookies.set('token_aff', newTokenAff, { expires: 7 });
+        setShouldCallAffiliatesClick(true);
+      } else {
+        setShouldCallAffiliatesClick(false);
+      }
+      setAffCode(aff);
+    } else {
+      Cookies.remove('aff_code');
+      Cookies.remove('token_aff');
+      setAffCode(null);
+      setShouldCallAffiliatesClick(false);
+    }
+  }, [searchParams]);
+
+  // Fetch header data and set initial `current` based on the first nav link
   useEffect(() => {
     const fetchData = async () => {
       try {
         const result = await getHeader(locale);
         setHeaderData(result);
-        setCurrent(result.nav_links[0]?.name.toLowerCase() || "home");
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching header data:", error);
+        console.error('Error fetching header data:', error);
         setLoading(false);
       }
     };
@@ -43,185 +107,346 @@ export default function Home() {
     fetchData();
   }, [locale]);
 
+  // Sync `current` state with the current pathname
+  useEffect(() => {
+    if (!headerData) return; // Wait for headerData to be available
+
+    const pathWithoutLocale = pathname.replace(`/${locale}`, '') || '/';
+    const alias: Record<string, string> = {
+      '/posts': '/posts',
+      '/affiliate': '/affiliate',
+    };
+    const mappedPath = alias[pathWithoutLocale] || pathWithoutLocale;
+    const activeLink = headerData.nav_links.find((link) => {
+      const linkPath = link.url === '/' ? '/' : link.url;
+      return mappedPath === linkPath;
+    });
+
+    const newCurrent = activeLink
+      ? activeLink.url === '/'
+        ? 'home'
+        : activeLink.url.replace(/^\//, '').toLowerCase()
+      : 'home';
+
+    setCurrent(newCurrent);
+  }, [pathname, headerData, locale]);
+
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 0) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 0);
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", mytheme);
+    document.documentElement.setAttribute('data-theme', mytheme);
   }, [mytheme]);
+
+  useEffect(() => {
+    const targetId = sessionStorage.getItem('scrollToSection');
+    if (targetId) {
+      const attemptScroll = (attempts = 5, delay = 100) => {
+        const element = document.getElementById(targetId);
+        if (element) {
+          const headerHeight = 80;
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition =
+            elementPosition + window.pageYOffset - headerHeight;
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth',
+          });
+          sessionStorage.removeItem('scrollToSection');
+        } else if (attempts > 0) {
+          setTimeout(() => attemptScroll(attempts - 1, delay), delay);
+        } else {
+          console.warn(`Element with ID "${targetId}" not found after retries.`);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          sessionStorage.removeItem('scrollToSection');
+        }
+      };
+      attemptScroll();
+    }
+  }, []);
+
+  const AffiliatesClick = async () => {
+    try {
+      const code = Cookies.get('aff_code');
+      const token = Cookies.get('token_aff');
+
+      const response = await fetch('http://localhost:3001/api/affiliates/click', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code,
+          token,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to submit affiliate code');
+      }
+
+      const data = await response.json();
+    } catch (error) {
+      console.error('Error in AffiliatesClick:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (affCode && shouldCallAffiliatesClick) {
+      AffiliatesClick();
+      setShouldCallAffiliatesClick(false);
+    }
+  }, [affCode, shouldCallAffiliatesClick]);
 
   const handleToggleTheme = () => {
     dispatch(toggleTheme());
   };
 
-  const getCSSVariable = (variable: string) =>
-    getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
-
   const themeConfig = {
     token: {
-      colorPrimary: getCSSVariable("--yellow-500") || "#FFC800",
+      colorPrimary: '#FFC800',
+      borderRadius: 8,
     },
-    algorithm: mytheme === "dark" ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+    algorithm:
+      mytheme === 'dark'
+        ? antdTheme.darkAlgorithm
+        : antdTheme.defaultAlgorithm,
   };
+
+  const getBannerImage = () => {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    if (isMobile) {
+      return mytheme === 'light' ? IMAGES.Banner9Mb : IMAGES.Banner1Mb;
+    }
+    return mytheme === 'light' ? IMAGES.Banner9 : IMAGES.Banner1;
+  };
+
+  const getElementId = (url: string) => {
+    return url === '/' ? 'home' : url.replace(/^\//, '').toLowerCase();
+  };
+
+  const getHrefFromUrl = (url: string) => {
+    return url === '/' ? '#home' : `#${url.replace(/^\//, '')}`;
+  };
+
+  const handleMenuClick = (menuItem: string, url: string) => {
+    setCurrent(url === '/' ? 'home' : url.replace(/^\//, '').toLowerCase());
+    setIsMenuOpen(false);
+
+    const currentPage = pathname.replace(`/${locale}`, '') || '/';
+
+    // Handle navigation to /posts or /affiliate
+    if (url === '/posts' || url === '/affiliate') {
+      router.push(`/${locale}${url}`);
+      return;
+    }
+
+    // Handle navigation to Home from /posts or /affiliate
+    if (url === '/' && (currentPage === '/posts' || currentPage === '/affiliate')) {
+      router.push(`/${locale}/`);
+      return;
+    }
+
+    // Handle scrolling for other links on the home page
+    const elementId = getElementId(url);
+    const element = document.getElementById(elementId);
+
+    if (element) {
+      const headerHeight = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+    } else {
+      console.warn(`Element with ID "${elementId}" not found.`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Filter nav_links based on current pathname
+  const getFilteredNavLinks = () => {
+    const currentPage = pathname.replace(`/${locale}`, '') || '/';
+    if (currentPage === '/posts' || currentPage === '/affiliate') {
+      return (
+        headerData?.nav_links.filter(
+          (link) => link.url === '/' || link.url === currentPage
+        ) || []
+      );
+    }
+    return headerData?.nav_links || [];
+  };
+
+  const filteredNavLinks = getFilteredNavLinks();
 
   if (loading) {
     return (
       <ConfigProvider theme={themeConfig}>
         <div
-          className={`min-h-screen font-roboto flex items-center justify-center ${
-            mytheme === "light" ? "bg-gradient-to-b bg-white/10" : "bg-gradient-to-b from-gray-900 to-black"
+          className={`min-h-screen font-inter flex items-center justify-center overflow-x-hidden ${
+            mytheme === 'light'
+              ? 'bg-gradient-to-b from-gray-50 to-white'
+              : 'bg-gradient-to-b from-gray-900 to-gray-950'
           }`}
         >
-          <div className="flex flex-col items-center justify-center">
-            {/* Enhanced loading animation with multiple elements */}
-            <div className="relative mb-8">
-              {/* Center logo */}
-              <div className="absolute inset-0 flex items-center justify-center z-20">
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg">
-                  <Image
-                    src={IMAGES.LogoMaxima}
-                    alt="Loading Logo"
-                    width={48}
-                    height={48}
-                    priority
-                  />
-                </div>
+          <motion.div
+            className="relative w-32 h-32 flex flex-col items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center z-20"
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <div
+                className={`w-16 h-16 rounded-full flex items-center justify-center shadow-lg ${
+                  mytheme === 'light' ? 'bg-white' : 'bg-gray-800'
+                }`}
+              >
+                <Image
+                  src={IMAGES.LogoMaxima}
+                  alt="Loading Logo"
+                  width={48}
+                  height={48}
+                  priority
+                />
               </div>
-
-              {/* Outer spinning ring */}
-              <div className="w-24 h-24 border-4 border-transparent border-t-green-500 border-r-green-400 rounded-full animate-spin"></div>
-
-              {/* Inner spinning ring (opposite direction) */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-20 h-20 border-4 border-transparent border-b-yellow-500 border-l-yellow-400 rounded-full animate-spin-slow"></div>
-              </div>
-
-              {/* Pulsing glow effect */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-32 h-32 bg-green-400 rounded-full opacity-20 animate-pulse"></div>
-              </div>
-            </div>
-
-            {/* Loading text with subtle animation */}
-            <div className="text-center">
-              <p className={`text-2xl font-medium ${mytheme === "light" ? "text-gray-800" : "text-white"}`}>
-                {locale === "vi"
-                  ? "Đang tải..."
-                  : locale === "zh"
-                    ? "加载中..."
-                    : "Loading..."}
-              </p>
-              <div className="mt-2 flex justify-center space-x-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce delay-100"></div>
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce delay-200"></div>
-              </div>
-            </div>
-          </div>
+            </motion.div>
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center"
+              animate={{ rotate: -360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+            >
+              <div className="w-20 h-20 border-4 border-transparent border-b-yellow-500 border-l-yellow-400 rounded-full"></div>
+            </motion.div>
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            >
+              <div className="w-32 h-32 bg-yellow-400 rounded-full opacity-20"></div>
+            </motion.div>
+          </motion.div>
         </div>
       </ConfigProvider>
     );
   }
 
-  function handleMenuClick(menuItem: string): void {
-    setCurrent(menuItem);
-    setIsMenuOpen(false);
-  }
+  const registrationUrl = affCode
+    ? `https://agreement.maximadao.com/#/register?code=${encodeURIComponent(
+        affCode
+      )}`
+    : `https://agreement.maximadao.com/#/register`;
 
   return (
     <ConfigProvider theme={themeConfig}>
       <div
-        className={`min-h-screen font-roboto relative ${
-          mytheme === "light" ? "bg-[#003055] text-black" : "bg-[#001529] text-white"
+        className={`min-h-screen font-inter relative ${
+          mytheme === 'light'
+            ? 'bg-gradient-to-b from-gray-50 to-white'
+            : 'bg-gradient-to-b from-gray-900 to-gray-950'
         }`}
       >
+        <div className="absolute inset-0 overflow-hidden z-0">
+          <div
+            className={`absolute inset-0 opacity-5 ${
+              mytheme === 'light' ? 'bg-gray-900' : 'bg-white'
+            }`}
+            style={{
+              backgroundImage: `radial-gradient(circle, ${
+                mytheme === 'light' ? '#1a202c' : '#ffffff'
+              } 1px, transparent 1px)`,
+              backgroundSize: '30px 30px',
+            }}
+          ></div>
+          <div className="absolute -top-32 -left-32 w-96 h-96 bg-yellow-500 rounded-full opacity-10 blur-3xl"></div>
+          <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-blue-600 rounded-full opacity-10 blur-3xl"></div>
+        </div>
+
         <Image
-          src={mytheme === "dark" ? IMAGES.Banner1 : IMAGES.Banner9}
+          src={getBannerImage()}
           alt="Banner Background"
           fill
-          style={{
-            objectFit: "cover",
-            objectPosition: "center",
-          }}
-          className="md:object-center object-[75%_50%]"
+          className="object-cover md:object-center object-[75%_50%]"
           priority
         />
         <div
           className={`absolute inset-0 z-0 ${
-            mytheme === "light" ? "bg-black/20" : "bg-black/20"
+            mytheme === 'light' ? 'bg-black/20' : 'bg-black/30'
           }`}
         ></div>
 
         <div className="relative z-50">
-          <header
-            className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+          <motion.header
+            className={`fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 overflow-x-hidden ${
               isScrolled
-                ? mytheme === "light"
-                  ? "bg-white shadow-md text-black"
-                  : "bg-black shadow-md text-white"
-                : "bg-transparent text-white"
+                ? mytheme === 'light'
+                  ? 'bg-white/80 backdrop-blur-md shadow-lg'
+                  : 'bg-gray-900/80 backdrop-blur-md shadow-black/20'
+                : 'bg-transparent'
             }`}
+            initial={{ y: -100 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.3 }}
           >
-            <div className="flex justify-between items-center px-4 py-4 mx-auto max-w-7xl">
-              <div className="flex items-center">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center mr-2 ${
-                    mytheme === "light" ? "bg-gray-200" : "bg-white/10"
-                  }`}
-                >
-                  <Image
-                    src={IMAGES.LogoMaxima}
-                    alt="Logo Maxima"
-                    width={40}
+            <div className="flex justify-between items-center px-4 py-4 mx-auto max-w-7xl w-full">
+              <motion.div className="flex items-center" variants={fadeInUp}>
+                <Link href={`/${locale}/`} className="flex items-center">
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center mr-2 ${
+                      mytheme === 'light' ? 'bg-gray-100' : 'bg-gray-800'
+                    } shadow-md`}
+                  >
+                    <Image
+                      src={IMAGES.LogoMaxima}
+                      alt="Logo Maxima"
+活动                    width={40}
                     height={40}
                     priority
                   />
-                </div>
-                
-                <style jsx global>{`
-                  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap');
-                  .maxima-brand-text {
-                    font-family: 'Montserrat', sans-serif;
-                    letter-spacing: 0.5px;
-                    font-weight: 700;
-                    text-transform: uppercase;
-                    background: ${mytheme === "light" 
-                      ? (isScrolled ? "linear-gradient(90deg, #000 0%, #333 100%)" : "linear-gradient(90deg, #fff 0%, #f0f0f0 100%)") 
-                      : "linear-gradient(90deg, #FFC800 0%, #FF9500 100%)"};
-                    background-clip: text;
-                    -webkit-background-clip: text;
-                    color: transparent;
-                    text-shadow: ${mytheme === "light" 
-                      ? (isScrolled ? "0px 1px 2px rgba(0,0,0,0.1)" : "0px 1px 2px rgba(255,255,255,0.2)") 
-                      : "0px 1px 2px rgba(255,200,0,0.2)"};
-                  }
-                `}</style>
-                
-                <span className="maxima-brand-text text-lg">
-                  MAXIMA
-                </span>
-              </div>
+                  </div>
+                  <span
+                    className={`text-lg font-bold tracking-tight ${
+                      mytheme === 'light'
+                        ? isScrolled
+                          ? 'text-gray-900'
+                          : 'text-white'
+                        : 'text-yellow-500'
+                    }`}
+                  >
+                    MAXIMA
+                  </span>
+                </Link>
+              </motion.div>
 
-              <button
-                className="md:hidden text-4xl"
+              <motion.button
+                className={`md:hidden pl-2.5 pr-2.5 pb-2 pt-2 rounded-full ${
+                  mytheme === 'light' ? 'bg-gray-100' : 'bg-gray-800'
+                } shadow-md`}
                 onClick={() => setIsMenuOpen(true)}
+                variants={buttonVariants}
+                initial="rest"
+                whileHover="hover"
+                whileTap="tap"
               >
                 <MenuOutlined
-                  className={`text-[20px] ${
-                    isScrolled && mytheme === "light" ? "text-black" : "text-white"
-                  }`}
+                  style={{
+                    fontSize: '18px',
+                    color: mytheme === 'light' ? '#000000' : '#ffffff',
+                  }}
                 />
-              </button>
+              </motion.button>
 
               <Drawer
                 placement="right"
@@ -231,23 +456,14 @@ export default function Home() {
                 width="80%"
                 closeIcon={
                   <CloseOutlined
-                    style={{ color: mytheme === "light" ? "#000000" : "#ffffff" }}
+                    style={{ color: mytheme === 'light' ? '#000000' : '#ffffff' }}
                   />
                 }
-                bodyStyle={{
-                  backgroundColor: mytheme === "light" ? "#ffffff" : "#000000",
-                  color: mytheme === "light" ? "#000000" : "#ffffff",
-                }}
-                headerStyle={{
-                  backgroundColor: mytheme === "light" ? "#ffffff" : "#000000",
-                  borderBottom:
-                    mytheme === "light" ? "1px solid #e0e0e0" : "1px solid #333333",
-                }}
                 title={
                   <div className="flex items-center">
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center mr-2 ${
-                        mytheme === "light" ? "bg-gray-200" : "bg-white"
+                        mytheme === 'light' ? 'bg-gray-100' : 'bg-gray-800'
                       }`}
                     >
                       <Image
@@ -259,8 +475,8 @@ export default function Home() {
                       />
                     </div>
                     <span
-                      className={`font-medium ${
-                        mytheme === "light" ? "text-black" : "text-white"
+                      className={`font-semibold ${
+                        mytheme === 'light' ? 'text-gray-900' : 'text-white'
                       }`}
                     >
                       Maxima Menu
@@ -268,237 +484,385 @@ export default function Home() {
                   </div>
                 }
               >
-                <div className="py-4">
-                  {headerData?.nav_links.map((item) => (
-                    <div
+                <motion.div
+                  className="py-4"
+                  variants={staggerContainer}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  {filteredNavLinks.map((item) => (
+                    <motion.div
                       key={item.name}
+                      variants={fadeInUp}
                       className={`px-6 py-4 border-b ${
-                        mytheme === "light"
-                          ? "border-gray-200"
-                          : "border-white/10"
+                        mytheme === 'light' ? 'border-gray-200' : 'border-gray-700'
                       } ${
-                        current === item.name.toLowerCase()
-                          ? mytheme === "light"
-                            ? "bg-gray-100"
-                            : "bg-white/10"
-                          : ""
+                        current ===
+                        (item.url === '/'
+                          ? 'home'
+                          : item.url.replace(/^\//, '').toLowerCase())
+                          ? mytheme === 'light'
+                            ? 'bg-yellow-50'
+                            : 'bg-yellow-900/20'
+                          : ''
                       }`}
-                      onClick={() => handleMenuClick(item.name.toLowerCase())}
+                      onClick={() => handleMenuClick(item.name, item.url)}
                     >
-                      <a
-                        href={item.url}
-                        className={`block text-lg ${
-                          current === item.name.toLowerCase()
-                            ? mytheme === "light"
-                              ? "text-black"
-                              : "text-white"
-                            : mytheme === "light"
-                              ? "text-gray-600"
-                              : "text-white/80"
+                      <motion.a
+                        href={
+                          item.url === '/posts' || item.url === '/affiliate'
+                            ? `/${locale}${item.url}`
+                            : getHrefFromUrl(item.url)
+                        }
+                        className={`block text-lg font-medium ${
+                          current ===
+                          (item.url === '/'
+                            ? 'home'
+                            : item.url.replace(/^\//, '').toLowerCase())
+                            ? mytheme === 'light'
+                              ? 'text-yellow-500'
+                              : 'text-yellow-400'
+                            : mytheme === 'light'
+                              ? 'text-gray-700'
+                              : 'text-gray-300'
                         }`}
+                        onClick={(e) => {
+                          if (
+                            item.url !== '/posts' &&
+                            item.url !== '/affiliate'
+                          ) {
+                            e.preventDefault();
+                            handleMenuClick(item.name, item.url);
+                          }
+                        }}
                       >
                         <span
-                          className={mytheme === "light" ? "text-black" : "text-white"}
+                          className={`${
+                            mytheme === 'light' ? 'text-gray-800' : 'text-white'
+                          }`}
                         >
                           {item.name}
                         </span>
-                      </a>
-                    </div>
+                      </motion.a>
+                    </motion.div>
                   ))}
-
-                  <div className="px-6 py-6 mt-4">
+                  <motion.div
+                    className="px-6 py-6 mt-4"
+                    variants={fadeInUp}
+                  >
                     <div className="flex items-center justify-between mb-6">
                       <span
-                        className={`text-base ${
-                          mytheme === "light" ? "text-black" : "text-white"
+                        className={`text-base font-medium ${
+                          mytheme === 'light' ? 'text-gray-900' : 'text-white'
                         }`}
                       >
                         Theme
                       </span>
-                      <button
-                        className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          mytheme === "light" ? "bg-gray-200" : "bg-white"
-                        }`}
+                      <motion.button
+                        className={`w-8 h-8 cursor-pointer rounded-full flex items-center justify-center ${
+                          mytheme === 'light' ? 'bg-gray-100' : 'bg-gray-800'
+                        } shadow-md`}
                         onClick={handleToggleTheme}
+                        variants={buttonVariants}
+                        initial="rest"
+                        whileHover="hover"
+                        whileTap="tap"
                       >
-                        {mytheme === "light" ? (
+                        {mytheme === 'light' ? (
                           <SunOutlined
-                            style={{ fontSize: "16px", color: "#1e3a8a" }}
+                            style={{ fontSize: '16px', color: '#FFC800' }}
                           />
                         ) : (
                           <MoonOutlined
-                            style={{ fontSize: "16px", color: "#1e3a8a" }}
+                            style={{ fontSize: '16px', color: '#FFC800' }}
                           />
                         )}
-                      </button>
+                      </motion.button>
                       <LanguageSwitcher />
                     </div>
-                    <div className="flex items-center justify-between">
-                    </div>
-                  </div>
-                </div>
+                  </motion.div>
+                </motion.div>
               </Drawer>
 
-              <nav className="hidden md:flex flex-row">
-                {headerData?.nav_links.map((item) => (
-                  <a
+              <motion.nav
+                className="hidden md:block flex-row items-center flex-wrap"
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
+              >
+                {filteredNavLinks.map((item) => (
+                  <motion.a
                     key={item.name}
-                    href={item.url}
-                    className={`px-5 py-2 text-base font-medium ${
-                      current === item.name.toLowerCase()
-                        ? isScrolled && mytheme === "light"
-                          ? "text-black bg-gray-200 rounded-full"
-                          : "text-white bg-white/15 rounded-full"
-                        : isScrolled && mytheme === "light"
-                          ? "text-black"
-                          : "text-white"
+                    href={
+                      item.url === '/posts' || item.url === '/affiliate'
+                        ? `/${locale}${item.url}`
+                        : getHrefFromUrl(item.url)
+                    }
+                    className={`px-5 py-2 text-base font-medium rounded-full transition-all duration-200 ${
+                      current ===
+                      (item.url === '/'
+                        ? 'home'
+                        : item.url.replace(/^\//, '').toLowerCase())
+                        ? mytheme === 'light'
+                          ? 'bg-yellow-500 text-white shadow-md'
+                          : 'bg-yellow-500/20 text-yellow-400 shadow-black/20'
+                        : mytheme === 'light'
+                          ? isScrolled
+                            ? 'text-gray-700 hover:bg-gray-100'
+                            : 'text-white hover:bg-white/10'
+                          : 'text-gray-300 hover:bg-gray-800/50'
                     }`}
-                    onClick={() => setCurrent(item.name.toLowerCase())}
+                    onClick={(e) => {
+                      if (
+                        item.url !== '/posts' &&
+                        item.url !== '/affiliate'
+                      ) {
+                        e.preventDefault();
+                        handleMenuClick(item.name, item.url);
+                      }
+                    }}
+                    variants={fadeInUp}
                   >
                     {item.name}
-                  </a>
+                  </motion.a>
                 ))}
-              </nav>
+              </motion.nav>
 
-              <div className="hidden md:flex items-center">
-                <button
-                  className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                    mytheme === "light" ? "bg-gray-200" : "bg-white"
-                  }`}
+              <motion.div
+                className="hidden md:flex items-center gap-4"
+                variants={fadeInUp}
+              >
+                <motion.button
+                  className={`w-9 h-9 rounded-full cursor-pointer flex items-center justify-center ${
+                    mytheme === 'light' ? 'bg-gray-100' : 'bg-gray-800'
+                  } shadow-md`}
                   onClick={handleToggleTheme}
+                  variants={buttonVariants}
+                  initial="rest"
+                  whileHover="hover"
+                  whileTap="tap"
                 >
-                  {mytheme === "light" ? (
-                    <SunOutlined
-                      style={{ fontSize: "16px", color: "#1e3a8a" }}
-                    />
+                  {mytheme === 'light' ? (
+                    <SunOutlined style={{ fontSize: '20px', color: '#FFC800' }} />
                   ) : (
                     <MoonOutlined
-                      style={{ fontSize: "16px", color: "#1e3a8a" }}
+                      style={{ fontSize: '20px', color: '#FFC800' }}
                     />
                   )}
-                </button>
-                <span
-                  className={`ml-3 mr-3 ${
-                    isScrolled && mytheme === "light" ? "text-black" : "text-white"
-                  }`}
-                >
-                  |
-                </span>
+                </motion.button>
                 <LanguageSwitcher />
-              </div>
+              </motion.div>
             </div>
-          </header>
+          </motion.header>
 
           <main className="px-4 py-10 pt-28 md:pt-36 max-w-7xl mx-auto">
-            <div className="md:mb-7 md:text-left">
-              <h1
-                className={`text-[30px] max-w-4xl sm:text-3xl md:text-[55px] uppercase font-bold mb-6 leading-tight tracking-wide ${
-                  mytheme === "light" ? "text-white" : "text-white"
-                }`}
+            <section id="home">
+              <motion.div
+                className="md:mb-7 md:text-left"
+                variants={staggerContainer}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
               >
-                {headerData?.main_title.split("<br />").map((line, index) => (
-                  <span key={index}>
-                    {line}
-                    <br />
-                  </span>
-                ))}
-              </h1>
-
-              <h1
-                className={`text-xl sm:text-xl md:text-3xl font-bold mb-2 ${
-                  mytheme === "light" ? "text-white" : "text-white"
-                }`}
-              >
-                {headerData?.subtitle}
-              </h1>
-
-              <p
-                className={`text-xl sm:text-lg md:text-xl mb-8 font-bold ${
-                  mytheme === "light" ? "text-white" : "text-white"
-                }`}
-              >
-                {headerData?.rate_text}
-              </p>
-
-              <a className="text-white" href={headerData?.cta_button_url}>
-                <button
-                  className={`bg-orange-400 hover:bg-orange-500 text-white font-medium px-8 sm:px-16 py-3 rounded-full sm:w-auto`}
+                <motion.p
+                  className={`text-3xl sm:text-4xl md:text-6xl md:w-4xl uppercase font-bold leading-tight tracking-tight ${
+                    mytheme === 'light' ? 'text-white' : 'text-white'
+                  }`}
+                  variants={fadeInUp}
                 >
-                  {headerData?.cta_button_text}
-                </button>
-              </a>
-            </div>
-          </main>
+                  {headerData?.main_title.split('<br />').map((line, index) => (
+                    <span key={index}>
+                      {line}
+                      <br />
+                    </span>
+                  ))}
+                </motion.p>
 
-          <div className="max-w-7xl mx-auto px-4 pb-10">
-            <div
-              className={`p-1 rounded-3xl shadow-xl border ${
-                mytheme === "light"
-                  ? "border-yellow-600"
-                  : "border-yellow-800"
-              }`}
-            >
-              <div
-                className={`grid grid-cols-1 md:grid-cols-3 md:gap-8 ml-5 md:ml-35 ${
-                  mytheme === "light" ? "text-white" : "text-white"
-                }`}
+                <motion.p
+                  className={`text-xl sm:text-2xl md:text-3xl md:w-3xl uppercase font-semibold pt-6 pb-4 ${
+                    mytheme === 'light' ? 'text-white' : 'text-gray-200'
+                  }`}
+                  variants={fadeInUp}
+                >
+                  {headerData?.subtitle}
+                </motion.p>
+
+                <motion.p
+                  className={`text-lg sm:text-xl pb-4 uppercase font-bold ${
+                    mytheme === 'light' ? 'text-white' : 'text-gray-300'
+                  }`}
+                  variants={fadeInUp}
+                >
+                  {headerData?.rate_text}
+                </motion.p>
+
+                <motion.a
+                  href={registrationUrl}
+                  className="inline-block text-white"
+                  variants={fadeInUp}
+                >
+                  <motion.button
+                    className={`px-8 py-3 rounded-lg cursor-pointer text-white font-medium text-base shadow-lg ${
+                      mytheme === 'light'
+                        ? 'bg-yellow-500 hover:bg-yellow-600 shadow-yellow-200/30'
+                        : 'bg-yellow-500 hover:bg-yellow-600 shadow-yellow-900/20'
+                    } transition-all duration-300`}
+                    variants={buttonVariants}
+                    initial="rest"
+                    whileHover="hover"
+                    whileTap="tap"
+                  >
+                    {headerData?.cta_button_text}
+                  </motion.button>
+                </motion.a>
+              </motion.div>
+
+              <motion.div
+                className="max-w-7xl mx-auto pt-10"
+                variants={staggerContainer}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
               >
-                {headerData?.stats.map((stat, index) => {
-                  const numberMatch = stat.value.match(/^\d{1,3}(,\d{3})*/);
-                  const number = numberMatch ? numberMatch[0] : stat.value;
-                  const unit = stat.value.replace(number, "").trim();
+                <motion.div
+                  className={`p-6 rounded-2xl shadow-xl pmd:pl-32 ${
+                    mytheme === 'light'
+                      ? 'bg-white/80 backdrop-blur-md'
+                      : 'bg-gray-800/80 backdrop-blur-md'
+                  }`}
+                  variants={fadeInUp}
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {headerData?.stats.map((stat, index) => {
+                      const numberMatch = stat.value.match(/^\d{1,3}(,\d{3})*/);
+                      const number = numberMatch ? numberMatch[0] : stat.value;
+                      const unit = stat.value.replace(number, '').trim();
 
-                  return (
-                    <div key={index} className="flex items-center">
-                      <div
-                        className={`p-4 rounded-full mr-4 shadow-xl ${
-                          index === 0
-                            ? mytheme === "light"
-                              ? "bg-orange-200"
-                              : "bg-orange-100"
-                            : index === 1
-                              ? mytheme === "light"
-                                ? "bg-blue-200 py-5"
-                                : "bg-blue-100 py-5"
-                              : mytheme === "light"
-                                ? "bg-green-200"
-                                : "bg-green-100"
-                        }`}
-                      >
-                        <Image
-                          src={
-                            index === 0
-                              ? IMAGES.Percent.src
-                              : index === 1
-                                ? IMAGES.User
-                                : IMAGES.Location
-                          }
-                          alt={`${stat.label} Icon`}
-                          width={32}
-                          height={32}
-                          priority
-                        />
-                      </div>
-                      <div className="mt-6">
-                        <span className="text-lg font-medium">{stat.label}</span>
-                        <p className="font-bold text-xl">
-                          {number}{" "}
-                          <span
-                            className={`text-sm font-normal ${
-                              mytheme === "light" ? "text-white" : "text-white"
+                      return (
+                        <motion.div
+                          key={index}
+                          className="flex items-center"
+                          variants={fadeInUp}
+                        >
+                          <div
+                            className={`p-6 rounded-full mr-4 shadow-md ${
+                              index === 0
+                                ? mytheme === 'light'
+                                  ? 'bg-yellow-100'
+                                  : 'bg-yellow-900/40'
+                                : index === 1
+                                ? mytheme === 'light'
+                                  ? 'bg-blue-100'
+                                  : 'bg-blue-900/40'
+                                : mytheme === 'light'
+                                ? 'bg-green-100'
+                                : 'bg-green-900/40'
                             }`}
                           >
-                            {unit}
-                          </span>
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+                            <Image
+                              src={
+                                index === 0
+                                  ? IMAGES.Percent.src
+                                  : index === 1
+                                  ? IMAGES.User
+                                  : IMAGES.Location
+                              }
+                              alt={`${stat.label} Icon`}
+                              width={32}
+                              height={32}
+                              priority
+                            />
+                          </div>
+                          <div>
+                            <span
+                              className={`text-[22px] font-bold ${
+                                mytheme === 'light'
+                                  ? 'text-gray-700'
+                                  : 'text-gray-300'
+                              }`}
+                            >
+                              {stat.label}
+                            </span>
+                            <p
+                              className={`font-bold text-xl ${
+                                mytheme === 'light'
+                                  ? 'text-gray-900'
+                                  : 'text-white'
+                              }`}
+                            >
+                              {number}{' '}
+                              <span
+                                className={`text-base font-bold ${
+                                  mytheme === 'light'
+                                    ? 'text-gray-600'
+                                    : 'text-gray-400'
+                                }`}
+                              >
+                                {unit}
+                              </span>
+                            </p>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              </motion.div>
+            </section>
+          </main>
         </div>
+
+        <style jsx global>{`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0');
+
+          .font-inter {
+            font-family: 'Inter', Arial, sans-serif;
+          }
+
+          @keyframes spin {
+            to {
+              transform: rotate(360deg);
+            }
+          }
+          .animate-spin {
+            animation: spin 1s linear infinite;
+          }
+
+          @keyframes spin-slow {
+            to {
+              transform: rotate(-360deg);
+            }
+          }
+          .animate-spin-slow {
+            animation: spin-slow 2s linear infinite;
+          }
+
+          @keyframes bounce {
+            0%,
+            100% {
+              transform: translateY(0);
+            }
+            50% {
+              transform: translateY(-5px);
+            }
+          }
+          .animate-bounce {
+            animation: bounce 0.6s infinite;
+          }
+          .delay-100 {
+            animation-delay: 0.1s;
+          }
+          .delay-200 {
+            animation-delay: 0.2s;
+          }
+
+          .transition-all {
+            transition-property: all;
+            transition-duration: 300ms;
+            transition-timing-function: ease-in-out;
+          }
+        `}</style>
       </div>
     </ConfigProvider>
   );

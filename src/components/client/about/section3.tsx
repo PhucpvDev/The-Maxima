@@ -1,15 +1,15 @@
-"use client";
 
-import { Row, Col } from "antd";
-import { IMAGES } from "@/constants/client/theme";
-import { Link } from "@/i18n/routing";
-import Image from "next/image";
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
-import { useLocale } from "next-intl";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-import { ConfigProvider, theme as antdTheme } from "antd";
+"use client"
+
+import React, { useState, useEffect } from "react"
+import { ConfigProvider, theme as antdTheme } from "antd"
+import Image from "next/image"
+import { motion } from "framer-motion"
+import { useLocale } from "next-intl"
+import { useSelector } from "react-redux"
+import { RootState } from "@/redux/store"
+import Cookies from "js-cookie"
+
 
 interface Translation {
   id: number;
@@ -54,7 +54,7 @@ async function getMaximaSuperWallet(locale: string): Promise<MaximaSuperWalletDa
   try {
     const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
     const response = await fetch(
-      `http://the-maxima.directus.app/items/maxima_super_wallet?lang=${lang}&fields=*,translations.*`,
+      `https://maximagoldhedging.com/items/maxima_super_wallet?lang=${lang}&fields=*,translations.*`,
       {
         headers: {
           Accept: "application/json",
@@ -106,39 +106,42 @@ async function getMaximaSuperWallet(locale: string): Promise<MaximaSuperWalletDa
   }
 }
 
-const containerVariants = {
-  hidden: { opacity: 0, y: 50 },
+const fadeInUp = {
+  hidden: { opacity: 0, y: 30 },
   visible: {
     opacity: 1,
     y: 0,
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
     transition: {
-      duration: 0.7,
-      ease: [0.6, 0.01, 0.05, 0.95],
-      when: "beforeChildren",
-      staggerChildren: 0.3,
+      staggerChildren: 0.1,
+      delayChildren: 0.3,
     },
   },
 };
 
-const childVariants = {
-  hidden: { opacity: 0, y: 100 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      type: "spring",
-      stiffness: 120,
-      damping: 18,
-      ease: [0.6, 0.01, 0.05, 0.95],
-    },
-  },
+const imageHoverVariants = {
+  rest: { scale: 1, transition: { duration: 0.3, ease: "easeOut" } },
+  hover: { scale: 1.03, transition: { duration: 0.3, ease: "easeIn" } },
+};
+
+const buttonVariants = {
+  rest: { scale: 1 },
+  hover: { scale: 1.05, transition: { duration: 0.2, ease: "easeInOut" } },
+  tap: { scale: 0.98, transition: { duration: 0.2, ease: "easeInOut" } },
 };
 
 export default function MaximaSuperWalletSection() {
   const locale = useLocale();
   const { mytheme } = useSelector((state: RootState) => state.theme);
   const [data, setData] = useState<MaximaSuperWalletData | null>(null);
+  const [activeImage, setActiveImage] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -161,7 +164,8 @@ export default function MaximaSuperWalletSection() {
 
   const themeConfig = {
     token: {
-      colorPrimary: getCSSVariable("--yellow-500") || "#FFC800",
+      colorPrimary: "#FFC800",
+      borderRadius: 8,
     },
     algorithm: mytheme === "dark" ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
   };
@@ -169,11 +173,10 @@ export default function MaximaSuperWalletSection() {
   if (!data) {
     return (
       <div
-        className={`text-center py-12 text-xl font-poppins ${
-          mytheme === "light" ? "text-gray-800" : "text-gray-200"
-        }`}
+        className={`flex items-center justify-center py-20 ${mytheme === "light" ? "text-gray-800" : "text-gray-200"
+          }`}
       >
-        Loading...
+        <div className="loader w-12 h-12 border-4 border-t-yellow-500 rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -182,152 +185,205 @@ export default function MaximaSuperWalletSection() {
 
   const images = [image_1, image_2, image_3].filter((img) => img !== null) as string[];
 
+  const getKeyPoints = (text: string) => {
+    const sentences = text.match(/[^\.!\?]+[\.!\?]+/g) || [];
+    return sentences.slice(0, 4);
+  };
+
+  const keyPoints = getKeyPoints(description);
+
+
+  const affCodeFromCookie = Cookies.get("aff_code");
+  const registrationUrl = affCodeFromCookie
+    ? `https://agreement.maximadao.com/#/register?code=${encodeURIComponent(affCodeFromCookie)}`
+    : `https://agreement.maximadao.com/#/register`;
+
   return (
     <ConfigProvider theme={themeConfig}>
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-        .font-poppins {
-          font-family: 'Poppins', Arial, Helvetica, sans-serif;
-        }
-      `}</style>
-      <motion.div
-        className={`md:py-24 py-12 relative overflow-hidden font-poppins ${
-          mytheme === "light"
-            ? "bg-gradient-to-b from-[#F4F8FB] to-[#E5E7EB]"
-            : "bg-gradient-to-b from-[#1a1a1a] to-[#2a2a2a]"
-        }`}
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
+      <div
+        className={`relative py-20 md:py-28 overflow-hidden font-inter ${mytheme === "light"
+            ? "bg-gradient-to-b from-gray-50 to-white"
+            : "bg-gradient-to-b from-gray-900 to-gray-950"
+          }`}
       >
-        <div className="absolute z-0 opacity-50">
-          <Image
-            src={IMAGES.BgFooter1.src}
-            alt="Decoration 1"
-            width={300}
-            height={300}
-            priority
-            className="filter hue-rotate-60"
-          />
-        </div>
-        <div className="absolute right-0 top-20 z-0 opacity-60">
-          <Image
-            src={IMAGES.BgFooter2.src}
-            alt="Decoration 2"
-            width={900}
-            height={300}
-            priority
-            className="filter hue-rotate-60"
-          />
+        <div className="absolute left-0 top-0 w-full h-full overflow-hidden z-0">
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-yellow-400 rounded-full opacity-5 blur-3xl"></div>
+          <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-blue-600 rounded-full opacity-5 blur-3xl"></div>
+          <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 w-full max-w-4xl h-40 bg-yellow-500 rounded-full opacity-5 blur-3xl"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <Row gutter={[32, 32]} align="middle">
-            <Col xs={24} lg={12}>
-              <motion.p
-                className={`text-3xl md:text-4xl font-bold uppercase ${
-                  mytheme === "light" ? "text-gray-900" : "text-yellow-600"
-                } mb-3`}
-                variants={childVariants}
-              >
-                {title}
-              </motion.p>
-              <motion.p
-                className={`text-lg leading-relaxed mb-8 ${
-                  mytheme === "light" ? "text-gray-700" : "text-gray-300"
-                }`}
-                variants={childVariants}
-              >
-                {description}
-              </motion.p>
-              <motion.div variants={childVariants}>
-                <Link
-                  href="#"
-                  className={`text-lg font-semibold underline ${
-                    mytheme === "light" ? "text-blue-900" : "text-yellow-600"
-                  } block mb-6`}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4 relative z-10">
+          <motion.div
+            className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={staggerContainer}
+          >
+            <div>
+              <motion.div className="mb-8" variants={fadeInUp}>
+                <div className="flex items-center space-x-2 mb-2">
+                  <div className="h-1 w-12 bg-yellow-500 rounded"></div>
+                  <span
+                    className={`text-sm font-semibold tracking-wider ${mytheme === "light" ? "text-gray-500" : "text-gray-400"
+                      }`}
+                  >
+                    MAXIMA PLATFORM
+                  </span>
+                </div>
+
+                <h2
+                  className={`text-3xl md:text-4xl font-bold tracking-tight mb-6 ${mytheme === "light" ? "text-gray-900" : "text-white"
+                    }`}
                 >
-                  {cta_title}
-                </Link>
+                  {title}
+                </h2>
+
+                <p
+                  className={`text-base md:text-lg leading-relaxed mb-8 ${mytheme === "light" ? "text-gray-700" : "text-gray-300"
+                    }`}
+                >
+                  {description}
+                </p>
               </motion.div>
-              {cta_button_text && (
-                <motion.div
-                  className="font-medium text-base text-white"
-                  variants={childVariants}
-                >
-                  <button
-                    className={`px-8 sm:px-16 py-2 rounded-full text-lg font-semibold transition-all duration-300 ${
-                      mytheme === "light"
-                        ? "bg-orange-400 hover:bg-orange-500 text-white"
-                        : "bg-yellow-600 hover:bg-yellow-700 text-white"
-                    }`}
-                  >
-                    {cta_button_text}
-                  </button>
-                </motion.div>
-              )}
-            </Col>
 
-            <Col xs={24} lg={12}>
-              <motion.div
-                className="grid xs:grid-cols-1 grid-cols-3 gap-4 sm:gap-6 mb-6"
-                variants={childVariants}
-              >
-                {images.map((imageId, index) => (
-                  <div
-                    key={index}
-                    className={`relative rounded-xl h-[370px] overflow-hidden shadow-lg ${
-                      mytheme === "light"
-                        ? "border border-gray-200"
-                        : "border border-yellow-700 shadow-yellow-700/30"
-                    }`}
-                    style={{ paddingTop: "75%" }} 
-                  >
-                    <Image
-                      src={`https://the-maxima.directus.app/assets/${imageId}`}
-                      alt={`${title} Image ${index + 1}`}
-                      fill
-                      className="object-cover"
-                      priority
-                    />
+              <motion.div className="space-y-4 mb-7" variants={fadeInUp}>
+                {keyPoints.map((point, index) => (
+                  <div key={index} className="flex items-start space-x-3">
+                    <div
+                      className={`mt-1 flex-shrink-0 p-1 rounded-full ${mytheme === "light" ? "bg-yellow-100" : "bg-yellow-900/40"
+                        }`}
+                    >
+                      <span className="material-symbols-outlined text-yellow-600 text-lg">
+                        {index === 0
+                          ? "trending_up"
+                          : index === 1
+                            ? "verified"
+                            : index === 2
+                              ? "security"
+                              : "payments"}
+                      </span>
+                    </div>
+                    <p
+                      className={`text-base ${mytheme === "light" ? "text-gray-600" : "text-gray-300"
+                        }`}
+                    >
+                      {point.trim()}
+                    </p>
                   </div>
                 ))}
-                {images.length < 3 &&
-                  Array.from({ length: 3 - images.length }).map((_, index) => (
+
+              </motion.div>
+
+              <motion.div className="space-y-5" variants={fadeInUp}>
+
+
+                {cta_button_text && (
+                  <motion.div className="mt-6 flex flex-wrap gap-4 text-white" variants={fadeInUp}>
+                    <motion.a
+                      className={`px-8 py-2 rounded-lg text-white font-medium text-base shadow-lg ${mytheme === "light"
+                          ? "bg-yellow-500 hover:bg-yellow-600 shadow-yellow-200"
+                          : "bg-yellow-500 hover:bg-yellow-600 shadow-yellow-900/20"
+                        } transition-all duration-300`}
+                      variants={buttonVariants}
+                      initial="rest"
+                      whileHover="hover"
+                      whileTap="tap"
+                      href={registrationUrl}
+                    >
+                      {cta_button_text}
+                    </motion.a>
+                  </motion.div>
+                )}
+              </motion.div>
+            </div>
+
+            <motion.div className="relative" variants={fadeInUp}>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {images.map((img, index) => (
+                  <motion.div
+                    key={index}
+                    className={`relative rounded-xl md:h-[400px] h-[630px] overflow-hidden shadow-lg ${mytheme === "light" ? "shadow-gray-200/80" : "shadow-black/50"
+                      } h-64 transform transition-all duration-300`}
+                    variants={imageHoverVariants}
+                    initial="rest"
+                    whileHover="hover"
+                    animate={activeImage === index ? "hover" : "rest"}
+                    onMouseEnter={() => setActiveImage(index)}
+                    onMouseLeave={() => setActiveImage(null)}
+                  >
+                    <Image
+                      src={`https://maximagoldhedging.com/assets/${img}`}
+                      alt={`${title} Image ${index + 1}`}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      priority={index === 0}
+                    />
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-t ${mytheme === "light" ? "from-black/40 to-transparent" : "from-black/60 to-transparent"
+                        }`}
+                    ></div>
+                    <div className="absolute bottom-3 left-3 text-white">
+                      <p className="text-lg font-bold">
+                        {index === 0 ? "Maxima Platform" : index === 1 ? "AI Trading" : "Trading Analysis"}
+                      </p>
+                      {index === 0 && <p className="text-lg text-bold opacity-80">Decentralized Trading</p>}
+                    </div>
+                  </motion.div>
+                ))}
+                {images.length < 2 &&
+                  Array.from({ length: 2 - images.length }).map((_, index) => (
                     <div
                       key={`placeholder-${index}`}
-                      className={`relative rounded-xl overflow-hidden shadow-lg ${
-                        mytheme === "light"
-                          ? "border border-gray-200 bg-gray-100"
-                          : "border border-yellow-700 bg-[#1a1a1a] shadow-yellow-700/30"
-                      }`}
-                      style={{ paddingTop: "75%" }} 
+                      className={`relative rounded-xl overflow-hidden h-64 ${mytheme === "light"
+                          ? "bg-gradient-to-br from-gray-100 to-gray-200"
+                          : "bg-gradient-to-br from-gray-800 to-gray-900"
+                        }`}
                     >
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span
-                          className={`text-sm ${
-                            mytheme === "light" ? "text-gray-500" : "text-gray-400"
-                          }`}
-                        >
-                          No Image
-                        </span>
+                        <span className="material-symbols-outlined text-4xl opacity-20">image</span>
                       </div>
                     </div>
                   ))}
-              </motion.div>
-              <motion.p
-                className={`text-lg leading-relaxed ${
-                  mytheme === "light" ? "text-gray-700" : "text-gray-300"
-                }`}
-                variants={childVariants}
+              </div>
+              <div
+                className={`inline-flex items-center mt-10 py-2 px-4 rounded-lg ${mytheme === "light" ? "bg-yellow-50" : "bg-yellow-900/20"
+                  }`}
               >
-                {additional_description}
-              </motion.p>
-            </Col>
-          </Row>
+                <span className="material-symbols-outlined text-yellow-600 mr-2">verified</span>
+                <span
+                  className={`text-lg font-semibold ${mytheme === "light" ? "text-gray-900" : "text-white"
+                    }`}
+                >
+                  {cta_title}
+                </span>
+              </div>
+            </motion.div>
+          </motion.div>
         </div>
-      </motion.div>
+
+        <style jsx global>{`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0');
+
+          .font-inter {
+            font-family: 'Inter', Arial, sans-serif;
+          }
+
+          @keyframes spin {
+            to {
+              transform: rotate(360deg);
+            }
+          }
+          .animate-spin {
+            animation: spin 1s linear infinite;
+          }
+
+          .transition-all {
+            transition-property: all;
+          }
+        `}</style>
+      </div>
     </ConfigProvider>
   );
 }
