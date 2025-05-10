@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Cookies from 'js-cookie'
 import { refreshToken } from '@/services/apiServices'
 
@@ -17,8 +17,19 @@ export const useAuth = () => {
     isAuthenticated: !!Cookies.get('token'),
   })
 
-  // Hàm làm mới token
-  const handleRefreshToken = async () => {
+  // Hàm logout
+  const logout = useCallback(() => {
+    Cookies.remove('token')
+    Cookies.remove('refresh_token')
+    setAuthState({
+      token: undefined,
+      refreshToken: undefined,
+      isAuthenticated: false,
+    })
+  }, [])
+
+  // Hàm làm mới token - sử dụng useCallback để memoize hàm
+  const handleRefreshToken = useCallback(async () => {
     try {
       const { token, refresh_token } = await refreshToken()
       setAuthState({
@@ -31,7 +42,7 @@ export const useAuth = () => {
       // Xử lý logout nếu làm mới thất bại
       logout()
     }
-  }
+  }, [logout]) // thêm logout vào dependencies
 
   // Kiểm tra và làm mới token sau mỗi 14 phút (thời gian gần hết hạn 15 phút)
   useEffect(() => {
@@ -43,30 +54,22 @@ export const useAuth = () => {
     }, 14 * 60 * 1000) // 14 phút
 
     return () => clearInterval(tokenExpiryCheck)
-  }, [])
+  }, [handleRefreshToken]) // Thêm handleRefreshToken vào dependency array
 
-  // Hàm logout
-  const logout = () => {
-    Cookies.remove('token')
-    Cookies.remove('refresh_token')
+  // Hàm login
+  const login = useCallback((newToken: string, newRefreshToken: string) => {
+    Cookies.set('token', newToken, { expires: 1/96 }) // 15 phút
+    Cookies.set('refresh_token', newRefreshToken, { expires: 7 }) // 7 ngày
     setAuthState({
-      token: undefined,
-      refreshToken: undefined,
-      isAuthenticated: false,
+      token: newToken,
+      refreshToken: newRefreshToken,
+      isAuthenticated: true,
     })
-  }
+  }, [])
 
   return {
     ...authState,
-    login: (newToken: string, newRefreshToken: string) => {
-      Cookies.set('token', newToken, { expires: 1/96 }) // 15 phút
-      Cookies.set('refresh_token', newRefreshToken, { expires: 7 }) // 7 ngày
-      setAuthState({
-        token: newToken,
-        refreshToken: newRefreshToken,
-        isAuthenticated: true,
-      })
-    },
+    login,
     logout,
   }
 }

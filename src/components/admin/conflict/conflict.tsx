@@ -10,7 +10,7 @@ export default function Conflict() {
 
   const handleResetLimit = async () => {
     try {
-      await fetch('/api/reset-limit')
+      await fetch('/reset-limit')
       router.push('/') 
     } catch (error) {
       console.error('Lỗi reset request limit:', error)

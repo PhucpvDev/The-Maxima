@@ -3,7 +3,7 @@
 import { useLocale } from 'next-intl'
 import { usePathname, useRouter } from 'next/navigation'
 import { IMAGES } from '@/constants/client/theme'
-import { Tooltip, Switch, Select } from 'antd'
+import { Tooltip, Select } from 'antd'
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 

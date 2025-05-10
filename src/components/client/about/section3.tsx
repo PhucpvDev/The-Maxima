@@ -54,7 +54,7 @@ async function getMaximaSuperWallet(locale: string): Promise<MaximaSuperWalletDa
   try {
     const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
     const response = await fetch(
-      `https://maximagoldhedging.com/items/maxima_super_wallet?lang=${lang}&fields=*,translations.*`,
+      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/maxima_super_wallet?lang=${lang}&fields=*,translations.*`,
       {
         headers: {
           Accept: "application/json",
@@ -159,8 +159,6 @@ export default function MaximaSuperWalletSection() {
     document.documentElement.setAttribute("data-theme", mytheme);
   }, [mytheme]);
 
-  const getCSSVariable = (variable: string) =>
-    getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
 
   const themeConfig = {
     token: {
@@ -181,7 +179,7 @@ export default function MaximaSuperWalletSection() {
     );
   }
 
-  const { title, description, additional_description, cta_title, cta_button_text, image_1, image_2, image_3 } = data;
+  const { title, description, cta_title, cta_button_text, image_1, image_2, image_3 } = data;
 
   const images = [image_1, image_2, image_3].filter((img) => img !== null) as string[];
 
@@ -313,7 +311,7 @@ export default function MaximaSuperWalletSection() {
                     onMouseLeave={() => setActiveImage(null)}
                   >
                     <Image
-                      src={`https://maximagoldhedging.com/assets/${img}`}
+                      src={`${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${img}`}
                       alt={`${title} Image ${index + 1}`}
                       fill
                       sizes="(max-width: 768px) 100vw, 33vw"

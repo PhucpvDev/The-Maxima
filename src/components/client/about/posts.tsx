@@ -2,17 +2,13 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Row, Col, ConfigProvider, theme as antdTheme } from "antd"
+import { ConfigProvider, theme as antdTheme } from "antd"
 import { useSelector } from "react-redux"
 import { useLocale } from "next-intl"
 import { useRouter } from "next/navigation"
 import { RootState } from "@/redux/store"
 import BlogPostModal from "@/components/client/posts/blogPostModal"
-
-interface Category {
-  key: string;
-  name: string;
-}
+import Image from "next/image"
 
 interface Translation {
   id: number;
@@ -109,7 +105,7 @@ async function getPosts(locale: string): Promise<{ posts: Post[]; title: string 
 
   try {
     const response = await fetch(
-      `https://maximagoldhedging.com/items/posts?lang=${lang}&fields=*,translations.*,category`,
+      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/posts?lang=${lang}&fields=*,translations.*,category`,
       {
         headers: {
           Accept: "application/json",
@@ -131,7 +127,7 @@ async function getPosts(locale: string): Promise<{ posts: Post[]; title: string 
         return [];
       }
 
-      title = translation.title || title; 
+      title = translation.title || title;
 
       const postIndices = [1, 2, 3, 4, 5, 6];
 
@@ -147,7 +143,7 @@ async function getPosts(locale: string): Promise<{ posts: Post[]; title: string 
           description: translation[descriptionKey] as string,
           published: item.status === "published",
           media: translation[imageKey]
-            ? [{ url: `https://maximagoldhedging.com/assets/${translation[imageKey]}` }]
+            ? [{ url: `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${translation[imageKey]}` }]
             : [{ url: "/placeholder.jpg" }],
           author: translation[authorKey] as string || "Unknown Author",
         };
@@ -173,7 +169,7 @@ async function getPosts(locale: string): Promise<{ posts: Post[]; title: string 
 
 export default function Posts() {
   const [posts, setPosts] = useState<Post[]>([]);
-  const [title, setTitle] = useState("Blog & News"); 
+  const [title, setTitle] = useState("Blog & News");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { mytheme } = useSelector((state: RootState) => state.theme);
@@ -205,9 +201,6 @@ export default function Posts() {
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", mytheme || "light");
   }, [mytheme]);
-
-  const getCSSVariable = (variable: string) =>
-    getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
 
   const themeConfig = {
     token: {
@@ -362,12 +355,14 @@ export default function Posts() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {posts[0] && (
                 <motion.div className="md:col-span-1 overflow-hidden" variants={childVariants}>
-                  <img
+                  <Image
                     src={getImageUrl(posts[0])}
-                    alt={posts[0]?.title}
+                    alt={posts[0]?.title || ''}
+                    width={400}
+                    height={192}
                     className="w-full object-cover h-48 rounded-xl shadow-md"
                   />
-                  <div className="pt-4 ">
+                  <div className="pt-4">
                     <motion.h2
                       className={`text-lg font-bold ${mytheme === "light" ? "text-gray-900" : "text-gray-100"
                         } mb-2`}
@@ -426,9 +421,11 @@ export default function Posts() {
 
               {posts[1] && (
                 <motion.div className="md:col-span-1 overflow-hidden" variants={childVariants}>
-                  <img
+                  <Image
                     src={getImageUrl(posts[1])}
-                    alt={posts[1]?.title}
+                    alt={posts[0]?.title || ''}
+                    width={400}
+                    height={192}
                     className="w-full object-cover h-48 rounded-xl shadow-md"
                   />
                   <div className="pt-4">
@@ -498,9 +495,11 @@ export default function Posts() {
                       onClick={() => handleViewDetails(post.id)}
                     >
                       <div className="w-4/6">
-                        <img
+                        <Image
                           src={getImageUrl(post)}
                           alt={post.title}
+                          width={400}
+                          height={192}
                           className="w-full h-22 object-cover rounded-xl shadow-md"
                         />
                       </div>

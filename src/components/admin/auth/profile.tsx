@@ -2,19 +2,18 @@
 
 import { Modal, Input, Select, Button, Upload } from 'antd';
 import {
-  EditOutlined,
   LockOutlined,
   SaveOutlined,
   CloseCircleOutlined,
   UploadOutlined,
 } from '@ant-design/icons';
-import { useState, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import type { UploadFile, UploadProps } from 'antd/es/upload/interface';
 import { useCustomNotification } from '@/components/admin/notification/customNotification';
 import Cookies from 'js-cookie';
-
+import Image from 'next/image';
 
 const { Option } = Select;
 
@@ -44,6 +43,9 @@ export default function AccountModal({ visible, onClose }: AccountModalProps) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const { showNotification, contextHolder } = useCustomNotification();
+  
+  const prevVisibleRef = useRef(visible);
+  const avatarUrlsToRevoke = useRef<string[]>([]);
 
   const locale = useLocale();
   const router = useRouter();
@@ -74,6 +76,10 @@ export default function AccountModal({ visible, onClose }: AccountModalProps) {
     if (file) {
       const previewUrl = URL.createObjectURL(file);
       setAvatarPreview(previewUrl);
+      
+      if (!previewUrl.startsWith('http')) {
+        avatarUrlsToRevoke.current.push(previewUrl);
+      }
     }
   };
 
@@ -81,15 +87,17 @@ export default function AccountModal({ visible, onClose }: AccountModalProps) {
     setUserName(e.target.value);
   };
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
+      setLoading(true);
       const token = Cookies.get('token');
       if (!token) {
         console.error('Token không tồn tại trong cookie');
+        setLoading(false);
         return;
       }
 
-      const response = await fetch('http://localhost:3001/api/users/profile/me', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/profile/me`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -117,7 +125,7 @@ export default function AccountModal({ visible, onClose }: AccountModalProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showNotification, t]);
 
   const logout = () => {
     Cookies.remove('token');
@@ -175,7 +183,7 @@ export default function AccountModal({ visible, onClose }: AccountModalProps) {
         if (fileList.length > 0 && fileList[0].originFileObj) {
           formData.append('avatar', fileList[0].originFileObj);
         }
-        response = await fetch('http://localhost:3001/api/users/profile/me', {
+        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/profile/me`, {
           method: 'PATCH',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -184,7 +192,7 @@ export default function AccountModal({ visible, onClose }: AccountModalProps) {
         });
       } else if (currentPassword && newPassword) {
         isPasswordUpdate = true;
-        response = await fetch('http://localhost:3001/api/users/profile/me', {
+        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/profile/me`, {
           method: 'PATCH',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -232,10 +240,10 @@ export default function AccountModal({ visible, onClose }: AccountModalProps) {
           logout();
         }, 1000); 
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Lỗi khi cập nhật profile:', error);
       showNotification({
-        message: error.message || t('updateProfileError'),
+        message: error instanceof Error ? error.message : t('updateProfileError'),
         showProgress: true,
       });
     } finally {
@@ -253,29 +261,40 @@ export default function AccountModal({ visible, onClose }: AccountModalProps) {
     setConfirmPassword('');
   };
 
-  useEffect(() => {
-    if (visible) {
-      fetchProfile();
-      setFileList([]);
-      setAvatarPreview(null);
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    }
-  }, [visible]);
+  if (visible && !prevVisibleRef.current) {
+    fetchProfile();
+    setFileList([]);
+    setAvatarPreview(null);
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
 
-  useEffect(() => {
-    return () => {
-      if (avatarPreview && !avatarPreview.startsWith('http')) {
-        URL.revokeObjectURL(avatarPreview);
+    avatarUrlsToRevoke.current.forEach(url => {
+      if (!url.startsWith('http')) {
+        URL.revokeObjectURL(url);
       }
-    };
-  }, [avatarPreview]);
+    });
+    avatarUrlsToRevoke.current = [];
+  }
+  
+  if (prevVisibleRef.current !== visible) {
+    prevVisibleRef.current = visible;
+  }
+
+  const handleModalClose = () => {
+    avatarUrlsToRevoke.current.forEach(url => {
+      if (!url.startsWith('http')) {
+        URL.revokeObjectURL(url);
+      }
+    });
+    avatarUrlsToRevoke.current = [];
+    onClose();
+  };
 
   const currentLanguage = languages.find((lang) => lang.code === locale)?.name || 'Tiếng Việt';
 
   return (
-    <Modal open={visible} onCancel={onClose} footer={null} width={1100}>
+    <Modal open={visible} onCancel={handleModalClose} footer={null} width={1100}>
       {contextHolder}
       <h1 className="block text-base font-bold w-32 pl-3 pt-2">{t('title')}</h1>
       {loading ? (
@@ -302,10 +321,12 @@ export default function AccountModal({ visible, onClose }: AccountModalProps) {
                   </Button>
                 </Upload>
                 <div className="block flex-col -mt-2 items-end">
-                  <img
+                <Image
                     src={avatarPreview || profile.avatar || '/default-avatar.png'}
                     alt="Avatar preview"
-                    style={{ width: '50px', height: '50px', borderRadius: '50px', objectFit: 'cover' }}
+                    width={50}
+                    height={50}
+                    style={{ borderRadius: '50px', objectFit: 'cover' }}
                   />
                 </div>
               </div>
@@ -356,7 +377,7 @@ export default function AccountModal({ visible, onClose }: AccountModalProps) {
             >
               {t('save')}
             </Button>
-            <Button icon={<CloseCircleOutlined />} onClick={onClose}>
+            <Button icon={<CloseCircleOutlined />} onClick={handleModalClose}>
               {t('cancel')}
             </Button>
           </div>

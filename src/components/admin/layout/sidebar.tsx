@@ -25,34 +25,41 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
     const [openKeys, setOpenKeys] = useState<string[]>(['sub1'])
 
     useEffect(() => {
-        const findKeyByPath = (items: any[]): string | null => {
+        interface MenuItem {
+            key: string;
+            children?: MenuItem[];
+        }
+
+        const findKeyByPath = (items: MenuItem[]): string | null => {
             for (const item of items) {
-                const itemRoute = item.key
+            const itemRoute: string = item.key
 
-                const parts = pathname.split('/')
-                const pagePath = parts.length >= 3 ? parts[2] : ''
+            const parts: string[] = pathname.split('/')
+            const pagePath: string = parts.length >= 3 ? parts[2] : ''
 
-                if (pagePath === itemRoute) {
-                    return item.key
-                }
+            if (pagePath === itemRoute) {
+                return item.key
+            }
 
-                if (item.children) {
-                    const key = findKeyByPath(item.children)
-                    if (key) return key
-                }
+            if (item.children) {
+                const key: string | null = findKeyByPath(item.children)
+                if (key) return key
+            }
             }
             return null
         }
 
-        const activeKey = findKeyByPath(items)
+        // Use the findKeyByPath function to get the active key based on current path
+        const activeKey = findKeyByPath(items as unknown as MenuItem[])
 
         if (activeKey) {
             setSelectedKeys([activeKey])
 
-            const findParentKey = (items: any[], targetKey: string): string | null => {
+            const findParentKey = (items: MenuProps['items'], targetKey: string): string | null => {
+                if (!items) return null;
                 for (const item of items) {
-                    if (item.children && item.children.some((child: any) => child.key === targetKey)) {
-                        return item.key
+                    if (item && 'children' in item && item.children?.some((child) => child && child.key === targetKey)) {
+                        return item.key as string
                     }
                 }
                 return null

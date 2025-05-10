@@ -17,6 +17,6 @@ export const items: MenuItem[] = [
     },
     {
         key: 'admin/affiliate',
-        label: 'Affiliate',
+        label: 'Đơn Affiliate',
     },
 ]

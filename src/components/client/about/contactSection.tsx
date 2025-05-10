@@ -8,8 +8,12 @@ import { getContact, TransformedContactData } from "@/lib/directus/contact_secti
 import { motion } from "framer-motion"
 import Cookies from "js-cookie"
 
+interface ContactProps {
+  id?: string; 
+}
 
-const ContactSection: React.FC = () => {
+
+export default function ContactSection ({ id }: ContactProps){
   const locale = useLocale();
   const [contactData, setContactData] = useState<TransformedContactData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,7 +38,7 @@ const ContactSection: React.FC = () => {
 
   const handleEmailChange = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/form-emails', {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/form-emails`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -116,7 +120,7 @@ const ContactSection: React.FC = () => {
   }
 
   return (
-    <section id="contact" className="relative py-20 font-inter overflow-hidden bg-gradient-to-b from-gray-900 via-blue-950 to-black">
+    <section id={id} className="relative py-20 font-inter overflow-hidden bg-gradient-to-b from-gray-900 via-blue-950 to-black">
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-blue-950/40 z-0"></div>
 
@@ -164,7 +168,7 @@ const ContactSection: React.FC = () => {
             >
               <div className="bg-white/10 backdrop-blur-md p-3 rounded-xl shadow-lg mr-4">
                 <Image
-                  src={`https://maximagoldhedging.com/assets/${contactData?.logo}`}
+                  src={`${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${contactData?.logo}`}
                   alt="Maxima Logo"
                   width={48}
                   height={48}
@@ -354,5 +358,3 @@ const ContactSection: React.FC = () => {
     </section>
   );
 };
-
-export default ContactSection;

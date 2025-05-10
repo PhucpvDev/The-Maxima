@@ -38,6 +38,7 @@ interface ApiResponse {
 
 interface AboutSectionProps {
   data?: ContentData;
+  id?: string; 
 }
 
 const translationFallbacks: Record<string, ContentData> = {
@@ -70,7 +71,7 @@ async function getAbout1(locale: string): Promise<ContentData> {
 
   try {
     const response = await fetch(
-      `https://maximagoldhedging.com/items/about_1?lang=${lang}&fields=*,translations.*`,
+      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/about_1?lang=${lang}&fields=*,translations.*`,
       {
         headers: {
           Accept: "application/json",
@@ -98,17 +99,6 @@ async function getAbout1(locale: string): Promise<ContentData> {
     return fallback;
   }
 }
-
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      duration: 0.6,
-      ease: "easeOut",
-    },
-  },
-};
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
@@ -156,7 +146,6 @@ export default function AboutSection({ data: initialData }: AboutSectionProps) {
   const [data, setData] = useState<ContentData>(
     initialData || translationFallbacks[locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US"]
   );
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(!initialData);
 
   useEffect(() => {
@@ -345,7 +334,7 @@ export default function AboutSection({ data: initialData }: AboutSectionProps) {
                 >
                   <div className="relative pb-[56.25%] h-0 overflow-hidden">
                     <iframe
-                      src={`${data.video_url}${isVideoPlaying ? "&autoplay=1" : ""}`}
+                      src={`${data.video_url}`}
                       title="Maxima Introduction Video"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       className="absolute top-0 left-0 w-full h-full border-0"

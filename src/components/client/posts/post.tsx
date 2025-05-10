@@ -29,6 +29,8 @@ import {
 import { useSelector } from "react-redux"
 import { useLocale } from "next-intl"
 import BlogPostModal from "@/components/client/posts/blogPostModal"
+import Image from "next/image"
+
 
 const { Title, Paragraph } = Typography;
 const { Meta } = Card;
@@ -169,7 +171,7 @@ async function getPosts(locale: string): Promise<{
 
   try {
     const response = await fetch(
-      `https://maximagoldhedging.com/items/posts?lang=${lang}&fields=*,translations.*,category`,
+      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/posts?lang=${lang}&fields=*,translations.*,category`,
       {
         headers: { Accept: "application/json" },
         cache: "no-store",
@@ -190,7 +192,6 @@ async function getPosts(locale: string): Promise<{
       title = translation.title || title;
       subtitle = translation.subtitle || subtitle;
 
-      let categories: Category[] = defaultCategories;
       if (translation.category) {
         try {
           const apiCategories: Category[] = JSON.parse(translation.category);
@@ -230,7 +231,7 @@ async function getPosts(locale: string): Promise<{
           content: translation[contentKey] as string || "<p>Content not available.</p>",
           published: item.status === "published",
           media: translation[imageKey]
-            ? [{ url: `https://maximagoldhedging.com/assets/${translation[imageKey]}` }]
+            ? [{ url: `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${translation[imageKey]}` }]
             : [{ url: "https://via.placeholder.com/300" }],
           category: categoriesList, // Store array of category keys
           author: translation[authorKey] as string || "The Maxima",
@@ -536,10 +537,11 @@ export default function Posts() {
                           }`}
                         cover={
                           <div className="relative overflow-hidden h-80">
-                            <img
+                            <Image
                               src={getImageUrl(featuredPosts[0])}
                               alt={featuredPosts[0].title}
-                              className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                              fill
+                              className="object-cover transition-transform duration-700 hover:scale-105"
                             />
                             <div className="absolute top-4 left-4 tags-container">
                               {featuredPosts[0].category.map((catKey) => {
@@ -557,8 +559,8 @@ export default function Posts() {
                             </div>
                             <div
                               className={`absolute bottom-0 left-0 w-full px-6 py-4 ${mytheme === "light"
-                                  ? "bg-gradient-to-t from-black/50 to-transparent"
-                                  : "bg-gradient-to-t from-black/80 to-transparent"
+                                ? "bg-gradient-to-t from-black/50 to-transparent"
+                                : "bg-gradient-to-t from-black/80 to-transparent"
                                 }`}
                             >
                               <Title level={4} className="text-white mb-0 line-clamp-2 drop-shadow-md">
@@ -610,9 +612,10 @@ export default function Posts() {
                               <Row gutter={16}>
                                 <Col xs={24} sm={8}>
                                   <div className="relative overflow-hidden h-[186px] rounded-l-xl">
-                                    <img
+                                    <Image
                                       src={getImageUrl(post)}
                                       alt={post.title}
+                                      fill
                                       className="w-full h-full object-cover rounded-xl transition-transform duration-700 hover:scale-105"
                                     />
                                     <div className="absolute top-2 left-2 tags-container">
@@ -707,10 +710,10 @@ export default function Posts() {
                           <Button
                             type={activeCategory === category.key ? "primary" : "text"}
                             className={`rounded-full whitespace-nowrap text-base font-medium ${activeCategory === category.key
-                                ? "shadow-md bg-yellow-600 hover:bg-yellow-700"
-                                : mytheme === "light"
-                                  ? "text-yellow-700 bg-yellow-100 hover:bg-yellow-200"
-                                  : "text-gray-300"
+                              ? "shadow-md bg-yellow-600 hover:bg-yellow-700"
+                              : mytheme === "light"
+                                ? "text-yellow-700 bg-yellow-100 hover:bg-yellow-200"
+                                : "text-gray-300"
                               }`}
                             onClick={() => handleCategoryChange(category.key)}
                           >
@@ -773,9 +776,10 @@ export default function Posts() {
                             }`}
                           cover={
                             <div className="relative overflow-hidden h-48">
-                              <img
+                              <Image
                                 src={getImageUrl(post)}
                                 alt={post.title}
+                                fill
                                 className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                               />
                               <div className="absolute top-3 left-3 tags-container">
@@ -803,10 +807,10 @@ export default function Posts() {
                                   shape="circle"
                                   icon={post.liked ? <HeartFilled /> : <HeartOutlined />}
                                   className={`absolute top-3 right-3 border-0 ${post.liked
-                                      ? "bg-red-500 text-white shadow-lg hover:bg-red-600"
-                                      : mytheme === "light"
-                                        ? "bg-white/90"
-                                        : "bg-black/30"
+                                    ? "bg-red-500 text-white shadow-lg hover:bg-red-600"
+                                    : mytheme === "light"
+                                      ? "bg-white/90"
+                                      : "bg-black/30"
                                     } backdrop-blur-sm hover:bg-white`}
                                   onClick={() => handleLike(post.id)}
                                 />

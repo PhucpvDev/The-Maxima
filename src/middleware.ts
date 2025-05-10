@@ -62,7 +62,7 @@ export async function middleware(req: NextRequest) {
 
   const isAdminPath =
     pathWithoutLang === '/admin' ||
-    protectedPatterns.some((pattern) => pathWithoutLang.startsWith('/admin/'));
+    protectedPatterns.some(() => pathWithoutLang.startsWith('/admin/'));
 
   if (token) {
     try {
@@ -80,6 +80,7 @@ export async function middleware(req: NextRequest) {
       const response = NextResponse.redirect(loginUrl);
       response.cookies.set('token', '', { expires: new Date(0), path: '/' });
       response.cookies.set('refresh_token', '', { expires: new Date(0), path: '/' });
+      console.error(error)
       return response;
     }
   }

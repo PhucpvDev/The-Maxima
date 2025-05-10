@@ -1,16 +1,15 @@
 'use client'
 
-import useSWR, { SWRResponse } from 'swr'
 import Cookies from 'js-cookie'
 
 interface RequestOptions {
   headers?: Record<string, string>
-  body?: any
+  body?: string | Record<string, unknown>
   useToken?: boolean
   params?: Record<string, string>
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
 const getAuthToken = (): string | undefined => Cookies.get('token')
 const getRefreshToken = (): string | undefined => Cookies.get('refresh_token')
@@ -21,11 +20,11 @@ const buildUrl = (endpoint: string, params?: Record<string, string>): string => 
   return `${fullUrl}?${new URLSearchParams(params).toString()}`
 };
 
-const fetcher = async (
+const fetcher = async <T>(
   url: string,
   method: string = 'GET',
   options?: RequestOptions
-): Promise<any> => {
+): Promise<T> => {
   try {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -37,10 +36,14 @@ const fetcher = async (
       if (token) headers['Authorization'] = `Bearer ${token}`
     }
 
+    const finalBody = typeof options?.body === 'string' 
+      ? options.body
+      : options?.body ? JSON.stringify(options.body) : undefined;
+
     const response = await fetch(url, {
       method,
       headers,
-      ...(options?.body && { body: JSON.stringify(options.body) }),
+      ...(finalBody && { body: finalBody }),
     })
 
     const responseText = await response.text()
@@ -69,52 +72,104 @@ const fetcher = async (
 }
 
 export const refreshToken = async (): Promise<{ token: string; refresh_token: string }> => {
-  const refreshToken = getRefreshToken()
-  if (!refreshToken) throw new Error('Refresh token not found')
+  const refreshTokenValue = getRefreshToken()
+  if (!refreshTokenValue) throw new Error('Refresh token not found')
 
-  const response = await fetcher(`${BASE_URL}/api/auth/refresh`, 'POST', {
-    body: { refresh_token: refreshToken },
-    useToken: false, 
-  })
+  const response = await fetcher<{ token: string; refresh_token: string }>(
+    `${BASE_URL}/api/auth/refresh`, 
+    'POST', 
+    {
+      body: { refresh_token: refreshTokenValue },
+      useToken: false,
+    }
+  )
 
-  if (response.token) Cookies.set('token', response.token, { expires: 1/96 }) 
-  if (response.refresh_token) Cookies.set('refresh_token', response.refresh_token, { expires: 7 }) 
-
+  if (response.token) Cookies.set('token', response.token, { expires: 1/96 })
+  if (response.refresh_token) Cookies.set('refresh_token', response.refresh_token, { expires: 7 })
+  
   return response
 }
 
+// Custom hook đúng chuẩn với "use" prefix
 export function useApi<T>() {
-  const get = (endpoint: string, options?: Omit<RequestOptions, 'body'>): SWRResponse<T, Error> => {
+  // Hàm fetch data (không sử dụng useSWR trực tiếp trong hàm này)
+  const fetchData = async (
+    endpoint: string, 
+    options?: Omit<RequestOptions, 'body'>
+  ): Promise<T> => {
     const url = buildUrl(endpoint, options?.params)
-    return useSWR<T, Error>(
-      url,
-      () => fetcher(url, 'GET', options),
-      {
-        revalidateOnFocus: false,
-        shouldRetryOnError: false,
-      }
-    )
-  };
+    return fetcher<T>(url, 'GET', options)
+  }
+
+  // Hàm get dùng để gọi API và quản lý cache thông qua fetcher
+  const get = async (
+    endpoint: string, 
+    options?: Omit<RequestOptions, 'body'>
+  ): Promise<T> => {
+    return fetchData(endpoint, options)
+  }
 
   const mutate = async (
     endpoint: string,
     method: 'POST' | 'PUT' | 'DELETE',
-    body?: any,
+    body?: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<T> => {
     const url = buildUrl(endpoint, options?.params)
-    const data = await fetcher(url, method, { ...options, body })
+    const data = await fetcher<T>(url, method, { ...options, body })
     return data
   }
 
-  const post = (endpoint: string, body: any, options?: Omit<RequestOptions, 'body'>) =>
-    mutate(endpoint, 'POST', body, options)
+  const post = (
+    endpoint: string, 
+    body: Record<string, unknown>, 
+    options?: Omit<RequestOptions, 'body'>
+  ) => mutate(endpoint, 'POST', body, options)
 
-  const put = (endpoint: string, body: any, options?: Omit<RequestOptions, 'body'>) =>
-    mutate(endpoint, 'PUT', body, options)
+  const put = (
+    endpoint: string, 
+    body: Record<string, unknown>, 
+    options?: Omit<RequestOptions, 'body'>
+  ) => mutate(endpoint, 'PUT', body, options)
 
-  const del = (endpoint: string, options?: Omit<RequestOptions, 'body'>) =>
-    mutate(endpoint, 'DELETE', undefined, options)
+  const del = (
+    endpoint: string, 
+    options?: Omit<RequestOptions, 'body'>
+  ) => mutate(endpoint, 'DELETE', undefined, options)
 
   return { get, post, put, del }
+}
+
+// Hàm tiện ích cho các component không phải hooks
+export const apiClient = {
+  get: async <T>(endpoint: string, options?: Omit<RequestOptions, 'body'>): Promise<T> => {
+    const url = buildUrl(endpoint, options?.params)
+    return fetcher<T>(url, 'GET', options)
+  },
+  
+  post: async <T>(
+    endpoint: string, 
+    body: Record<string, unknown>, 
+    options?: Omit<RequestOptions, 'body'>
+  ): Promise<T> => {
+    const url = buildUrl(endpoint, options?.params)
+    return fetcher<T>(url, 'POST', { ...options, body })
+  },
+  
+  put: async <T>(
+    endpoint: string, 
+    body: Record<string, unknown>, 
+    options?: Omit<RequestOptions, 'body'>
+  ): Promise<T> => {
+    const url = buildUrl(endpoint, options?.params)
+    return fetcher<T>(url, 'PUT', { ...options, body })
+  },
+  
+  delete: async <T>(
+    endpoint: string, 
+    options?: Omit<RequestOptions, 'body'>
+  ): Promise<T> => {
+    const url = buildUrl(endpoint, options?.params)
+    return fetcher<T>(url, 'DELETE', options)
+  }
 }

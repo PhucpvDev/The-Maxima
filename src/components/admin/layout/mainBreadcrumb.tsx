@@ -1,19 +1,14 @@
 'use client'
 
-import { Breadcrumb, Typography } from 'antd'
+import { Breadcrumb } from 'antd'
 import { usePathname } from 'next/navigation'
 import { items } from '@/constants/admin/menu'
 import { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { RootState } from '@/redux/store'
 import Link from 'next/link'
 
 export default function BreadcrumbWithTitle() {
   const pathname = usePathname()
   const [breadcrumbItems, setBreadcrumbItems] = useState<BreadcrumbItem[]>([])
-  const { mytheme } = useSelector((state: RootState) => state.theme)
-  const { title: reduxTitle } = useSelector((state: RootState) => state.title)
-  const { Title } = Typography
 
   useEffect(() => {
     const pathSegments = pathname.split('/').filter(Boolean)
@@ -45,8 +40,6 @@ export default function BreadcrumbWithTitle() {
     }
     setBreadcrumbItems(buildBreadcrumbItems())
   }, [pathname])
-
-  const displayTitle = reduxTitle || (breadcrumbItems.length > 0 ? breadcrumbItems[breadcrumbItems.length - 1].title : '')
 
   const antdBreadcrumbItems = breadcrumbItems.map((item, index) => {
     if (index < breadcrumbItems.length - 1) {

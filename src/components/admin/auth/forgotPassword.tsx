@@ -24,7 +24,7 @@ export default function ForgotPassword() {
   const onFinish = async (values: { email: string }) => {
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:3001/api/auth/forgot-password', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -42,12 +42,8 @@ export default function ForgotPassword() {
         message: data.message || t('requestSuccess'),
         showProgress: true,
       })
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error sending forgot password request:', error)
-      showNotification({
-        message: error.message || t('requestFailed'),
-        showProgress: true,
-      })
     } finally {
       setLoading(false)
     }

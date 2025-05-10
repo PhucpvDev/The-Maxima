@@ -2,28 +2,22 @@
 
 import { useLocale, useTranslations } from 'next-intl'
 import { Form, Input, Button } from 'antd'
-import { MailOutlined, LockOutlined } from '@ant-design/icons'
+import { LockOutlined } from '@ant-design/icons'
 import { IMAGES } from '@/constants/client/theme'
 import { Link } from '@/i18n/routing'
 import { useSearchParams } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useCustomNotification } from '@/components/admin/notification/customNotification'
 import Image from 'next/image'
 
-
-export default function ResetPassword() {
+function ResetPasswordForm() {
   const t = useTranslations('resetPassword')
   const locale = useLocale()
-  const [isMounted, setIsMounted] = useState(false)
   const [loading, setLoading] = useState(false)
   const { showNotification, contextHolder } = useCustomNotification()
   const searchParams = useSearchParams()
   const email = searchParams.get('email') || ''
   const token = searchParams.get('token') || ''
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
 
   const onFinish = async (values: { newPassword: string; confirmPassword: string }) => {
     setLoading(true)
@@ -38,7 +32,7 @@ export default function ResetPassword() {
         throw new Error(t('invalidLink'))
       }
 
-      const response = await fetch('http://localhost:3001/api/auth/reset-password', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,11 +57,12 @@ export default function ResetPassword() {
       })
       setTimeout(() => {
         window.location.href = `/${locale}/auth/login`
-      }, 2000) 
-    } catch (error: any) {
+      }, 2000)
+    } catch (error) {
       console.error('Error resetting password:', error)
+      const errorMessage = error instanceof Error ? error.message : t('requestFailed')
       showNotification({
-        message: error.message || t('requestFailed'),
+        message: errorMessage,
         showProgress: true,
       })
     } finally {
@@ -75,11 +70,85 @@ export default function ResetPassword() {
     }
   }
 
+  return (
+    <>
+      {contextHolder}
+      <Form
+        name="reset_password"
+        style={{ maxWidth: 600 }}
+        layout="vertical"
+        size="large"
+        requiredMark={false}
+        onFinish={onFinish}
+      >
+        <Form.Item
+          label={<span className="text-gray-700 text-base font-medium">{t('newPasswordLabel')}</span>}
+          name="newPassword"
+          rules={[
+            { required: true, message: t('passwordRequired') },
+            { min: 6, message: t('passwordTooShort') },
+          ]}
+          className="mb-5"
+        >
+          <Input.Password
+            prefix={<LockOutlined className="text-gray-400" />}
+            placeholder={t('newPasswordPlaceholder')}
+            className="rounded-md py-2 px-4 text-gray-700"
+          />
+        </Form.Item>
+        <Form.Item
+          label={<span className="text-gray-700 text-base font-medium">{t('confirmPasswordLabel')}</span>}
+          name="confirmPassword"
+          rules={[
+            { required: true, message: t('confirmPasswordRequired') },
+          ]}
+          className="mb-5"
+        >
+          <Input.Password
+            prefix={<LockOutlined className="text-gray-400" />}
+            placeholder={t('confirmPasswordPlaceholder')}
+            className="rounded-md py-2 px-4 text-gray-700"
+          />
+        </Form.Item>
+
+        <Form.Item>
+          <Button
+            type="primary"
+            danger
+            htmlType="submit"
+            className="w-full h-12 font-medium tracking-wide"
+            loading={loading}
+          >
+            {t('submitButton')}
+          </Button>
+        </Form.Item>
+
+        <div className="text-center mt-4">
+          <Link
+            href="/auth/login"
+            className="text-sm text-red-600 hover:text-red-800 transition-colors"
+          >
+            {t('backToLogin')}
+          </Link>
+        </div>
+      </Form>
+    </>
+  )
+}
+
+export default function ResetPassword() {
+  const t = useTranslations('resetPassword')
+  const locale = useLocale()
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   if (!isMounted) return null
 
   return (
     <div className="flex min-h-screen font-roboto">
-      {contextHolder}
       <div className="hidden md:flex md:w-1/2 bg-white flex-col items-center justify-center p-8">
         <div className="mb-8 flex items-center gap-4 transform transition-transform hover:scale-105">
           <Image
@@ -125,65 +194,9 @@ export default function ResetPassword() {
                 {t('resetTitle')}
               </h1>
             </div>
-            <Form
-              name="reset_password"
-              style={{ maxWidth: 600 }}
-              layout="vertical"
-              size="large"
-              requiredMark={false}
-              onFinish={onFinish}
-            >
-              <Form.Item
-                label={<span className="text-gray-700 text-base font-medium">{t('newPasswordLabel')}</span>}
-                name="newPassword"
-                rules={[
-                  { required: true, message: t('passwordRequired') },
-                  { min: 6, message: t('passwordTooShort') },
-                ]}
-                className="mb-5"
-              >
-                <Input.Password
-                  prefix={<LockOutlined className="text-gray-400" />}
-                  placeholder={t('newPasswordPlaceholder')}
-                  className="rounded-md py-2 px-4 text-gray-700"
-                />
-              </Form.Item>
-              <Form.Item
-                label={<span className="text-gray-700 text-base font-medium">{t('confirmPasswordLabel')}</span>}
-                name="confirmPassword"
-                rules={[
-                  { required: true, message: t('confirmPasswordRequired') },
-                ]}
-                className="mb-5"
-              >
-                <Input.Password
-                  prefix={<LockOutlined className="text-gray-400" />}
-                  placeholder={t('confirmPasswordPlaceholder')}
-                  className="rounded-md py-2 px-4 text-gray-700"
-                />
-              </Form.Item>
-
-              <Form.Item>
-                <Button
-                  type="primary"
-                  danger
-                  htmlType="submit"
-                  className="w-full h-12 font-medium tracking-wide"
-                  loading={loading}
-                >
-                  {t('submitButton')}
-                </Button>
-              </Form.Item>
-
-              <div className="text-center mt-4">
-                <Link
-                  href="/auth/login"
-                  className="text-sm text-red-600 hover:text-red-800 transition-colors"
-                >
-                  {t('backToLogin')}
-                </Link>
-              </div>
-            </Form>
+            <Suspense fallback={<div className="text-center py-4">Loading...</div>}>
+              <ResetPasswordForm />
+            </Suspense>
           </div>
         </div>
       </div>

@@ -156,7 +156,7 @@ async function getAbout2(locale: string): Promise<ContentData> {
 
   try {
     const response = await fetch(
-      `https://maximagoldhedging.com/items/about_2?lang=${lang}&fields=*,translations.*`,
+      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/about_2?lang=${lang}&fields=*,translations.*`,
       {
         headers: {
           Accept: "application/json",
@@ -331,19 +331,13 @@ export default function AboutSection({ data: initialData }: AboutSectionProps) {
   const additionalContentLines = additionalContent.split("\n").filter((line) => line.trim());
 
   const benefitPoints = mainContentLines.filter((line) => line.startsWith("• "));
-  const operationPoints = mainContentLines.filter(
-    (line) =>
-      !line.startsWith("• ") &&
-      mainContentLines.indexOf(line) > mainContentLines.indexOf("Here's how it operates:") &&
-      line !== "Here's how it operates:"
-  );
 
   const introText = mainContentLines
     .slice(0, mainContentLines.findIndex((line) => line.startsWith("• ")))
     .filter((line) => line.length > 0);
 
   const imageSrc = hero_cover
-    ? `https://maximagoldhedging.com/assets/${hero_cover}`
+    ? `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${hero_cover}`
     : IMAGES.Banner3.src;
 
   if (isLoading) {

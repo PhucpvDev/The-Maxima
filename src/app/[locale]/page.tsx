@@ -19,7 +19,6 @@ import Testimonials from "@/components/client/about/testimonials";
 import FAQSection from "@/components/client/about/faqSection";
 import ConatctSection from "@/components/client/about/contactSection";
 import Posts from "@/components/client/about/posts";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function MainPage() {
   return (
@@ -34,7 +33,7 @@ export default function MainPage() {
         <Section3 />
         <Tutorial id="tutorial" />
         <TraditionalSection />
-        <Posts id="posts" />
+        <Posts/>
         <OchardSection />
         <TradersRanks />
         <Commission id="become-ib" />

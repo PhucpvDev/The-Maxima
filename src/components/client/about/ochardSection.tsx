@@ -63,7 +63,7 @@ async function getAppleOrchard(locale: string): Promise<AppleOrchardData> {
   try {
     const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
     const response = await fetch(
-      `https://maximagoldhedging.com/items/apple_orchard?lang=${lang}&fields=*,translations.*`,
+      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/apple_orchard?lang=${lang}&fields=*,translations.*`,
       {
         headers: {
           Accept: "application/json",
@@ -119,17 +119,6 @@ async function getAppleOrchard(locale: string): Promise<AppleOrchardData> {
     };
   }
 }
-
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: { 
-    opacity: 1, 
-    transition: { 
-      duration: 0.6,
-      ease: "easeOut"
-    } 
-  }
-};
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
@@ -188,8 +177,6 @@ export default function AppleOrchardSection() {
     document.documentElement.setAttribute("data-theme", mytheme);
   }, [mytheme]);
 
-  const getCSSVariable = (variable: string) =>
-    getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
 
   const themeConfig = {
     token: {
@@ -336,7 +323,7 @@ export default function AppleOrchardSection() {
                 } aspect-[3/4]`}>
                   {image ? (
                     <Image
-                      src={`https://maximagoldhedging.com/assets/${image}`}
+                      src={`${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${image}`}
                       alt={title}
                       fill
                       sizes="(max-width: 768px) 100vw, 50vw"

@@ -13,23 +13,15 @@ import {
   Modal,
   Skeleton,
   Divider,
-  Space,
-  Tooltip,
   Dropdown,
 } from "antd"
 import {
   CloseOutlined,
-  ClockCircleOutlined,
   UserOutlined,
   HeartOutlined,
   HeartFilled,
   ShareAltOutlined,
-  FacebookOutlined,
-  TwitterOutlined,
-  LinkedinOutlined,
   CopyOutlined,
-  EyeOutlined,
-  CalendarOutlined,
   TagsOutlined,
 } from "@ant-design/icons"
 import { useSelector } from "react-redux"
@@ -189,7 +181,7 @@ async function getPostDetail(locale: string, postId: string): Promise<{ post: Po
     }
 
     const response = await fetch(
-      `https://maximagoldhedging.com/items/posts?lang=${lang}&fields=*,translations.*,category`,
+      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/posts?lang=${lang}&fields=*,translations.*,category`,
       {
         headers: {
           Accept: "application/json",
@@ -227,7 +219,7 @@ async function getPostDetail(locale: string, postId: string): Promise<{ post: Po
           content: (translation[contentKey] as string) || "<p>Content not available.</p>",
           published: item.status === "published",
           media: translation[imageKey]
-            ? [{ url: `https://maximagoldhedging.com/assets/${translation[imageKey]}` }]
+            ? [{ url: `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${translation[imageKey]}` }]
             : [{ url: "/placeholder.jpg" }],
           category: (translation[categoryKey] as string) || "investment",
           author: (translation[authorKey] as string) || "The Maxima",
@@ -282,7 +274,7 @@ async function getPostDetail(locale: string, postId: string): Promise<{ post: Po
   }
 }
 
-export default function BlogPostModal({ isOpen, postId, onClose, onViewRelatedPost }: BlogPostModalProps) {
+export default function BlogPostModal({ isOpen, postId, onClose }: BlogPostModalProps) {
   const locale = useLocale();
   const { mytheme } = useSelector((state: RootState) => state.theme);
   const [post, setPost] = useState<Post | null>(null);

@@ -41,9 +41,7 @@ export interface TransformedTestimonialData {
 // Function to transform data
 function transformTestimonialData(data: RawTestimonialData): TransformedTestimonialData {
   const testimonials: TestimonialItem[] = [];
-  const assetUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL || '';
 
-  // Create testimonials array from individual fields
   for (let i = 1; i <= 3; i++) {
     const authorKey = i === 1 ? 'author' : `author_${i}`;
     const contentKey = i === 1 ? 'content' : `content_${i}`;

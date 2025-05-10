@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Table, Space, Button, Spin, Input } from 'antd';
 import { DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import { useTranslations } from 'next-intl';
@@ -8,14 +8,12 @@ import { useCustomNotification } from '@/components/admin/notification/customNot
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-
 const apiClient = axios.create({
-    baseURL: 'http://localhost:3001/api',
+    baseURL: process.env.NEXT_PUBLIC_API_URL,
     headers: {
         'Content-Type': 'application/json',
     },
 });
-
 
 apiClient.interceptors.request.use(
     (config) => {
@@ -34,7 +32,6 @@ apiClient.interceptors.request.use(
     }
 );
 
-
 interface ContactEmail {
     id: number;
     email: string;
@@ -48,22 +45,26 @@ export default function ListContact() {
     const [contactEmails, setContactEmails] = useState<ContactEmail[]>([]);
     const [searchText, setSearchText] = useState('');
     const { showNotification, contextHolder } = useCustomNotification();
+    const dataFetchedRef = useRef(false);
 
     const fetchContactEmails = async () => {
+        if (loading) return;
+        
         setLoading(true);
         try {
             const response = await apiClient.get('/form-emails');
-            let emails = response.data;
+            const emails = response.data;
 
             if (!Array.isArray(emails)) {
                 throw new Error('Expected contact emails to be an array');
             }
 
             setContactEmails(emails);
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error fetching contact emails:', error);
+            const err = error as { response?: { data?: { message?: string } } };
             showNotification({
-                message: error.response?.data?.message || t('fetchError'),
+                message: err.response?.data?.message || t('fetchError'),
                 showProgress: true,
             });
             setContactEmails([]);
@@ -81,19 +82,22 @@ export default function ListContact() {
             });
             fetchContactEmails();
             return true;
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error deleting contact email:', error);
+            const err = error as { response?: { data?: { message?: string } } };
             showNotification({
-                message: error.response?.data?.message || t('deleteError'),
+                message: err.response?.data?.message || t('deleteError'),
                 showProgress: true,
             });
             return false;
         }
     };
 
-    useEffect(() => {
+    // Thực hiện fetch data khi component được render lần đầu
+    if (!dataFetchedRef.current) {
+        dataFetchedRef.current = true;
         fetchContactEmails();
-    }, []);
+    }
 
     const handleDelete = async (id: number) => {
         await deleteContactEmailApi(id);
@@ -121,7 +125,7 @@ export default function ListContact() {
         {
             title: t('columnAction'),
             key: 'action',
-            render: (_: any, record: ContactEmail) => (
+            render: (_: string, record: ContactEmail) => (
                 <Space size="middle">
                     <Button
                         type="text"

@@ -8,7 +8,12 @@ import { ConfigProvider, theme as antdTheme } from "antd"
 import { motion, AnimatePresence } from "framer-motion"
 import { getFaqs, FaqItem } from "@/lib/directus/faqs"
 
-const FAQSection: React.FC = () => {
+interface FAQSectionProps {
+  id?: string; 
+}
+
+
+export default function FAQSection ({ id }: FAQSectionProps)  {
   const locale = useLocale();
   const { mytheme } = useSelector((state: RootState) => state.theme);
   const [faqData, setFaqData] = useState<FaqItem[]>([]);
@@ -58,9 +63,6 @@ const FAQSection: React.FC = () => {
       setFilteredFaqs(filtered);
     }
   }, [searchQuery, faqData]);
-
-  const getCSSVariable = (variable: string) =>
-    getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
 
   const themeConfig = {
     token: {
@@ -118,7 +120,7 @@ const FAQSection: React.FC = () => {
 
   return (
     <ConfigProvider theme={themeConfig}>
-      <section id="faq" className={`py-24 relative font-inter ${
+      <section id={id}  className={`py-24 relative font-inter ${
         mytheme === "light" 
           ? "bg-gradient-to-b from-blue-50 to-gray-50" 
           : "bg-gradient-to-b from-gray-900 to-gray-950"
@@ -296,5 +298,3 @@ const FAQSection: React.FC = () => {
     </ConfigProvider>
   );
 };
-
-export default FAQSection;

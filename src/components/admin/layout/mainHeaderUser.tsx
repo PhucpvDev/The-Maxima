@@ -1,8 +1,8 @@
 'use client'
 
 import type { MenuProps } from 'antd';
-import { SettingOutlined, UserOutlined, LogoutOutlined, UserAddOutlined } from '@ant-design/icons';
-import { Dropdown, Avatar, message, Modal } from 'antd';
+import { UserOutlined, LogoutOutlined, UserAddOutlined } from '@ant-design/icons';
+import { Dropdown, Avatar, message } from 'antd';
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -33,7 +33,7 @@ export default function MainHeaderUser() {
           return;
         }
   
-        const response = await fetch('http://localhost:3001/api/users/profile/me', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/profile/me`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -46,7 +46,7 @@ export default function MainHeaderUser() {
         if (data.avatar) {
           setAvatarUrl(data.avatar);
         }
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error fetching user data:', error);
       }
     };

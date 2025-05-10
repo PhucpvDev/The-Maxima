@@ -43,7 +43,7 @@ async function getStatistics(locale: string): Promise<StatisticsData> {
   try {
     const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
     const response = await fetch(
-      `https://maximagoldhedging.com/items/statistics?lang=${lang}&fields=*,translations.*`,
+      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/statistics?lang=${lang}&fields=*,translations.*`,
       {
         headers: {
           Accept: "application/json",
@@ -125,7 +125,6 @@ export default function BannerSection() {
   const [data, setData] = useState<StatisticsData | null>(null);
   const [isCountingUp, setIsCountingUp] = useState(false);
   const [userCount, setUserCount] = useState(0);
-  const [profitCount, setProfitCount] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -155,22 +154,6 @@ export default function BannerSection() {
           return next;
         });
       }, 20);
-
-      const profitInterval = setInterval(() => {
-        setProfitCount((prev) => {
-          const next = prev + 1;
-          if (next >= 20) {
-            clearInterval(profitInterval);
-            return 20;
-          }
-          return next;
-        });
-      }, 100);
-
-      return () => {
-        clearInterval(userInterval);
-        clearInterval(profitInterval);
-      };
     }
   }, [isCountingUp]);
 
@@ -186,7 +169,7 @@ export default function BannerSection() {
     );
   }
 
-  const { line_1, line_2, line_3, line_title_1, line_title_2, line_title_3 } = data;
+  const { line_1, line_2, line_3, line_title_2, line_title_3 } = data;
 
   return (
     <section

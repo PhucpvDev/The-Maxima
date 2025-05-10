@@ -1,13 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import {
   Table,
-  Card,
   Input,
   Button,
   Space,
-  Tag,
   Dropdown,
   Avatar,
   Badge,
@@ -32,7 +30,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:3001/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
 
 apiClient.interceptors.request.use(
@@ -62,10 +60,23 @@ apiClient.interceptors.request.use(
   }
 );
 
+// Custom interface to type axios-like errors without using AxiosError
+interface AxiosErrorLike {
+  response?: {
+    data?: ErrorResponse;
+    status?: number;
+  };
+}
+
 interface Role {
   id: number;
   name: string;
   description: string;
+}
+
+interface Affiliate {
+  code: string;
+  clicks: number;
 }
 
 interface User {
@@ -92,7 +103,7 @@ interface User {
       };
     }>;
   };
-  affiliates: string;
+  affiliates: Affiliate[];
   avatar?: {
     id?: number;
     fileName?: string;
@@ -109,6 +120,14 @@ interface User {
   codeAff?: string | null;
 }
 
+interface ErrorResponse {
+  message?: string | string[];
+}
+
+interface ApiResponse {
+  data?: User[];
+}
+
 export default function Users() {
   const t = useTranslations('users');
   const [searchText, setSearchText] = useState('');
@@ -121,15 +140,19 @@ export default function Users() {
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
   const { showNotification, contextHolder } = useCustomNotification();
 
-  const getAvatarUrl = (avatar: any): string | undefined => {
+  // Refs to manage state
+  const initializedRef = useRef(false);
+  const userRoleFetchedRef = useRef(false);
+
+  const getAvatarUrl = (avatar: User['avatar']): string | undefined => {
     if (!avatar) return undefined;
     if (typeof avatar === 'string') return avatar;
     if (avatar.url) return avatar.url;
-    if (avatar.avatar && avatar.avatar.url) return avatar.avatar.url;
+    if (avatar.avatar?.url) return avatar.avatar.url;
     return undefined;
   };
 
-  const fetchCurrentUserRoleFromCookie = () => {
+  const fetchCurrentUserRoleFromCookie = useCallback(() => {
     try {
       const userCookie = Cookies.get('user');
       if (userCookie) {
@@ -139,7 +162,7 @@ export default function Users() {
         console.warn('User cookie not found');
         setCurrentUserRole(null);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error parsing user cookie:', error);
       showNotification({
         message: 'Failed to parse user information from cookie',
@@ -147,30 +170,26 @@ export default function Users() {
       });
       setCurrentUserRole(null);
     }
-  };
+  }, [showNotification]);
 
   const fetchRoles = async () => {
     try {
-      const response = await apiClient.get('/roles');
+      const response = await apiClient.get<Role[]>('/roles');
       setRoles(response.data);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching roles:', error);
     }
   };
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     if (currentUserRole !== 'admin') {
       setUserData([]);
       return;
     }
     setLoading(true);
     try {
-      const response = await apiClient.get('/users');
-      let users = response.data;
-
-      if (!Array.isArray(users) && users.data) {
-        users = users.data;
-      }
+      const response = await apiClient.get<User[] | ApiResponse>('/users');
+      const users: User[] = Array.isArray(response.data) ? response.data : response.data.data || [];
 
       if (!Array.isArray(users)) {
         throw new Error('Expected users to be an array');
@@ -178,21 +197,25 @@ export default function Users() {
 
       const mappedUsers = users.map((user: User) => ({
         ...user,
-        status: user.loginAttempts < 5 ? 'active' : 'inactive',
+        status: user.loginAttempts < 5 ? 'active' : 'inactive' as 'active' | 'inactive',
       }));
 
       setUserData(mappedUsers);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching users:', error);
+      const errorResponse = (error as AxiosErrorLike).response?.data;
       showNotification({
-        message: error.response?.data?.message || 'Failed to fetch users',
+        message:
+          typeof errorResponse?.message === 'string'
+            ? errorResponse.message
+            : JSON.stringify(errorResponse?.message || 'Failed to fetch users'),
         showProgress: true,
       });
       setUserData([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUserRole, showNotification]);
 
   const createUserApi = async (formData: FormData) => {
     if (currentUserRole !== 'admin') {
@@ -203,19 +226,20 @@ export default function Users() {
       return null;
     }
     try {
-      const response = await apiClient.post('/users', formData);
+      const response = await apiClient.post<User>('/users', formData);
       showNotification({
         message: t('addSuccess'),
         showProgress: true,
       });
       fetchUsers();
       return response.data;
-    } catch (error: any) {
-      console.error('Error creating user:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Error creating user:', error);
+      const errorResponse = (error as AxiosErrorLike).response?.data;
       const errorMessage =
-        typeof error.response?.data?.message === 'string'
-          ? error.response.data.message
-          : JSON.stringify(error.response?.data?.message || 'Failed to create user');
+        typeof errorResponse?.message === 'string'
+          ? errorResponse.message
+          : JSON.stringify(errorResponse?.message || 'Failed to create user');
       showNotification({
         message: errorMessage,
         showProgress: true,
@@ -233,28 +257,29 @@ export default function Users() {
       return null;
     }
     try {
-      const formDataObj: any = {};
+      const formDataObj: { [key: string]: FormDataEntryValue } = {};
       formData.forEach((value, key) => {
         formDataObj[key] = value;
       });
-  
+
+      // Keep roleId as string and validate
       if (formDataObj.roleId) {
-        formDataObj.roleId = Number(formDataObj.roleId);
-        if (isNaN(formDataObj.roleId) || formDataObj.roleId <= 0) {
-          formDataObj.roleId = roles[0]?.id || 4;
+        const roleIdNum = Number(formDataObj.roleId);
+        if (isNaN(roleIdNum) || roleIdNum <= 0) {
+          formDataObj.roleId = String(roles[0]?.id ?? 4);
         }
       } else {
-        formDataObj.roleId = roles[0]?.id || 4;
+        formDataObj.roleId = String(roles[0]?.id ?? 4);
       }
-  
+
       if (!formDataObj.avatar || !(formDataObj.avatar instanceof File)) {
-        const jsonData: any = {};
+        const jsonData: { [key: string]: string | number } = {};
         formData.forEach((value, key) => {
-          if (key !== 'avatar' && value !== '') {
+          if (key !== 'avatar' && value !== '' && typeof value === 'string') {
             jsonData[key] = key === 'roleId' ? Number(value) : value;
           }
         });
-        const response = await apiClient.patch(`/users/${id}`, jsonData);
+        const response = await apiClient.patch<User>(`/users/${id}`, jsonData);
         showNotification({
           message: t('updateSuccess'),
           showProgress: true,
@@ -264,7 +289,7 @@ export default function Users() {
       } else {
         formData.delete('roleId');
         formData.append('roleId', String(formDataObj.roleId));
-        const response = await apiClient.patch(`/users/${id}`, formData);
+        const response = await apiClient.patch<User>(`/users/${id}`, formData);
         showNotification({
           message: t('updateSuccess'),
           showProgress: true,
@@ -272,12 +297,13 @@ export default function Users() {
         fetchUsers();
         return response.data;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating user:', error);
+      const errorResponse = (error as AxiosErrorLike).response?.data;
       const errorMessage =
-        typeof error.response?.data?.message === 'string'
-          ? error.response.data.message
-          : JSON.stringify(error.response?.data?.message || 'Failed to update user');
+        typeof errorResponse?.message === 'string'
+          ? errorResponse.message
+          : JSON.stringify(errorResponse?.message || 'Failed to update user');
       showNotification({
         message: errorMessage,
         showProgress: true,
@@ -286,7 +312,7 @@ export default function Users() {
     }
   };
 
-  const deleteUserApi = async (id: number, retries = 1) => {
+  const deleteUserApi = async (id: number, retries = 1): Promise<boolean> => {
     if (currentUserRole !== 'admin') {
       showNotification({
         message: t('unauthorizedAction'),
@@ -297,11 +323,12 @@ export default function Users() {
     try {
       await apiClient.delete(`/users/${id}`);
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting user:', error);
-      console.error('Error response:', error.response?.data);
+      const errorResponse = (error as AxiosErrorLike).response?.data;
+      const status = (error as AxiosErrorLike).response?.status;
 
-      if (error.response?.status === 401 && retries > 0) {
+      if (status === 401 && retries > 0) {
         showNotification({
           message: 'Authentication failed, retrying...',
           showProgress: true,
@@ -310,9 +337,9 @@ export default function Users() {
       }
 
       const errorMessage =
-        typeof error.response?.data?.message === 'string'
-          ? error.response.data.message
-          : JSON.stringify(error.response?.data?.message || 'Failed to delete user');
+        typeof errorResponse?.message === 'string'
+          ? errorResponse.message
+          : JSON.stringify(errorResponse?.message || 'Failed to delete user');
       showNotification({
         message: errorMessage,
         showProgress: true,
@@ -321,24 +348,26 @@ export default function Users() {
     }
   };
 
-  useEffect(() => {
+  // Initialize data - replaces useEffect
+  if (!initializedRef.current) {
+    initializedRef.current = true;
     fetchCurrentUserRoleFromCookie();
-  }, []);
+  }
 
-  useEffect(() => {
-    if (currentUserRole) {
-      fetchUsers();
-      fetchRoles();
-    }
-  }, [currentUserRole]);
+  // Handle after currentUserRole is set - replaces useEffect
+  if (currentUserRole && !userRoleFetchedRef.current) {
+    userRoleFetchedRef.current = true;
+    fetchUsers();
+    fetchRoles();
+  }
 
   const filteredUsers = userData.filter((user) => {
     const matchesSearch =
       user.name?.toLowerCase().includes(searchText.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchText.toLowerCase()) ||
-      (user.affiliates &&
-        user.affiliates.length > 0 &&
-        user.affiliates[0].code.toLowerCase().includes(searchText.toLowerCase()));
+      user.affiliates.some((affiliate) =>
+        affiliate.code.toLowerCase().includes(searchText.toLowerCase())
+      );
     return matchesSearch;
   });
 
@@ -449,23 +478,23 @@ export default function Users() {
     {
       title: t('columnRole'),
       key: 'role',
-      render: (_, record: User) => <span className="capitalize">{record.role?.name || '-'}</span>,
+      render: (_: unknown, record: User) => (
+        <span className="capitalize">{record.role?.name || '-'}</span>
+      ),
     },
     {
       title: t('columnAffiliateId'),
       key: 'affiliateId',
-      render: (_, record: User) => {
-        const affiliate =
-          record.affiliates && record.affiliates.length > 0 ? record.affiliates[0] : null;
-        return affiliate ? affiliate.code : '-';
+      render: (_: unknown, record: User) => {
+        const affiliate = record.affiliates.length > 0 ? record.affiliates[0] : null;
+        return affiliate ? affiliate.code : record.codeAff || '-';
       },
     },
     {
       title: t('columnClicks'),
       key: 'clicks',
-      render: (_, record: User) => {
-        const affiliate =
-          record.affiliates && record.affiliates.length > 0 ? record.affiliates[0] : null;
+      render: (_: unknown, record: User) => {
+        const affiliate = record.affiliates.length > 0 ? record.affiliates[0] : null;
         const clicks = affiliate ? affiliate.clicks : 0;
         return (
           <Tooltip title={t('tooltipClicks')}>
@@ -475,18 +504,16 @@ export default function Users() {
           </Tooltip>
         );
       },
-      sorter: (a, b) => {
-        const aClicks =
-          a.affiliates && a.affiliates.length > 0 ? a.affiliates[0].clicks : 0;
-        const bClicks =
-          b.affiliates && b.affiliates.length > 0 ? b.affiliates[0].clicks : 0;
+      sorter: (a: User, b: User) => {
+        const aClicks = a.affiliates.length > 0 ? a.affiliates[0].clicks : 0;
+        const bClicks = b.affiliates.length > 0 ? b.affiliates[0].clicks : 0;
         return aClicks - bClicks;
       },
     },
     {
       title: '',
       key: 'action',
-      render: (_: any, record: User) => (
+      render: (_: unknown, record: User) => (
         <Space size="middle">
           <Dropdown
             menu={{

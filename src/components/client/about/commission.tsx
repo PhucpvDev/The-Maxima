@@ -61,11 +61,15 @@ interface RawCommissionData {
   translations: Translation[];
 }
 
+interface CommissionProps {
+  id?: string; 
+}
+
 async function getCommission(locale: string): Promise<TransformedCommissionData> {
   try {
     const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
     const response = await fetch(
-      `https://maximagoldhedging.com/items/commission?lang=${lang}&fields=*,translations.*`,
+      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/commission?lang=${lang}&fields=*,translations.*`,
       {
         headers: {
           Accept: "application/json",
@@ -187,7 +191,7 @@ const tableRowVariants = {
   })
 };
 
-export default function CommissionSection() {
+export default function CommissionSection ({ id }: CommissionProps) {
   const locale = useLocale();
   const { mytheme } = useSelector((state: RootState) => state.theme);
   const [data, setData] = useState<TransformedCommissionData | null>(null);
@@ -230,9 +234,6 @@ export default function CommissionSection() {
     document.documentElement.setAttribute("data-theme", mytheme);
   }, [mytheme]);
 
-  const getCSSVariable = (variable: string) =>
-    getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
-  
   const themeConfig = {
     token: {
       colorPrimary: "#FFC800",
@@ -276,7 +277,7 @@ export default function CommissionSection() {
 
   return (
     <ConfigProvider theme={themeConfig}>
-      <section className={`py-20 relative overflow-hidden font-inter ${
+      <section id={id} className={`py-20 relative overflow-hidden font-inter ${
         mytheme === "light" 
           ? "bg-gray-50" 
           : "bg-gray-950"

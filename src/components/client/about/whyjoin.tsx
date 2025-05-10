@@ -77,7 +77,7 @@ async function getWhyJoin(locale: string): Promise<WhyJoinMaximaData> {
   try {
     const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
     const response = await fetch(
-      `https://maximagoldhedging.com/items/why_join_maxima?lang=${lang}&fields=*,translations.*`,
+      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/why_join_maxima?lang=${lang}&fields=*,translations.*`,
       {
         headers: {
           Accept: "application/json",
@@ -191,9 +191,6 @@ export default function WhyJoinMaxima() {
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", mytheme);
   }, [mytheme]);
-
-  const getCSSVariable = (variable: string) =>
-    getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
 
   const themeConfig = {
     token: {
@@ -333,7 +330,7 @@ export default function WhyJoinMaxima() {
                   ></div>
                   <Image
                     src={
-                      `https://maximagoldhedging.com/assets/${section.image}` || fallbackImage.src
+                      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${section.image}` || fallbackImage.src
                     }
                     alt={section.section_title}
                     width={280}

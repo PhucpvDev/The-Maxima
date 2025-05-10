@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useRef, useCallback } from "react"
 import { motion } from "framer-motion"
 import { useSelector } from "react-redux"
 import { RootState } from "@/redux/store"
@@ -55,126 +55,128 @@ interface ApiResponse {
     data: AffiliateData;
 }
 
+// Interface for form values
+interface FormValues {
+    username: string;
+    referralLink: string;
+    referralId: string;
+    email: string;
+}
+
 export default function AffiliatePage() {
     const { mytheme } = useSelector((state: RootState) => state.theme);
     const locale = useLocale();
     const [content, setContent] = useState<AffiliateData | null>(null);
-    const [formData, setFormData] = useState({
-        username: "",
-        referralLink: "",
-        referralId: "",
-        email: ""
-    });
-
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [currentLocale, setCurrentLocale] = useState(locale);
+    
+    // Refs for managing effects
+    const themeSetRef = useRef(false);
+    const dataFetchedRef = useRef(false);
+    
+    const [form] = Form.useForm();
 
-    // Reset form data and state when locale changes
-    useEffect(() => {
-        if (currentLocale !== locale) {
-            setCurrentLocale(locale);
-            setFormData({
-                username: "",
-                referralLink: "",
-                referralId: "",
-                email: ""
-            });
-            setFormSubmitted(false);
+    // Handle locale change
+    if (currentLocale !== locale) {
+        setCurrentLocale(locale);
+        form.resetFields();
+        setFormSubmitted(false);
+    }
 
-            if (form) {
-                form.resetFields();
-            }
-        }
-    }, [locale, currentLocale]);
+    // Setup theme effect
+    if (!themeSetRef.current) {
+        document.documentElement.setAttribute("data-theme", mytheme);
+        themeSetRef.current = true;
+    }
+    if (mytheme && document.documentElement.getAttribute("data-theme") !== mytheme) {
+        document.documentElement.setAttribute("data-theme", mytheme);
+    }
 
-    useEffect(() => {
-        const fetchContent = async () => {
-            setIsLoading(true);
-            try {
-                const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
-                console.log("Fetching content for language:", lang);
+    // Fetch content handler - uses useCallback to memoize function
+    const fetchContent = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
+            console.log("Fetching content for language:", lang);
 
-                const response = await fetch(
-                    `https://maximagoldhedging.com/items/affiliate?lang=${lang}&fields=*,translations.*`,
-                    {
-                        headers: {
-                            "Accept": "application/json"
-                        }
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/affiliate?lang=${lang}&fields=*,translations.*`,
+                {
+                    headers: {
+                        "Accept": "application/json"
                     }
-                );
-
-                if (!response.ok) {
-                    throw new Error("Failed to fetch content");
-                }   
-
-                const result: ApiResponse = await response.json();
-                console.log("API response:", result);
-
-                const translation = result.data.translations.find(
-                    t => t.languages_code === lang
-                );
-
-                if (translation) {
-                    setContent({
-                        ...result.data,
-                        hero_st_ju_title: translation.hero_st_ju_title || result.data.hero_st_ju_title,
-                        hero_st_wb_title: translation.hero_st_wb_title || result.data.hero_st_wb_title,
-                        step_description_1: translation.step_description_1 || result.data.step_description_1,
-                        step_description_2: translation.step_description_2 || result.data.step_description_2,
-                        step_description_3: translation.step_description_3 || result.data.step_description_3,
-                        step_title_1: translation.step_title_1 || result.data.step_title_1,
-                        step_title_2: translation.step_title_2 || result.data.step_title_2,
-                        step_title_3: translation.step_title_3 || result.data.step_title_3,
-                        submit_button_text: translation.submit_button_text || result.data.submit_button_text,
-                        subtitle_ju: translation.subtitle_ju || result.data.subtitle_ju,
-                        title_form_1: translation.title_form_1 || result.data.title_form_1,
-                        title_form_2: translation.title_form_2 || result.data.title_form_2,
-                        title_form_3: translation.title_form_3 || result.data.title_form_3,
-                        title_form_4: translation.title_form_4 || result.data.title_form_4,
-                        title_ju: translation.title_ju || result.data.title_ju,
-                        title_wb: translation.title_wb || result.data.title_wb,
-                    });
-                } else {
-                    setContent(result.data);
                 }
-            } catch (error) {
-                console.error("Error fetching content:", error);
-                setContent({
-                    hero_st_ju_title: "JOIN US",
-                    hero_st_wb_title: "Why Become",
-                    id: 1,
-                    status: "draft",
-                    step_description_1: "Earn high commissions for every successful referral to the Maxima platform.",
-                    step_description_2: "Access a comprehensive dashboard to track your referrals and earnings in real-time.",
-                    step_description_3: "Get personalized assistance from our affiliate management team whenever you need it.",
-                    step_title_1: "Commission",
-                    step_title_2: "Easy Tracking",
-                    step_title_3: "Dedicated Support",
-                    submit_button_text: "Submit",
-                    subtitle_ju: "Join Maxima's affiliate program and earn rewards by referring users to our platform. Fill out the form below to register as an affiliate partner.",
-                    title_form_1: "Username",
-                    title_form_2: "Maxima Referral Link",
-                    title_form_3: "Referral ID No.",
-                    title_form_4: "Email",
-                    title_ju: "Affiliate Program",
-                    title_wb: "Why Become an Affiliate?",
-                    translations: []
-                });
-            } finally {
-                setIsLoading(false);
-            }
-        };
+            );
 
-        fetchContent();
+            if (!response.ok) {
+                throw new Error("Failed to fetch content");
+            }   
+
+            const result: ApiResponse = await response.json();
+            console.log("API response:", result);
+
+            const translation = result.data.translations.find(
+                t => t.languages_code === lang
+            );
+
+            if (translation) {
+                setContent({
+                    ...result.data,
+                    hero_st_ju_title: translation.hero_st_ju_title || result.data.hero_st_ju_title,
+                    hero_st_wb_title: translation.hero_st_wb_title || result.data.hero_st_wb_title,
+                    step_description_1: translation.step_description_1 || result.data.step_description_1,
+                    step_description_2: translation.step_description_2 || result.data.step_description_2,
+                    step_description_3: translation.step_description_3 || result.data.step_description_3,
+                    step_title_1: translation.step_title_1 || result.data.step_title_1,
+                    step_title_2: translation.step_title_2 || result.data.step_title_2,
+                    step_title_3: translation.step_title_3 || result.data.step_title_3,
+                    submit_button_text: translation.submit_button_text || result.data.submit_button_text,
+                    subtitle_ju: translation.subtitle_ju || result.data.subtitle_ju,
+                    title_form_1: translation.title_form_1 || result.data.title_form_1,
+                    title_form_2: translation.title_form_2 || result.data.title_form_2,
+                    title_form_3: translation.title_form_3 || result.data.title_form_3,
+                    title_form_4: translation.title_form_4 || result.data.title_form_4,
+                    title_ju: translation.title_ju || result.data.title_ju,
+                    title_wb: translation.title_wb || result.data.title_wb,
+                });
+            } else {
+                setContent(result.data);
+            }
+        } catch (error) {
+            console.error("Error fetching content:", error);
+            setContent({
+                hero_st_ju_title: "JOIN US",
+                hero_st_wb_title: "Why Become",
+                id: 1,
+                status: "draft",
+                step_description_1: "Earn high commissions for every successful referral to the Maxima platform.",
+                step_description_2: "Access a comprehensive dashboard to track your referrals and earnings in real-time.",
+                step_description_3: "Get personalized assistance from our affiliate management team whenever you need it.",
+                step_title_1: "Commission",
+                step_title_2: "Easy Tracking",
+                step_title_3: "Dedicated Support",
+                submit_button_text: "Submit",
+                subtitle_ju: "Join Maxima's affiliate program and earn rewards by referring users to our platform. Fill out the form below to register as an affiliate partner.",
+                title_form_1: "Username",
+                title_form_2: "Maxima Referral Link",
+                title_form_3: "Referral ID No.",
+                title_form_4: "Email",
+                title_ju: "Affiliate Program",
+                title_wb: "Why Become an Affiliate?",
+                translations: []
+            });
+        } finally {
+            setIsLoading(false);
+        }
     }, [locale]);
 
-    useEffect(() => {
-        document.documentElement.setAttribute("data-theme", mytheme);
-    }, [mytheme]);
-
-    const [form] = Form.useForm();
+    // Initial content fetch
+    if (!dataFetchedRef.current) {
+        dataFetchedRef.current = true;
+        fetchContent();
+    }
 
     const showSuccessMessage = () => {
         message.success('Application submitted successfully!');
@@ -186,18 +188,12 @@ export default function AffiliatePage() {
 
     const resetFormAndState = () => {
         form.resetFields();
-        setFormData({
-            username: "",
-            referralLink: "",
-            referralId: "",
-            email: ""
-        });
         setFormSubmitted(false);
     };
 
-    const handleEAffiliate = async (values: any) => {
+    const handleEAffiliate = async (values: FormValues) => {
         try {
-            const response = await fetch('http://localhost:3001/api/form-affiliate', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/form-affiliate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -216,13 +212,13 @@ export default function AffiliatePage() {
 
             const result = await response.json();
             return result;
-        } catch (error) {
-            console.error("Error submitting affiliate form:", error);
-            throw error;
+        } catch (err) {
+            console.error("Error submitting affiliate form:", err);
+            throw err;
         }
     };
 
-    const onFinish = async (values: any) => {
+    const onFinish = async (values: FormValues) => {
         setIsSubmitting(true);
         try {
             await handleEAffiliate(values);
@@ -231,7 +227,8 @@ export default function AffiliatePage() {
             setTimeout(() => {
                 resetFormAndState();
             }, 3000);
-        } catch (error) {
+        } catch (err) {
+            console.error(err)
             showErrorMessage(
                 locale === 'vi' ? 'Đã xảy ra lỗi khi gửi đơn. Vui lòng thử lại!' :
                 locale === 'zh' ? '提交申请时发生错误。请重试！' :
@@ -239,17 +236,6 @@ export default function AffiliatePage() {
             );
         } finally {
             setIsSubmitting(false);
-        }
-    };
-
-    const fadeIn = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                duration: 0.6,
-                ease: "easeOut"
-            }
         }
     };
 
@@ -322,7 +308,7 @@ export default function AffiliatePage() {
     const getPlaceholders = () => {
         if (locale === "vi") {
             return {
-                username: "https://maximagoldhedging.com/affiliate-1/[tên người dùng]",
+                username: "${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/affiliate-1/[tên người dùng]",
                 referralLink: "Sao chép & Dán từ liên kết Lời mời Maxima",
                 referralId: "Ví dụ: 66128169",
                 email: "Nhập email của bạn"
@@ -495,7 +481,7 @@ export default function AffiliatePage() {
                     </motion.div>
 
                     <motion.div
-                        className={`rounded-xl p-8 shadow-2xl ${mytheme === "light"
+                        className={`rounded-xl p-8 shadow-2xl custom-ant-styles ${mytheme === "light"
                             ? "bg-white shadow-blue-200/60"
                             : "bg-gray-800/80 shadow-black/50"
                             }`}
@@ -503,10 +489,6 @@ export default function AffiliatePage() {
                         whileInView="visible"
                         viewport={{ once: true, amount: 0.2 }}
                         variants={fadeInUp}
-                        style={{
-                            "--ant-color-primary": "#FFC800",
-                            "--ant-color-primary-hover": "#FFD700"
-                        }}
                         key={`form-section-${locale}`}
                     >
                         {formSubmitted ? (
@@ -650,24 +632,29 @@ export default function AffiliatePage() {
                 </div>
 
                 <style jsx global>{`
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-          @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0');
-          
-          .font-inter {
-            font-family: 'Inter', Arial, sans-serif;
-          }
-          
-          .leading-relaxed {
-            line-height: 1.75 !important;
-          }
-          
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-          .animate-spin {
-            animation: spin 1s linear infinite;
-          }
-        `}</style>
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+                    @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0');
+                    
+                    .font-inter {
+                        font-family: 'Inter', Arial, sans-serif;
+                    }
+                    
+                    .leading-relaxed {
+                        line-height: 1.75 !important;
+                    }
+                    
+                    @keyframes spin {
+                        to { transform: rotate(360deg); }
+                    }
+                    .animate-spin {
+                        animation: spin 1s linear infinite;
+                    }
+
+                    .custom-ant-styles {
+                        --ant-color-primary: #FFC800;
+                        --ant-color-primary-hover: #FFD700;
+                    }
+                `}</style>
             </section>
         </ConfigProvider>
     );

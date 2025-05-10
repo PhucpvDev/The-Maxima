@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Button, Drawer, ConfigProvider, theme as antdTheme } from 'antd';
+import { useState, useEffect, Suspense } from 'react';
+import { Drawer, ConfigProvider, theme as antdTheme } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { toggleTheme } from '@/redux/theme/themeSlice';
@@ -21,6 +21,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
 
+// Animation variants
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
   visible: {
@@ -47,18 +48,13 @@ const buttonVariants = {
   tap: { scale: 0.98, transition: { duration: 0.2, ease: 'easeInOut' } },
 };
 
-export default function Home() {
-  const locale = useLocale();
-  const router = useRouter();
-  const pathname = usePathname();
+// New AffiliateHandler Component (Client Component)
+function AffiliateHandler({
+  onAffCodeChange,
+}: {
+  onAffCodeChange: (affCode: string | null, shouldCall: boolean) => void;
+}) {
   const searchParams = useSearchParams();
-  const dispatch = useDispatch();
-  const { mytheme } = useSelector((state: RootState) => state.theme);
-  const [headerData, setHeaderData] = useState<TransformedHeaderData | null>(null);
-  const [current, setCurrent] = useState('home');
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [affCode, setAffCode] = useState<string | null>(null);
   const [shouldCallAffiliatesClick, setShouldCallAffiliatesClick] = useState(false);
 
@@ -68,7 +64,6 @@ export default function Home() {
     return `${timestamp}-${random}`;
   };
 
-  // Extract and store affiliate code from URL, generate token_aff if needed
   useEffect(() => {
     const aff = searchParams.get('aff');
     const existingAffCode = Cookies.get('aff_code');
@@ -89,9 +84,34 @@ export default function Home() {
       setAffCode(null);
       setShouldCallAffiliatesClick(false);
     }
-  }, [searchParams]);
 
-  // Fetch header data and set initial `current` based on the first nav link
+    onAffCodeChange(affCode, shouldCallAffiliatesClick);
+  }, [searchParams, affCode, shouldCallAffiliatesClick, onAffCodeChange]);
+
+  return null; // This component doesn't render anything
+}
+
+export default function Home() {
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+  const dispatch = useDispatch();
+  const { mytheme } = useSelector((state: RootState) => state.theme);
+  const [headerData, setHeaderData] = useState<TransformedHeaderData | null>(null);
+  const [current, setCurrent] = useState('home');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [affCode, setAffCode] = useState<string | null>(null);
+  const [shouldCallAffiliatesClick, setShouldCallAffiliatesClick] = useState(false);
+
+  // Handle affiliate code change
+  const handleAffCodeChange = (newAffCode: string | null, shouldCall: boolean) => {
+    setAffCode(newAffCode);
+    setShouldCallAffiliatesClick(shouldCall);
+  };
+
+  // Fetch header data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -107,9 +127,9 @@ export default function Home() {
     fetchData();
   }, [locale]);
 
-  // Sync `current` state with the current pathname
+  // Sync `current` state with pathname
   useEffect(() => {
-    if (!headerData) return; // Wait for headerData to be available
+    if (!headerData) return;
 
     const pathWithoutLocale = pathname.replace(`/${locale}`, '') || '/';
     const alias: Record<string, string> = {
@@ -131,6 +151,7 @@ export default function Home() {
     setCurrent(newCurrent);
   }, [pathname, headerData, locale]);
 
+  // Handle scroll for header
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
@@ -140,10 +161,12 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Set theme
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', mytheme);
   }, [mytheme]);
 
+  // Handle section scrolling
   useEffect(() => {
     const targetId = sessionStorage.getItem('scrollToSection');
     if (targetId) {
@@ -171,12 +194,13 @@ export default function Home() {
     }
   }, []);
 
+  // Affiliate click API call
   const AffiliatesClick = async () => {
     try {
       const code = Cookies.get('aff_code');
       const token = Cookies.get('token_aff');
 
-      const response = await fetch('http://localhost:3001/api/affiliates/click', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/affiliates/click`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -191,13 +215,12 @@ export default function Home() {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to submit affiliate code');
       }
-
-      const data = await response.json();
     } catch (error) {
       console.error('Error in AffiliatesClick:', error);
     }
   };
 
+  // Trigger AffiliatesClick when needed
   useEffect(() => {
     if (affCode && shouldCallAffiliatesClick) {
       AffiliatesClick();
@@ -242,19 +265,16 @@ export default function Home() {
 
     const currentPage = pathname.replace(`/${locale}`, '') || '/';
 
-    // Handle navigation to /posts or /affiliate
     if (url === '/posts' || url === '/affiliate') {
       router.push(`/${locale}${url}`);
       return;
     }
 
-    // Handle navigation to Home from /posts or /affiliate
     if (url === '/' && (currentPage === '/posts' || currentPage === '/affiliate')) {
       router.push(`/${locale}/`);
       return;
     }
 
-    // Handle scrolling for other links on the home page
     const elementId = getElementId(url);
     const element = document.getElementById(elementId);
 
@@ -273,7 +293,6 @@ export default function Home() {
     }
   };
 
-  // Filter nav_links based on current pathname
   const getFilteredNavLinks = () => {
     const currentPage = pathname.replace(`/${locale}`, '') || '/';
     if (currentPage === '/posts' || currentPage === '/affiliate') {
@@ -358,6 +377,10 @@ export default function Home() {
             : 'bg-gradient-to-b from-gray-900 to-gray-950'
         }`}
       >
+        <Suspense fallback={null}>
+          <AffiliateHandler onAffCodeChange={handleAffCodeChange} />
+        </Suspense>
+
         <div className="absolute inset-0 overflow-hidden z-0">
           <div
             className={`absolute inset-0 opacity-5 ${
@@ -411,10 +434,10 @@ export default function Home() {
                     <Image
                       src={IMAGES.LogoMaxima}
                       alt="Logo Maxima"
-活动                    width={40}
-                    height={40}
-                    priority
-                  />
+                      width={40}
+                      height={40}
+                      priority
+                    />
                   </div>
                   <span
                     className={`text-lg font-bold tracking-tight ${

@@ -11,16 +11,25 @@ interface ClientLayoutProps {
   children: React.ReactNode;
 }
 
+interface ThemeConfig {
+  token: {
+    colorPrimary: string;
+  };
+  algorithm: typeof antdTheme.darkAlgorithm | typeof antdTheme.defaultAlgorithm;
+}
+
+interface Messages {
+  [key: string]: string | Messages;
+}
+
 export default function ClientLayout({ children }: ClientLayoutProps) {
   const [isClient, setIsClient] = useState(false);
-  const [themeConfig, setThemeConfig] = useState<any>(null);
-  const [messages, setMessages] = useState<any>({});
+  const [themeConfig, setThemeConfig] = useState<ThemeConfig | null>(null);
+  const [messages, setMessages] = useState<Messages>({});
   const { mytheme } = useSelector((state: RootState) => state.theme);
   
-  // Get locale from next-intl's hook
   const locale = useLocale();
   
-  // Fetch messages for the current locale
   useEffect(() => {
     const loadMessages = async () => {
       try {
@@ -34,12 +43,10 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
     loadMessages();
   }, [locale]);
   
-  // Setup theme and client-side rendering
   useEffect(() => {
     setIsClient(true);
     document.documentElement.setAttribute('data-theme', mytheme === 'light' ? 'light' : 'dark');
 
-    // Configure Ant Design theme
     const getCSSVariable = (variable: string) =>
       getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
 

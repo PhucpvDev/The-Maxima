@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { Table, Space, Button, Spin, Input } from 'antd';
@@ -9,7 +9,7 @@ import { useTranslations } from 'next-intl';
 import { useCustomNotification } from '@/components/admin/notification/customNotification';
 
 const apiClient = axios.create({
-    baseURL: 'http://localhost:3001/api',
+    baseURL: process.env.NEXT_PUBLIC_API_URL,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -18,6 +18,10 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
     (config) => {
         const token = Cookies.get('token');
+        if (!config.headers) {
+            config.headers = {};
+        }
+        
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         } else {
@@ -47,29 +51,33 @@ export default function ListAffiliate() {
     const [affiliateForms, setAffiliateForms] = useState<AffiliateForm[]>([]);
     const [searchText, setSearchText] = useState('');
     const { showNotification, contextHolder } = useCustomNotification();
+    const dataFetchedRef = useRef(false);
 
-    const fetchAffiliateForms = async () => {
+    const fetchAffiliateForms = useCallback(async () => {
+        if (loading) return;
+        
         setLoading(true);
         try {
             const response = await apiClient.get('/form-affiliate');
-            let forms = response.data;
+            const forms = response.data;
 
             if (!Array.isArray(forms)) {
                 throw new Error('Expected affiliate forms to be an array');
             }
 
             setAffiliateForms(forms);
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error fetching affiliate forms:', error);
-            showNotification({
-                message: error.response?.data?.message || t('fetchError'),
-                showProgress: true,
-            });
             setAffiliateForms([]);
         } finally {
             setLoading(false);
         }
-    };
+    }, [loading]); 
+
+    if (!dataFetchedRef.current) {
+        dataFetchedRef.current = true;
+        fetchAffiliateForms();
+    }
 
     const deleteAffiliateFormApi = async (id: number) => {
         try {
@@ -80,19 +88,15 @@ export default function ListAffiliate() {
             });
             fetchAffiliateForms();
             return true;
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error deleting affiliate form:', error);
             showNotification({
-                message: error.response?.data?.message || t('deleteError'),
+                message: t('deleteError'),
                 showProgress: true,
             });
             return false;
         }
     };
-
-    useEffect(() => {
-        fetchAffiliateForms();
-    }, []);
 
     const handleDelete = async (id: number) => {
         await deleteAffiliateFormApi(id);
@@ -147,7 +151,7 @@ export default function ListAffiliate() {
         {
             title: t('columnAction'),
             key: 'action',
-            render: (_: any, record: AffiliateForm) => (
+            render: (_: unknown, record: AffiliateForm) => (
                 <Space size="middle">
                     <Button
                         type="text"

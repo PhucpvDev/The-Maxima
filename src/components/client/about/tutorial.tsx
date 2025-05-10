@@ -64,11 +64,15 @@ interface RawTutorialData {
   translations: Translation[];
 }
 
+interface TutorialProps {
+  id?: string; 
+}
+
 async function getTutorial(locale: string): Promise<TutorialData> {
   try {
     const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
     const response = await fetch(
-      `https://maximagoldhedging.com/items/tutorial?lang=${lang}&fields=*,translations.*`,
+      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/tutorial?lang=${lang}&fields=*,translations.*`,
       {
         headers: {
           Accept: "application/json",
@@ -219,17 +223,6 @@ async function getTutorial(locale: string): Promise<TutorialData> {
   }
 }
 
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      duration: 0.6,
-      ease: "easeOut",
-    },
-  },
-};
-
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
   visible: {
@@ -253,7 +246,7 @@ const staggerContainer = {
   },
 };
 
-const Tutorial: React.FC = () => {
+export default function Tutorial ({ id }: TutorialProps){
   const locale = useLocale();
   const { mytheme } = useSelector((state: RootState) => state.theme);
   const [tutorialData, setTutorialData] = useState<TutorialData | undefined>(undefined);
@@ -308,13 +301,6 @@ const Tutorial: React.FC = () => {
     document.documentElement.setAttribute("data-theme", mytheme);
   }, [mytheme]);
 
-  const getCSSVariable = (variable: string) => {
-    if (typeof window !== "undefined") {
-      return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
-    }
-    return "#FFC800"; 
-  };
-
   const themeConfig = {
     token: {
       colorPrimary: "#FFC800",
@@ -356,7 +342,7 @@ const Tutorial: React.FC = () => {
 
   return (
     <ConfigProvider theme={themeConfig}>
-      <section id="tutorial"
+      <section id={id}
         className={`py-24 relative overflow-hidden font-inter ${
           mytheme === "light" ? "bg-gradient-to-b from-gray-50 to-white" : "bg-gradient-to-b from-gray-900 to-gray-950"
         }`}
@@ -660,5 +646,3 @@ const Tutorial: React.FC = () => {
     </ConfigProvider>
   );
 };
-
-export default Tutorial;

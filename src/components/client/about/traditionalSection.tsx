@@ -99,7 +99,7 @@ async function getTraditionalVsMaximaIb(locale: string): Promise<TraditionalVsMa
   try {
     const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
     const response = await fetch(
-      `https://maximagoldhedging.com/items/traditional_vs_maxima_ib?lang=${lang}&fields=*,translations.*`,
+      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/traditional_vs_maxima_ib?lang=${lang}&fields=*,translations.*`,
       {
         headers: {
           Accept: "application/json",

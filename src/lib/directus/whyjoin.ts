@@ -28,7 +28,7 @@ export async function getWhyJoin(): Promise<RawWhyJoinMaximaData[]> {
   // Normalize the data: if rawData is an object, wrap it in an array; if it's an array, use it as-is
   const dataArray = Array.isArray(rawData) ? rawData : [rawData];
 
-  return dataArray.map((item: Record<string, any>) => ({
+  return dataArray.map((item: Record<string, RawWhyJoinMaximaData[keyof RawWhyJoinMaximaData]>) => ({
     id: item.id,
     status: item.status,
     title: item.title,

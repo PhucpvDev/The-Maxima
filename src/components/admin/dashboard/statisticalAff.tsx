@@ -12,12 +12,10 @@ import {
     Badge,
 } from 'antd';
 import {
-    DollarOutlined,
     LinkOutlined,
     UserOutlined,
     SearchOutlined,
 } from '@ant-design/icons';
-import { Bar, Line } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -27,7 +25,7 @@ import {
     PointElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
 } from 'chart.js';
 import { useTranslations } from 'next-intl';
 import moment from 'moment';
@@ -43,6 +41,19 @@ ChartJS.register(
     Tooltip,
     Legend
 );
+
+// Định nghĩa interface cho dữ liệu API
+interface ApiAffiliateItem {
+    id: number;
+    code: string;
+    commission: number;
+    periodClicks: number;
+    totalClicks: number;
+    user: {
+        name: string;
+    };
+}
+
 
 export default function StatisticalAff() {
     const t = useTranslations('statisticalAff');
@@ -67,7 +78,7 @@ export default function StatisticalAff() {
                     return;
                 }
 
-                const response = await fetch('http://localhost:3001/api/affiliates/dashboard/stats', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/affiliates/dashboard/stats`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -97,7 +108,7 @@ export default function StatisticalAff() {
                     return;
                 }
 
-                const response = await fetch('http://localhost:3001/api/affiliates/stats/top', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/affiliates/stats/top`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -110,7 +121,7 @@ export default function StatisticalAff() {
                 }
 
                 const data = await response.json();
-                const transformedData: Staff[] = data.map((item: any) => ({
+                const transformedData: Staff[] = data.map((item: ApiAffiliateItem) => ({
                     id: item.id,
                     name: item.user.name,
                     code: item.code,
@@ -145,10 +156,6 @@ export default function StatisticalAff() {
         );
     }, [staffData, searchQuery]);
 
-    const totalCommissions = filteredStaffData.reduce((sum, staff) => sum + staff.commission, 0);
-    const totalConversions = filteredStaffData.reduce((sum, staff) => sum + staff.conversions, 0);
-    const totalClicks = filteredStaffData.reduce((sum, staff) => sum + staff.clicks, 0);
-    const avgConversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0;
 
     interface Product {
         name: string;
@@ -189,7 +196,7 @@ export default function StatisticalAff() {
         dataIndex: keyof StaffColumnRecord;
         key: string;
         sorter?: (a: StaffColumnRecord, b: StaffColumnRecord) => number;
-        render?: (value: any, record?: StaffColumnRecord) => React.ReactNode;
+        render?: (value: string | number, record?: StaffColumnRecord) => React.ReactNode;
     }> = [
             {
                 title: t('columnStaff'),
@@ -215,148 +222,6 @@ export default function StatisticalAff() {
                 sorter: (a, b) => a.clicks - b.clicks,
             },
         ];
-
-    const salesComparisonData = {
-        labels: filteredStaffData.map(staff => staff.name),
-        datasets: [
-            {
-                label: t('chartCommissionLabel'),
-                data: filteredStaffData.map(staff => staff.commission),
-                backgroundColor: 'rgba(136, 132, 216, 0.6)',
-                borderColor: 'rgba(136, 132, 216, 1)',
-                borderWidth: 1,
-            },
-        ],
-    };
-
-    const conversionRateData = {
-        labels: filteredStaffData.map(staff => staff.name),
-        datasets: [
-            {
-                label: t('chartConversionRateLabel'),
-                data: filteredStaffData.map(staff => staff.conversionRate),
-                backgroundColor: 'rgba(130, 202, 157, 0.6)',
-                borderColor: 'rgba(130, 202, 157, 1)',
-                borderWidth: 1,
-            },
-        ],
-    };
-
-    const trendData = filteredStaffData.reduce((acc, staff) => {
-        staff.historicalSales.forEach(sale => {
-            const existing = acc.find(d => d.date === sale.date);
-            if (existing) {
-                existing.sales += sale.sales;
-            } else {
-                acc.push({ date: sale.date, sales: sale.sales });
-            }
-        });
-        return acc;
-    }, [] as { date: string; sales: number }[]).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    const trendLineData = {
-        labels: trendData.map(data => data.date),
-        datasets: [
-            {
-                label: t('chartSalesLabel'),
-                data: trendData.map(data => data.sales),
-                fill: false,
-                borderColor: 'rgba(136, 132, 216, 1)',
-                tension: 0.1,
-            },
-        ],
-    };
-
-
-    const salesComparisonOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { position: 'top' as const, labels: { font: { size: 12 } } },
-            tooltip: {
-                callbacks: {
-                    label: (tooltipItem: any) => {
-                        return `${t('chartCommissionLabel')}: ${tooltipItem.raw.toFixed(2)}%`; // Show as percentage
-                    },
-                },
-            },
-        },
-        scales: {
-            y: {
-                ticks: {
-                    callback: (value: number) => `${value.toFixed(2)}%`, // Show percentage on Y-axis
-                    font: { size: 10 },
-                },
-            },
-            x: {
-                ticks: {
-                    font: { size: 10 },
-                    maxRotation: 45,
-                    minRotation: 45,
-                },
-            },
-        },
-    };
-
-    const conversionRateOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { position: 'top' as const, labels: { font: { size: 12 } } },
-            tooltip: {
-                callbacks: {
-                    label: (tooltipItem: any) => {
-                        return `${t('chartConversionRateLabel')}: ${tooltipItem.raw.toFixed(2)}%`;
-                    },
-                },
-            },
-        },
-        scales: {
-            y: {
-                ticks: {
-                    callback: (value: number) => `${value.toFixed(2)}%`,
-                    font: { size: 10 },
-                },
-            },
-            x: {
-                ticks: {
-                    font: { size: 10 },
-                    maxRotation: 45,
-                    minRotation: 45,
-                },
-            },
-        },
-    };
-
-    const trendLineOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { position: 'top' as const, labels: { font: { size: 12 } } },
-            tooltip: {
-                callbacks: {
-                    label: (tooltipItem: any) => {
-                        return `${t('chartSalesLabel')}: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(tooltipItem.raw)}`;
-                    },
-                },
-            },
-        },
-        scales: {
-            y: {
-                ticks: {
-                    callback: (value: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value),
-                    font: { size: 10 },
-                },
-            },
-            x: {
-                ticks: {
-                    font: { size: 10 },
-                    maxRotation: 45,
-                    minRotation: 45,
-                },
-            },
-        },
-    };
 
     const tabItems = [
         {
@@ -386,36 +251,6 @@ export default function StatisticalAff() {
                         scroll={{ x: 800 }}
                     />
                 </Card>
-            )
-        },
-        {
-            key: '2',
-            label: t('tabCharts'),
-            children: (
-                <>
-                    <Row gutter={[12, 12]}>
-                        <Col xs={24} sm={12}>
-                            <Card title={t('cardCommissionComparison')} className="mb-4 sm:mb-6">
-                                <div className="chart-container">
-                                    <Bar
-                                        data={salesComparisonData}
-                                        options={salesComparisonOptions}
-                                    />
-                                </div>
-                            </Card>
-                        </Col>
-                        <Col xs={24} sm={12}>
-                            <Card title={t('cardConversionRate')} className="mb-4 sm:mb-6">
-                                <div className="chart-container">
-                                    <Bar
-                                        data={conversionRateData}
-                                        options={conversionRateOptions}
-                                    />
-                                </div>
-                            </Card>
-                        </Col>
-                    </Row>
-                </>
             )
         }
     ];

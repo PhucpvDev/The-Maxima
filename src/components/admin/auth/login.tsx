@@ -11,13 +11,19 @@ import { useApi } from '@/services/apiServices';
 import Image from 'next/image';
 import Cookies from 'js-cookie';
 
+interface LoginResponse {
+  access_token: string;
+  refresh_token?: string;
+  user?: string; 
+}
+
 export default function Login() {
   const t = useTranslations('login');
   const [loading, setLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const { showNotification, contextHolder } = useCustomNotification();
   const router = useRouter();
-  const { post } = useApi();
+  const { post } = useApi<LoginResponse>(); 
 
   useEffect(() => {
     setIsMounted(true);
@@ -26,7 +32,7 @@ export default function Login() {
   const onFinish = async (values: { email: string; password: string; remember: boolean }) => {
     setLoading(true);
     try {
-      const response = await post('/api/auth/login', {
+      const response = await post('/auth/login', {
         email: values.email,
         password: values.password,
       }, { useToken: false });
@@ -54,7 +60,6 @@ export default function Login() {
 
         showNotification({
           message: t('loginSuccess'),
-          type: 'success',
           showProgress: true,
         });
         router.push('/admin/dashboard');
@@ -62,34 +67,32 @@ export default function Login() {
         console.error('Invalid response format:', response);
         showNotification({
           message: t('loginFailedTitle'),
-          description: 'Invalid server response format',
-          type: 'error',
           showProgress: true,
         });
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Login error:', error);
 
       let errorMessage = t('loginFailedDescription');
 
-      if (error.message) {
+      if (error instanceof Error) {
         errorMessage = error.message;
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
+      } else if (error && typeof error === 'object' && 'response' in error && 
+                error.response && typeof error.response === 'object' && 
+                'data' in error.response && error.response.data && 
+                typeof error.response.data === 'object' && 
+                'message' in error.response.data) {
+        errorMessage = (error.response.data as { message: string }).message;
       }
 
       if (errorMessage.includes('Account locked')) {
         showNotification({
           message: t('accountLockedTitle'),
-          description: errorMessage,
-          type: 'error',
           showProgress: true,
         });
       } else {
         showNotification({
           message: t('loginFailedTitle'),
-          description: errorMessage,
-          type: 'error',
           showProgress: true,
         });
       }

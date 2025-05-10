@@ -29,6 +29,10 @@ interface Translation {
   description_6: string;
 }
 
+interface HowItWorksProps {
+  id?: string; 
+}
+
 interface Step {
   title: string;
   description: string;
@@ -76,7 +80,7 @@ async function getHowItWorks(locale: string): Promise<HowItWorksData> {
   try {
     const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
     const response = await fetch(
-      `https://maximagoldhedging.com/items/how_it_works?lang=${lang}&fields=*,translations.*`,
+      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/how_it_works?lang=${lang}&fields=*,translations.*`,
       {
         headers: {
           Accept: "application/json",
@@ -97,9 +101,7 @@ async function getHowItWorks(locale: string): Promise<HowItWorksData> {
 
     const source = translation || data;
 
-    const conclusion =
-      // @ts-ignore: Handle the typo in the API response
-      source.conclusion || source.conclution || "Earn profits consistently with Maxima's decentralized system!\n\nThe world's leading decentralized AI trading platform";
+    const conclusion = source.conclusion || "Earn profits consistently with Maxima's decentralized system!\n\nThe world's leading decentralized AI trading platform";
 
     return {
       title: source.title || "Maxima Trading Model",
@@ -216,7 +218,7 @@ const scaleIn = {
   }
 };
 
-const HowItWorks: React.FC = () => {
+export default function HowItWorks ({ id }: HowItWorksProps) {
   const locale = useLocale();
   const { mytheme } = useSelector((state: RootState) => state.theme);
   const [data, setData] = useState<HowItWorksData | null>(null);
@@ -251,8 +253,6 @@ const HowItWorks: React.FC = () => {
     document.documentElement.setAttribute("data-theme", mytheme);
   }, [mytheme]);
 
-  const getCSSVariable = (variable: string) =>
-    getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
     
   const themeConfig = {
     token: {
@@ -274,7 +274,7 @@ const HowItWorks: React.FC = () => {
 
   return (
     <ConfigProvider theme={themeConfig}>
-      <div  id="how" className={`py-12 md:py-24 px-4 md:px-8 font-inter ${
+      <div  id={id} className={`py-12 md:py-24 px-4 md:px-8 font-inter ${
         mytheme === "light"
           ? "bg-gradient-to-b from-slate-50 to-gray-100"
           : "bg-gradient-to-b from-gray-900 to-gray-950"
@@ -520,5 +520,3 @@ const HowItWorks: React.FC = () => {
     </ConfigProvider>
   );
 };
-
-export default HowItWorks;

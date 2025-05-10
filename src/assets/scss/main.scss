@@ -1,9 +1,8 @@
-@import "tailwindcss";
-@import "admin/sidebar";
-@import "admin/modal";
-@import "admin/nprogress";
+@use "tailwindcss";
+@use "admin/sidebar";
+@use "admin/modal";
+@use "admin/nprogress";
 
-/* In your globals.css file */
 body, 
 .ant-row,
 .ant-col,
