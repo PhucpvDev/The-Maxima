@@ -495,15 +495,6 @@ export default function Tutorial ({ id }: TutorialProps){
                       >
                         {tutorialData.help_description}
                       </p>
-                      <button
-                        className={`mt-3 px-4 py-2 rounded-lg text-sm font-medium ${
-                          mytheme === "light"
-                            ? "bg-green-500 text-white hover:bg-green-600"
-                            : "bg-green-600 text-white hover:bg-green-700"
-                        } transition-colors`}
-                      >
-                        <span className="text-white ">{tutorialData.help_button_text}</span>
-                      </button>
                     </div>
                   </div>
                 </motion.div>
@@ -571,7 +562,7 @@ export default function Tutorial ({ id }: TutorialProps){
                     <button
                       onClick={() => setActiveVideo((prev) => Math.max(0, prev - 1))}
                       disabled={activeVideo === 0}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
+                      className={`flex items-center cursor-pointer  gap-2 px-4 py-2 rounded-lg font-medium ${
                         activeVideo === 0
                           ? mytheme === "light"
                             ? "bg-gray-100 text-gray-400 cursor-not-allowed"
@@ -589,7 +580,7 @@ export default function Tutorial ({ id }: TutorialProps){
                         <button
                           key={index}
                           onClick={() => setActiveVideo(index)}
-                          className={`w-8 h-2 rounded-full transition-all ${
+                          className={`w-8 h-2 rounded-full cursor-pointer transition-all ${
                             activeVideo === index
                               ? mytheme === "light"
                                 ? "bg-blue-500"
@@ -605,7 +596,7 @@ export default function Tutorial ({ id }: TutorialProps){
                     <button
                       onClick={() => setActiveVideo((prev) => Math.min(steps.length - 1, prev + 1))}
                       disabled={activeVideo === steps.length - 1}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
+                      className={`flex items-center cursor-pointer  gap-2 px-4 py-2 rounded-lg font-medium ${
                         activeVideo === steps.length - 1
                           ? mytheme === "light"
                             ? "bg-gray-100 text-gray-400 cursor-not-allowed"
@@ -615,8 +606,8 @@ export default function Tutorial ({ id }: TutorialProps){
                             : "bg-blue-600 text-white hover:bg-blue-700"
                       } transition-colors`}
                     >
-                      {t.next}
-                      <span className="material-symbols-outlined">arrow_forward</span>
+                      <span className={`${mytheme === "dark" ? "text-white" : "text-white"}`}>{t.next}</span>
+                      <span className={`material-symbols-outlined ${mytheme === "dark" ? "text-white" : "text-white"}`}>arrow_forward</span>
                     </button>
                   </div>
                 </div>

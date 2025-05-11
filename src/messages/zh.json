@@ -319,5 +319,11 @@
     "fetchError": "无法获取联盟表单列表",
     "noFormsFound": "未找到联盟表单",
     "searchPlaceholder": "按用户名、邮箱或代码搜索"
+  },
+  "adminMenu": {
+    "dashboard": "控制面板",
+    "user": "员工",
+    "contact": "联系人",
+    "affiliate": "联盟营销订单"
   }
 }

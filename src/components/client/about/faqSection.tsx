@@ -178,7 +178,7 @@ export default function FAQSection ({ id }: FAQSectionProps)  {
               </div>
             </div>
 
-            <div className="lg:col-span-8">
+            <div className="lg:col-span-8 text-white">
               {filteredFaqs.length === 0 ? (
                 <div className={`text-center py-12 rounded-xl ${
                   mytheme === "light" 
@@ -190,13 +190,13 @@ export default function FAQSection ({ id }: FAQSectionProps)  {
                   }`}>
                     No matches found
                   </h3>
-                  <p className={`${
+                  <p className={`pb-2 ${
                     mytheme === "light" ? "text-gray-500" : "text-gray-400"
                   }`}>
                     Try different search terms or browse all FAQs
                   </p>
                   <button 
-                    className={`mt-4 px-4 py-2 rounded-lg font-medium ${
+                    className={`px-4 py-2 cursor-pointer rounded-lg font-medium ${
                       mytheme === "light" 
                         ? "bg-blue-600 text-white hover:bg-blue-700" 
                         : "bg-blue-600 text-white hover:bg-blue-700"
@@ -224,7 +224,7 @@ export default function FAQSection ({ id }: FAQSectionProps)  {
                       } transition-all duration-200`}
                     >
                       <button
-                        className={`w-full text-left px-6 py-5 flex items-center justify-between ${
+                        className={`w-full text-left cursor-pointer px-6 py-5 flex items-center justify-between ${
                           expandedIndex === index 
                             ? mytheme === "light"
                               ? "border-b border-gray-200"

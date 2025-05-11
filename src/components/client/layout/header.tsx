@@ -48,7 +48,6 @@ const buttonVariants = {
   tap: { scale: 0.98, transition: { duration: 0.2, ease: 'easeInOut' } },
 };
 
-// New AffiliateHandler Component (Client Component)
 function AffiliateHandler({
   onAffCodeChange,
 }: {
@@ -88,7 +87,7 @@ function AffiliateHandler({
     onAffCodeChange(affCode, shouldCallAffiliatesClick);
   }, [searchParams, affCode, shouldCallAffiliatesClick, onAffCodeChange]);
 
-  return null; // This component doesn't render anything
+  return null; 
 }
 
 export default function Home() {
@@ -105,13 +104,11 @@ export default function Home() {
   const [affCode, setAffCode] = useState<string | null>(null);
   const [shouldCallAffiliatesClick, setShouldCallAffiliatesClick] = useState(false);
 
-  // Handle affiliate code change
   const handleAffCodeChange = (newAffCode: string | null, shouldCall: boolean) => {
     setAffCode(newAffCode);
     setShouldCallAffiliatesClick(shouldCall);
   };
 
-  // Fetch header data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -127,7 +124,6 @@ export default function Home() {
     fetchData();
   }, [locale]);
 
-  // Sync `current` state with pathname
   useEffect(() => {
     if (!headerData) return;
 
@@ -151,7 +147,6 @@ export default function Home() {
     setCurrent(newCurrent);
   }, [pathname, headerData, locale]);
 
-  // Handle scroll for header
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
@@ -161,12 +156,10 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Set theme
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', mytheme);
   }, [mytheme]);
 
-  // Handle section scrolling
   useEffect(() => {
     const targetId = sessionStorage.getItem('scrollToSection');
     if (targetId) {
@@ -194,7 +187,6 @@ export default function Home() {
     }
   }, []);
 
-  // Affiliate click API call
   const AffiliatesClick = async () => {
     try {
       const code = Cookies.get('aff_code');
@@ -220,7 +212,6 @@ export default function Home() {
     }
   };
 
-  // Trigger AffiliatesClick when needed
   useEffect(() => {
     if (affCode && shouldCallAffiliatesClick) {
       AffiliatesClick();
@@ -246,7 +237,7 @@ export default function Home() {
   const getBannerImage = () => {
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     if (isMobile) {
-      return mytheme === 'light' ? IMAGES.Banner9Mb : IMAGES.Banner1Mb;
+      return mytheme === 'light' ? IMAGES.Banner10 : IMAGES.Banner1Mb;
     }
     return mytheme === 'light' ? IMAGES.Banner9 : IMAGES.Banner1;
   };
@@ -401,7 +392,7 @@ export default function Home() {
           src={getBannerImage()}
           alt="Banner Background"
           fill
-          className="object-cover md:object-center object-[75%_50%]"
+          className="md:object-center object-[75%_50%]"
           priority
         />
         <div
@@ -454,7 +445,7 @@ export default function Home() {
               </motion.div>
 
               <motion.button
-                className={`md:hidden pl-2.5 pr-2.5 pb-2 pt-2 rounded-full ${
+                className={`md:hidden cursor-pointer w-9 h-9 rounded-full ${
                   mytheme === 'light' ? 'bg-gray-100' : 'bg-gray-800'
                 } shadow-md`}
                 onClick={() => setIsMenuOpen(true)}
@@ -678,7 +669,7 @@ export default function Home() {
             </div>
           </motion.header>
 
-          <main className="px-4 py-10 pt-28 md:pt-36 max-w-7xl mx-auto">
+          <main className="px-4 py-10 pt-28 md:pt-32 max-w-7xl mx-auto">
             <section id="home">
               <motion.div
                 className="md:mb-7 md:text-left"

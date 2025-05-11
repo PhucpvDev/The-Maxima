@@ -295,9 +295,9 @@ export default function AppleOrchardSection() {
                     whileHover={{ y: -5 }}
                   >
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${
-                      mytheme === "light" ? "bg-yellow-100" : "bg-yellow-900/30"
+                      mytheme === "light" ? "bg-yellow-100" : "bg-yellow-600"
                     }`}>
-                      <span className="material-symbols-outlined text-yellow-600">{feature.icon}</span>
+                      <span className={`material-symbols-outlined ${mytheme === "dark" ? "text-white" : "text-yellow-600"}`}>{feature.icon}</span>
                     </div>
                     <h3 className={`text-lg font-semibold mb-2 ${
                       mytheme === "light" ? "text-gray-900" : "text-white"

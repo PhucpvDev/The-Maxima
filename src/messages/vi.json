@@ -328,6 +328,23 @@
     "fetchError": "Không thể lấy danh sách đơn affiliate",
     "noFormsFound": "Không tìm thấy đơn affiliate nào",
     "searchPlaceholder": "Tìm kiếm theo tên người dùng, email hoặc mã"
+  },
+  "adminMenu": {
+    "dashboard": "Bảng điều khiển",
+    "user": "Nhân viên",
+    "contact": "Liên hệ",
+    "affiliate": "Đơn Affiliate"
+  },
+  "affiliatePage": {
+    "affiliateStatistics": "Thống kê Affiliate",
+    "totalStaff": "Tổng nhân viên",
+    "totalClicks": "Tổng lượt click",
+    "totalAffiliates": "Tổng Affiliates",
+    "staffRanking": "Xếp hạng nhân viên",
+    "affiliateCode": "Mã Affiliate",
+    "clicks": "Lượt click",
+    "staff": "Nhân viên",
+    "searchPlaceholder": "Tìm theo tên hoặc mã"
   }
   
 }

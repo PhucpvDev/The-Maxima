@@ -172,7 +172,6 @@ export default function AffiliatePage() {
         }
     }, [locale]);
 
-    // Initial content fetch
     if (!dataFetchedRef.current) {
         dataFetchedRef.current = true;
         fetchContent();
@@ -308,7 +307,7 @@ export default function AffiliatePage() {
     const getPlaceholders = () => {
         if (locale === "vi") {
             return {
-                username: "${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/affiliate-1/[tên người dùng]",
+                username: "https://admin.maximagoldhedging.com/affiliate-1/[tên người dùng]",
                 referralLink: "Sao chép & Dán từ liên kết Lời mời Maxima",
                 referralId: "Ví dụ: 66128169",
                 email: "Nhập email của bạn"

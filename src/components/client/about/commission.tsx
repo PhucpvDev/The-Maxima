@@ -344,7 +344,7 @@ export default function CommissionSection ({ id }: CommissionProps) {
                 }`} style={{ minWidth: "700px" }}>
                   <button 
                     onClick={() => requestSort('rank')}
-                    className="flex items-center justify-start gap-2 font-semibold"
+                    className="flex items-center cursor-pointer justify-start gap-2 font-semibold"
                   >
                     <span>Rank</span>
                     <span className="material-symbols-outlined text-sm">
@@ -356,7 +356,7 @@ export default function CommissionSection ({ id }: CommissionProps) {
                   </button>
                   <button 
                     onClick={() => requestSort('commission')}
-                    className="flex items-center justify-start gap-2 font-semibold"
+                    className="flex items-center cursor-pointer justify-start gap-2 font-semibold"
                   >
                     <span>Commission Per Lot</span>
                     <span className="material-symbols-outlined text-sm">
@@ -368,7 +368,7 @@ export default function CommissionSection ({ id }: CommissionProps) {
                   </button>
                   <button 
                     onClick={() => requestSort('profits')}
-                    className="flex items-center justify-start gap-2 font-semibold"
+                    className="flex items-center cursor-pointer justify-start gap-2 font-semibold"
                   >
                     <span>Profits Sharing</span>
                     <span className="material-symbols-outlined text-sm">
@@ -380,7 +380,7 @@ export default function CommissionSection ({ id }: CommissionProps) {
                   </button>
                   <button 
                     onClick={() => requestSort('apple')}
-                    className="flex items-center justify-start gap-2 font-semibold"
+                    className="flex items-center cursor-pointer justify-start gap-2 font-semibold"
                   >
                     <span>Apple Orchard</span>
                     <span className="material-symbols-outlined text-sm">

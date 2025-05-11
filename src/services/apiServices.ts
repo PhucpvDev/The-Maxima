@@ -11,6 +11,8 @@ interface RequestOptions {
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
+const TOKEN_COOKIE_EXPIRY = 0.5; 
+
 const getAuthToken = (): string | undefined => Cookies.get('token')
 const getRefreshToken = (): string | undefined => Cookies.get('refresh_token')
 
@@ -84,15 +86,13 @@ export const refreshToken = async (): Promise<{ token: string; refresh_token: st
     }
   )
 
-  if (response.token) Cookies.set('token', response.token, { expires: 1/96 })
+  if (response.token) Cookies.set('token', response.token, { expires: TOKEN_COOKIE_EXPIRY })
   if (response.refresh_token) Cookies.set('refresh_token', response.refresh_token, { expires: 7 })
   
   return response
 }
 
-// Custom hook đúng chuẩn với "use" prefix
 export function useApi<T>() {
-  // Hàm fetch data (không sử dụng useSWR trực tiếp trong hàm này)
   const fetchData = async (
     endpoint: string, 
     options?: Omit<RequestOptions, 'body'>
@@ -101,7 +101,6 @@ export function useApi<T>() {
     return fetcher<T>(url, 'GET', options)
   }
 
-  // Hàm get dùng để gọi API và quản lý cache thông qua fetcher
   const get = async (
     endpoint: string, 
     options?: Omit<RequestOptions, 'body'>
@@ -140,7 +139,6 @@ export function useApi<T>() {
   return { get, post, put, del }
 }
 
-// Hàm tiện ích cho các component không phải hooks
 export const apiClient = {
   get: async <T>(endpoint: string, options?: Omit<RequestOptions, 'body'>): Promise<T> => {
     const url = buildUrl(endpoint, options?.params)

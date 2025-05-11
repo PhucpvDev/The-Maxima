@@ -249,10 +249,10 @@ export default function MaximaSuperWalletSection() {
                 {keyPoints.map((point, index) => (
                   <div key={index} className="flex items-start space-x-3">
                     <div
-                      className={`mt-1 flex-shrink-0 p-1 rounded-full ${mytheme === "light" ? "bg-yellow-100" : "bg-yellow-900/40"
+                      className={`flex-shrink-0 px-2.5 py-2 rounded-full ${mytheme === "light" ? "bg-yellow-100" : "bg-yellow-900/40"
                         }`}
                     >
-                      <span className="material-symbols-outlined text-yellow-600 text-lg">
+                      <span className={`material-symbols-outlined text-lg ${mytheme === "dark" ? "text-white" : "text-yellow-600"}`}>
                         {index === 0
                           ? "trending_up"
                           : index === 1

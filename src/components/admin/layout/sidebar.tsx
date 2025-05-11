@@ -1,18 +1,25 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import type { MenuProps } from 'antd'
 import { Layout, Menu } from 'antd'
-import { items } from '@/constants/admin/menu'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/redux/store'
 import { IMAGES } from '@/constants/client/theme'
 import { useRouter, usePathname } from 'next/navigation'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 
 interface SidebarProps {
     collapsed: boolean
     setCollapsed: (collapsed: boolean) => void
+}
+
+// Định nghĩa kiểu dữ liệu MenuItem có bổ sung trường children
+interface MenuItem {
+    key: string;
+    label: string | React.ReactNode;
+    children?: MenuItem[];
 }
 
 export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
@@ -20,45 +27,60 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
     const { mytheme } = useSelector((state: RootState) => state.theme)
     const router = useRouter()
     const pathname = usePathname()
+    const t = useTranslations('adminMenu')
 
     const [selectedKeys, setSelectedKeys] = useState<string[]>(['1'])
     const [openKeys, setOpenKeys] = useState<string[]>(['sub1'])
 
+    // Wrap items in useMemo to prevent recreation on every render
+    const items: MenuItem[] = useMemo(() => [
+        {
+            key: 'admin/dashboard',
+            label: t('dashboard'),
+        },
+        {
+            key: 'admin/user',
+            label: t('user'),
+        },
+        {
+            key: 'admin/contact',
+            label: t('contact'),
+        },
+        {
+            key: 'admin/affiliate',
+            label: t('affiliate'),
+        },
+    ], [t]) // Only recreate when t changes
+
     useEffect(() => {
-        interface MenuItem {
-            key: string;
-            children?: MenuItem[];
-        }
+        const findKeyByPath = (menuItems: MenuItem[]): string | null => {
+            for (const item of menuItems) {
+                const itemRoute: string = item.key
 
-        const findKeyByPath = (items: MenuItem[]): string | null => {
-            for (const item of items) {
-            const itemRoute: string = item.key
+                const parts: string[] = pathname.split('/')
+                const pagePath: string = parts.length >= 3 ? parts[2] : ''
 
-            const parts: string[] = pathname.split('/')
-            const pagePath: string = parts.length >= 3 ? parts[2] : ''
+                if (pagePath === itemRoute) {
+                    return item.key
+                }
 
-            if (pagePath === itemRoute) {
-                return item.key
-            }
-
-            if (item.children) {
-                const key: string | null = findKeyByPath(item.children)
-                if (key) return key
-            }
+                if (item.children) {
+                    const key: string | null = findKeyByPath(item.children)
+                    if (key) return key
+                }
             }
             return null
         }
 
         // Use the findKeyByPath function to get the active key based on current path
-        const activeKey = findKeyByPath(items as unknown as MenuItem[])
+        const activeKey = findKeyByPath(items)
 
         if (activeKey) {
             setSelectedKeys([activeKey])
 
-            const findParentKey = (items: MenuProps['items'], targetKey: string): string | null => {
-                if (!items) return null;
-                for (const item of items) {
-                    if (item && 'children' in item && item.children?.some((child) => child && child.key === targetKey)) {
+            const findParentKey = (menuItems: MenuItem[], targetKey: string): string | null => {
+                for (const item of menuItems) {
+                    if (item.children?.some((child) => child.key === targetKey)) {
                         return item.key as string
                     }
                 }
@@ -70,15 +92,12 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
                 setOpenKeys([parentKey])
             }
         }
-    }, [pathname])
+    }, [pathname, items])
 
     const onClick: MenuProps['onClick'] = (e) => {
-
         const locale = pathname.split('/')[1]
-
         const routePath = `/${locale}/${e.key}`
         router.push(routePath)
-
         setSelectedKeys([e.key])
     }
 
@@ -122,7 +141,7 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
                     text-shadow: "0px 1px 2px rgba(255,255,255,0.2)") 
                   }
                 `}</style>
-                    <span className="maxima-brand-text text-lg">
+                    <span className={`maxima-brand-text text-lg ${mytheme === "dark" ? "text-white" : "text-gray-800"}`}>
                         MAXIMA
                     </span>
                 </div>
@@ -133,7 +152,7 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
                 openKeys={collapsed ? [] : openKeys}
                 onOpenChange={onOpenChange}
                 mode="inline"
-                items={items}
+                items={items as MenuProps['items']}
                 theme='light'
             />
         </Sider>

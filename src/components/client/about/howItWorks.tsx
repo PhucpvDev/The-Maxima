@@ -428,7 +428,7 @@ export default function HowItWorks ({ id }: HowItWorksProps) {
                           <div className={`w-10 h-10 flex items-center justify-center rounded-lg ${
                             mytheme === "light" ? "bg-yellow-100" : "bg-yellow-900"
                           }`}>
-                            <span className="material-symbols-outlined text-yellow-600">{step.icon}</span>
+                            <span className={`material-symbols-outlined ${mytheme === "dark" ? "text-white" : "text-yellow-600"}`}>{step.icon}</span>
                           </div>
                           <h3 className={`text-xl font-bold ${
                             mytheme === "light" ? "text-gray-900" : "text-white"
@@ -471,7 +471,7 @@ export default function HowItWorks ({ id }: HowItWorksProps) {
               <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center ${
                 mytheme === "light" ? "bg-yellow-100" : "bg-yellow-900"
               }`}>
-                <span className="material-symbols-outlined text-2xl md:text-3xl text-yellow-600">rocket_launch</span>
+                <span className={`material-symbols-outlined text-2xl md:text-3xl ${mytheme === "dark" ? "text-white" : "text-yellow-600"}`}>rocket_launch</span>
               </div>
             </div>
             

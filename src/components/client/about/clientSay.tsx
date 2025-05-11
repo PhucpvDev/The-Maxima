@@ -292,7 +292,7 @@ const TestimonialsSection: React.FC = () => {
           >
             <div className="relative">
               <div
-                className={`relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl ${
+                className={`relative w-full md:h-full h-[350px] aspect-video rounded-2xl overflow-hidden shadow-2xl ${
                   mytheme === "light" ? "shadow-gray-200/80" : "shadow-black/50"
                 }`}
               >
@@ -307,7 +307,7 @@ const TestimonialsSection: React.FC = () => {
                 <div className="absolute top-1/2 left-4 right-4 flex justify-between items-center transform -translate-y-1/2 z-10">
                   <button
                     onClick={prevSlide}
-                    className={`p-2 md:p-3 rounded-full bg-black/30 backdrop-blur-md text-white hover:bg-black/50 transform transition-all ${
+                    className={`px-2.5 py-2 md:w-[55px] md:h-[55px] cursor-pointer rounded-full bg-black/30 backdrop-blur-md text-white hover:bg-black/50 transform transition-all ${
                       mytheme === "light" ? "hover:shadow-lg" : "hover:shadow-black/30"
                     }`}
                     aria-label="Previous testimonial"
@@ -316,7 +316,7 @@ const TestimonialsSection: React.FC = () => {
                   </button>
                   <button
                     onClick={nextSlide}
-                    className={`p-2 md:p-3 rounded-full bg-black/30 backdrop-blur-md text-white hover:bg-black/50 transform transition-all ${
+                    className={`px-2.5 py-2 md:w-[55px] md:h-[55px]  cursor-pointer rounded-full bg-black/30 backdrop-blur-md text-white hover:bg-black/50 transform transition-all ${
                       mytheme === "light" ? "hover:shadow-lg" : "hover:shadow-black/30"
                     }`}
                     aria-label="Next testimonial"
@@ -330,7 +330,7 @@ const TestimonialsSection: React.FC = () => {
                   <button
                     key={index}
                     onClick={() => goToSlide(index)}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                    className={`h-1.5 rounded-full cursor-pointer transition-all duration-300 ${
                       activeSlide === index
                         ? "w-12 bg-yellow-500"
                         : "w-8 bg-gray-300 dark:bg-gray-700"

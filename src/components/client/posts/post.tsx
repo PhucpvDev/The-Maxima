@@ -15,7 +15,6 @@ import {
   Skeleton,
   Pagination,
   Empty,
-  Tooltip,
 } from "antd"
 import {
   SearchOutlined,
@@ -23,8 +22,6 @@ import {
   FireOutlined,
   ClockCircleOutlined,
   UserOutlined,
-  HeartOutlined,
-  HeartFilled,
 } from "@ant-design/icons"
 import { useSelector } from "react-redux"
 import { useLocale } from "next-intl"
@@ -327,12 +324,6 @@ export default function Posts() {
     [filteredPosts, currentPage]
   );
 
-  const handleLike = useCallback((postId: string) => {
-    setPosts((prev) =>
-      prev.map((post) => (post.id === postId ? { ...post, liked: !post.liked } : post))
-    );
-  }, []);
-
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
     setCurrentPage(1);
@@ -418,7 +409,7 @@ export default function Posts() {
   return (
     <ConfigProvider theme={themeConfig}>
       <div
-        className={`min-h-screen pt-12 pb-24 px-6 ${mytheme === "light" ? "bg-gray-50" : "bg-gray-900"
+        className={`min-h-screen pt-12 pb-24 ${mytheme === "light" ? "bg-gray-50" : "bg-gray-900"
           }`}
       >
         <style jsx>{`
@@ -446,7 +437,7 @@ export default function Posts() {
             }
           }
         `}</style>
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl px-4 mx-auto">
           <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0, y: -30 }}
@@ -796,28 +787,8 @@ export default function Posts() {
                                   ) : null;
                                 })}
                               </div>
-                              <Tooltip
-                                title={
-                                  post.liked
-                                    ? getLocalizedText("Unlike", "Bỏ thích", "取消喜欢")
-                                    : getLocalizedText("Like", "Thích", "喜欢")
-                                }
-                              >
-                                <Button
-                                  shape="circle"
-                                  icon={post.liked ? <HeartFilled /> : <HeartOutlined />}
-                                  className={`absolute top-3 right-3 border-0 ${post.liked
-                                    ? "bg-red-500 text-white shadow-lg hover:bg-red-600"
-                                    : mytheme === "light"
-                                      ? "bg-white/90"
-                                      : "bg-black/30"
-                                    } backdrop-blur-sm hover:bg-white`}
-                                  onClick={() => handleLike(post.id)}
-                                />
-                              </Tooltip>
                             </div>
                           }
-                          bodyStyle={{ padding: "24px" }}
                         >
                           <Meta
                             title={<Title level={5} className="mb-3 line-clamp-2">{post.title}</Title>}

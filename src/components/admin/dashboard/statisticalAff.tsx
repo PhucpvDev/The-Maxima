@@ -8,7 +8,6 @@ import {
     Row,
     Col,
     Input,
-    Tabs,
     Badge,
 } from 'antd';
 import {
@@ -144,8 +143,6 @@ export default function StatisticalAff() {
         fetchTopAffiliates();
     }, []);
 
-    const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
-
     const filteredStaffData = useMemo(() => {
         if (!searchQuery) return staffData;
         const lowerQuery = searchQuery.toLowerCase();
@@ -222,38 +219,6 @@ export default function StatisticalAff() {
                 sorter: (a, b) => a.clicks - b.clicks,
             },
         ];
-
-    const tabItems = [
-        {
-            key: '1',
-            label: t('tabStaffRanking'),
-            children: (
-                <Card>
-                    <Input
-                        placeholder={t('searchPlaceholder')}
-                        prefix={<SearchOutlined />}
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{ marginBottom: 16, maxWidth: 300 }}
-                    />
-                    <Table
-                        columns={staffColumns}
-                        dataSource={filteredStaffData}
-                        rowKey="id"
-                        onRow={(record) => ({
-                            onClick: () => setSelectedStaff(record),
-                            style: { cursor: 'pointer' }
-                        })}
-                        pagination={{
-                            pageSize: 5,
-                            showSizeChanger: false,
-                        }}
-                        scroll={{ x: 800 }}
-                    />
-                </Card>
-            )
-        }
-    ];
 
     return (
         <div className="p-3 sm:p-4">
@@ -372,62 +337,26 @@ export default function StatisticalAff() {
                 </Col>
             </Row>
 
-            {selectedStaff ? (
-                <div>
-                    <div className="flex justify-between items-center mb-3 sm:mb-4">
-                        <h2 className="text-lg sm:text-xl font-semibold">{t('staffDetailTitle', { name: selectedStaff.name })}</h2>
-                        <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onClick={() => setSelectedStaff(null)}>{t('backButton')}</button>
-                    </div>
-
-                    <Row gutter={[12, 12]} className="mb-4 sm:mb-6">
-                        <Col xs={24} sm={12} md={6}>
-                            <Card>
-                                <Statistic
-                                    title={t('statCommission')}
-                                    value={selectedStaff.commission}
-                                    precision={2} 
-                                    valueStyle={{ color: '#52c41a' }}
-                                    suffix="%"
-                                />
-                            </Card>
-                        </Col>
-                        <Col xs={24} sm={12} md={6}>
-                            <Card>
-                                <Statistic
-                                    title={t('statConversions')}
-                                    value={selectedStaff.conversions}
-                                    precision={0}
-                                    valueStyle={{ color: '#722ed1' }}
-                                />
-                            </Card>
-                        </Col>
-                        <Col xs={24} sm={12} md={6}>
-                            <Card>
-                                <Statistic
-                                    title={t('statClicks')}
-                                    value={selectedStaff.clicks}
-                                    precision={0}
-                                    valueStyle={{ color: '#13c2c2' }}
-                                    prefix={<LinkOutlined />}
-                                />
-                            </Card>
-                        </Col>
-                        <Col xs={24} sm={12} md={6}>
-                            <Card>
-                                <Statistic
-                                    title={t('statConversionRate')}
-                                    value={selectedStaff.conversionRate}
-                                    precision={2}
-                                    valueStyle={{ color: '#fa8c16' }}
-                                    suffix="%"
-                                />
-                            </Card>
-                        </Col>
-                    </Row>
-                </div>
-            ) : (
-                <Tabs defaultActiveKey="1" tabBarGutter={12} items={tabItems} />
-            )}
+            <Card>
+                <h2 className="text-lg sm:text-xl font-semibold mb-4">{t('tabStaffRanking')}</h2>
+                <Input
+                    placeholder={t('searchPlaceholder')}
+                    prefix={<SearchOutlined />}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ marginBottom: 16, maxWidth: 300 }}
+                />
+                <Table
+                    columns={staffColumns}
+                    dataSource={filteredStaffData}
+                    rowKey="id"
+                    pagination={{
+                        pageSize: 5,
+                        showSizeChanger: false,
+                    }}
+                    scroll={{ x: 800 }}
+                />
+            </Card>
         </div>
     );
 }

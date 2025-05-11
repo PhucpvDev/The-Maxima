@@ -19,7 +19,7 @@ import LangAnh from "@/assets/images/icon/lang-anh.png"
 import LangViet from "@/assets/images/icon/lang-viet.png"
 import LangCn from "@/assets/images/icon/langcn.jpeg"
 import Banner1 from "@/assets/images/bg-section/banner1.jpg"
-import Banner1Mb from "@/assets/images/bg-section/banner1Mobile.png"
+import Banner1Mb from "@/assets/images/bg-section/banner1Mobile.jpg"
 import Banner2 from "@/assets/images/bg-section/banner2.jpg"
 import Banner3 from "@/assets/images/bg-section/banner3.png"
 import Banner4 from "@/assets/images/bg-section/banner4.avif"
@@ -29,6 +29,7 @@ import Banner7 from "@/assets/images/bg-section/banner6.png"
 import Banner8 from "@/assets/images/bg-section/banner7.png"
 import Banner9 from "@/assets/images/bg-section/banner8.jpg"
 import Banner9Mb from "@/assets/images/bg-section/banner8Mobile.png"
+import Banner10 from "@/assets/images/bg-section/banner9.jpg"
 import BgFooter1 from "@/assets/images/bg-section/bg-footer-1.png"
 import BgFooter2 from "@/assets/images/bg-section/bg-footer-2.png"
 import Whyjoin1 from "@/assets/images/whyjoin/img-46.png"
@@ -70,6 +71,7 @@ export const IMAGES = {
     Banner8: Banner8,
     Banner9: Banner9,
     Banner9Mb: Banner9Mb,
+    Banner10: Banner10,
     BgFooter1: BgFooter1,
     BgFooter2: BgFooter2,
     Whyjoin1: Whyjoin1,

@@ -30,7 +30,7 @@ export default function MainHeader({ collapsed, setCollapsed }: MainHeaderProps)
                     onClick={() => setCollapsed(!collapsed)}
                     className="text-sm p-2"
                 />
-                <Search placeholder="Tìm kiếm..." allowClear onSearch={onSearch} style={{ width: 200 }} />
+                <Search placeholder="Search.." allowClear onSearch={onSearch} style={{ width: 200 }} />
             </div>
 
             <div className="flex items-center gap-2 ml-auto">

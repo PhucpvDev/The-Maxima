@@ -389,9 +389,9 @@ export default function Posts() {
                     </motion.p>
                     <div className="p-1 rounded-lg text-white">
                       <motion.button
-                        className={`px-5 py-1.5 bg-gradient-to-r ${mytheme === "light"
+                        className={`px-5 py-1.5 cursor-pointer bg-yellow-600 ${mytheme === "light"
                           ? "from-blue-500 to-indigo-600"
-                          : "from-yellow-600 to-yellow-700"
+                          : "bg-yellow-600"
                           } text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg flex items-center justify-center`}
                         whileHover={{ scale: 1.05, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
                         whileTap={{ scale: 0.95 }}
@@ -455,9 +455,9 @@ export default function Posts() {
                     </motion.p>
                     <div className="p-1 rounded-lg text-white">
                       <motion.button
-                        className={`px-5 py-1.5 bg-gradient-to-r ${mytheme === "light"
+                        className={`px-5 py-1.5 cursor-pointer bg-yellow-600 ${mytheme === "light"
                           ? "from-blue-500 to-indigo-600"
-                          : "from-yellow-600 to-yellow-700"
+                          : "bg-yellow-600"
                           } text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg flex items-center justify-center`}
                         whileHover={{ scale: 1.05, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
                         whileTap={{ scale: 0.95 }}
@@ -523,9 +523,9 @@ export default function Posts() {
           {posts.length > 0 && (
             <div className="p-1 mt-10 flex justify-center text-center mx-auto rounded-lg text-white">
               <motion.button
-                className={`px-15 py-3 bg-gradient-to-r cursor-pointer ${mytheme === "light"
+                className={`px-15 py-3 cursor-pointer bg-yellow-600 ${mytheme === "light"
                   ? "from-blue-500 to-indigo-600"
-                  : "from-yellow-600 to-yellow-700"
+                  : "bg-yellow-600 "
                   } text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg flex items-center justify-center`}
                 whileHover={{ scale: 1.05, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
                 whileTap={{ scale: 0.95 }}

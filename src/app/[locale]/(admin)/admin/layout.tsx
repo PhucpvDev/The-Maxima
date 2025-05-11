@@ -9,7 +9,6 @@ import { motion } from 'framer-motion'
 import { usePathname, useSearchParams, useRouter } from 'next/navigation'
 import Sidebar from '@/components/admin/layout/sidebar'
 import MainHeader from '@/components/admin/layout/mainHeader'
-import MainBreadcrumb from '@/components/admin/layout/mainBreadcrumb'
 import Image from 'next/image'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
@@ -52,8 +51,7 @@ function DashboardContent({
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
       <Layout>
         <MainHeader collapsed={collapsed} setCollapsed={setCollapsed} />
-        <MainBreadcrumb />
-        <Content className={`${mytheme === 'light' ? 'bg-white' : 'bg-neutral-900'} mx-3 p-2 rounded-md`}>
+        <Content className={`${mytheme === 'light' ? 'bg-white' : 'bg-neutral-900'} mx-3 p-2 mt-2 rounded-md`}>
           {children}
         </Content>
       </Layout>
@@ -61,7 +59,6 @@ function DashboardContent({
   )
 }
 
-// Component chính không trực tiếp sử dụng useSearchParams
 export default function DashboardLayout({
   children,
 }: {

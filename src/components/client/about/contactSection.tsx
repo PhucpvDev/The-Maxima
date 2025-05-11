@@ -9,11 +9,11 @@ import { motion } from "framer-motion"
 import Cookies from "js-cookie"
 
 interface ContactProps {
-  id?: string; 
+  id?: string;
 }
 
 
-export default function ContactSection ({ id }: ContactProps){
+export default function ContactSection({ id }: ContactProps) {
   const locale = useLocale();
   const [contactData, setContactData] = useState<TransformedContactData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -185,7 +185,6 @@ export default function ContactSection ({ id }: ContactProps){
               <h3 className="text-2xl font-bold text-white mb-6">{contactData?.title}</h3>
 
               <div className="space-y-6">
-                {/* Office info */}
                 <div className="flex items-start">
                   <div className="bg-blue-500/20 backdrop-blur-sm p-2 rounded-lg mr-4">
                     <span className="material-symbols-outlined text-blue-400">location_on</span>
@@ -196,7 +195,6 @@ export default function ContactSection ({ id }: ContactProps){
                   </div>
                 </div>
 
-                {/* Phone info */}
                 <div className="flex items-start">
                   <div className="bg-yellow-500/20 backdrop-blur-sm p-2 rounded-lg mr-4">
                     <span className="material-symbols-outlined text-yellow-400">call</span>
@@ -207,7 +205,6 @@ export default function ContactSection ({ id }: ContactProps){
                   </div>
                 </div>
 
-                {/* Email info */}
                 <div className="flex items-start">
                   <div className="bg-green-500/20 backdrop-blur-sm p-2 rounded-lg mr-4">
                     <span className="material-symbols-outlined text-green-400">email</span>
@@ -280,7 +277,7 @@ export default function ContactSection ({ id }: ContactProps){
               <form onSubmit={handleSubmit} className="mb-6">
                 <div className="mb-6 mt-7">
                   <label htmlFor="email" className="sr-only">Email</label>
-                  <div className="relative">
+                  <div className="relative text-white">
                     <input
                       id="email"
                       type="email"
@@ -299,7 +296,7 @@ export default function ContactSection ({ id }: ContactProps){
 
                 <motion.button
                   type="submit"
-                  className="w-full py-3 px-6 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium shadow-lg shadow-blue-900/50 hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center justify-center"
+                  className="w-full py-3 cursor-pointer px-6 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium shadow-lg shadow-blue-900/50 hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center justify-center"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleEmailChange}
@@ -319,22 +316,22 @@ export default function ContactSection ({ id }: ContactProps){
               </form>
             </div>
             <motion.div variants={fadeInUp}>
-            <div className="bg-white/5 backdrop-blur-md mt-10 rounded-2xl p-5 shadow-xl">
-              <div className="border-gray-700">
-                <motion.a
-                  href={registrationUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center px-6 py-3 rounded-lg bg-gradient-to-r from-yellow-600 to-amber-600 text-white font-medium shadow-lg shadow-amber-900/50 hover:from-yellow-700 hover:to-amber-700 transition-all duration-300"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <span className="material-symbols-outlined mr-2">download</span>
-                  {contactData?.download_button_text}
-                </motion.a>
+              <div className="bg-white/5 backdrop-blur-md mt-10 rounded-2xl p-5 shadow-xl">
+                <div className="border-gray-700">
+                  <motion.a
+                    href={registrationUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center px-6 py-3 rounded-lg bg-gradient-to-r from-yellow-600 to-amber-600 text-white font-medium shadow-lg shadow-amber-900/50 hover:from-yellow-700 hover:to-amber-700 transition-all duration-300"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <span className="material-symbols-outlined mr-2">download</span>
+                    {contactData?.download_button_text}
+                  </motion.a>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
           </motion.div>
         </motion.div>
       </div>

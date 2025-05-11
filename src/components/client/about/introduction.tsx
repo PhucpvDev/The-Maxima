@@ -4,6 +4,7 @@ import React, { useState, useCallback, useRef } from "react"
 import { Modal } from "antd"
 import { useLocale } from "next-intl"
 import Image from "next/image"
+import { useSelector } from "react-redux"
 
 interface TeamMemberTranslation {
   id: number;
@@ -60,7 +61,7 @@ interface TeamSliderProps {
     title: string;
     subtitle: string;
   };
-  id?: string; 
+  id?: string;
 }
 
 const translationFallbacks: Record<string, { hero_section_title: string; title: string; subtitle: string }> = {
@@ -137,7 +138,7 @@ async function getTeamMembers(locale: string): Promise<{
       languages_code: lang
     } as TeamMemberTranslation;
 
-    const teamMembers: TeamMember[] = Array.from({ length: 4 }, (_, i) => {
+    const teamMembers: TeamMember[] = Array.from({ length: 5 }, (_, i) => {
       const index = i + 1;
       return {
         id: index,
@@ -266,6 +267,7 @@ async function getTeamMembers(locale: string): Promise<{
 
 export default function TeamSlider({ initialData }: TeamSliderProps) {
   const locale = useLocale();
+  const { mytheme } = useSelector((state: RootState) => state.theme);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(initialData?.teamMembers || []);
   const [heroSectionTitle, setHeroSectionTitle] = useState<string>(
     initialData?.hero_section_title || translationFallbacks["en-US"].hero_section_title
@@ -389,24 +391,26 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
         <div className="flex flex-col items-center mb-16 text-center">
           <div className="flex items-center justify-center mb-4">
             <div className="h-1 w-10 bg-yellow-600 rounded mr-2"></div>
-            <span className="text-yellow-600 font-bold uppercase tracking-wider text-sm">
+            <span className={`font-bold uppercase tracking-wider text-sm ${mytheme === "dark" ? "text-gray-400" : "text-gray-500"
+              }`}>
               {heroSectionTitle}
             </span>
             <div className="h-1 w-10 bg-yellow-600 rounded ml-2"></div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold pb-6 bg-gradient-to-r from-yellow-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className={`text-4xl md:text-5xl font-bold pb-6 ${mytheme === "dark" ? "text-white" : "text-gray-800"
+            }`}>
             {title}
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mb-8">{subtitle}</p>
+          <p className={`text-lg text-gray-600 dark:text-gray-300 max-w-3xl mb-8`}>{subtitle}</p>
         </div>
 
         <div className="relative px-4">
           <button
             onClick={goToPrev}
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 z-20 bg-white dark:bg-gray-800 rounded-full p-3 shadow-lg text-yellow-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors"
+            className="absolute left-0 cursor-pointer  top-1/2 transform -translate-y-1/2 z-20 bg-white dark:bg-gray-800 rounded-full p-2 md:p-3 shadow-lg text-yellow-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors"
             aria-label={locale === "vi" ? "Thành viên trước" : locale === "zh" ? "上一成员" : "Previous team member"}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={`w-6 h-6 ${mytheme === "dark" ? "text-white" : "text-gray-800"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
@@ -454,7 +458,7 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
                         <p className="text-gray-600 dark:text-gray-300 pb-4 line-clamp-3">{member.bio}</p>
                         <button
                           onClick={() => setActiveTeamMember(member)}
-                          className="w-full py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center"
+                          className="w-full cursor-pointer  py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center"
                         >
                           <span className="text-white cursor-pointer">
                             {locale === "vi" ? "Xem Hồ Sơ" : locale === "zh" ? "查看简介" : "View Profile"}
@@ -473,23 +477,23 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
 
           <button
             onClick={goToNext}
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 z-20 bg-white dark:bg-gray-800 rounded-full p-3 shadow-lg text-yellow-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors"
+            className="absolute right-0 cursor-pointer  top-1/2 transform -translate-y-1/2 z-20 bg-white dark:bg-gray-800 rounded-full p-2 md:p-3 shadow-lg text-yellow-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors"
             aria-label={locale === "vi" ? "Thành viên tiếp theo" : locale === "zh" ? "下一成员" : "Next team member"}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={`w-6 h-6 ${mytheme === "dark" ? "text-white" : "text-gray-800"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>
 
-        <div className="flex justify-center mt-6 space-x-2">
+        <div className="flex justify-center md:mt-6 space-x-2">
           {teamMembers.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentIndex
-                  ? "bg-yellow-600 w-8"
-                  : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
+              className={`w-3 h-3 rounded-full cursor-pointer transition-all duration-300 ${index === currentIndex
+                ? "bg-yellow-600 w-8"
+                : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
                 }`}
               aria-label={locale === "vi" ? `Đi đến slide ${index + 1}` : locale === "zh" ? `转到幻灯片 ${index + 1}` : `Go to slide ${index + 1}`}
             />
@@ -503,7 +507,7 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
           closable={false}
           centered
           width="90%"
-          style={{ maxWidth: "1240px"}}
+          style={{ maxWidth: "1240px" }}
           className="team-member-modal"
         >
           <div
@@ -515,22 +519,22 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
               className="absolute top-0 cursor-pointer hover:bg-gray-100 right-4 z-30 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full p-2 text-gray-700 hover:text-red-600 dark:text-gray-300 dark:hover:text-red-400 transition-colors"
               aria-label={locale === "vi" ? "Đóng hồ sơ" : locale === "zh" ? "关闭简介" : "Close profile"}
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-6 h-6 ${mytheme === "dark" ? "text-white" : "text-gray-800"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
 
             <div className="flex flex-col md:flex-row">
               <div className="md:w-2/5 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-yellow-600 to-purple-600 opacity-90"></div>
+                <div className="absolute inset-0 bg-gray-700"></div>
                 <div className="absolute inset-0 bg-pattern opacity-10"></div>
                 <div className="relative z-10 p-8 h-full flex flex-col items-center justify-center text-white">
                   <div className="p-2 rounded-full bg-white/20 p-1 backdrop-blur-sm mb-6 ring-4 ring-white/30">
-                    <div className="w-full h-full p-4 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center">
+                    <div className="w-full h-full p-1 rounded-full flex items-center justify-center">
                       <Image
                         src={`${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${activeTeamMember?.avatar}`}
                         alt={activeTeamMember?.name || "Team Member"}
-                        className="object-cover rounded-full"
+                        className="object-cover h-36 w-36 min-h-32 min-w-32 rounded-full"
                         width={130}
                         height={130}
                       />
@@ -548,7 +552,6 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
                 </div>
               </div>
 
-              {/* Right Column - Detailed Information */}
               <div className="md:w-3/5 p-8 max-h-[80vh] overflow-y-auto">
                 <div className="mb-8">
                   <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">

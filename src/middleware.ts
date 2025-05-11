@@ -6,6 +6,8 @@ const requestLimit = 60;
 const timeWindow = 60 * 1000;
 const requestCounts = new Map<string, { count: number; timestamp: number }>();
 
+const TOKEN_EXPIRY_TIME = 12 * 60 * 60; 
+
 interface JwtPayload {
   exp?: number;
   iat?: number;
@@ -69,7 +71,14 @@ export async function middleware(req: NextRequest) {
       const decoded = jwtDecode<JwtPayload>(token);
       const currentTimestamp = Math.floor(Date.now() / 1000);
 
-      if (decoded.exp && decoded.exp < currentTimestamp) {
+      if (decoded.iat && currentTimestamp - decoded.iat > TOKEN_EXPIRY_TIME) {
+        const response = NextResponse.redirect(new URL(`/${locale}/auth/login`, req.url));
+        response.cookies.set('token', '', { expires: new Date(0), path: '/' });
+        response.cookies.set('refresh_token', '', { expires: new Date(0), path: '/' });
+        return response;
+      }
+      
+      if (!decoded.iat && decoded.exp && decoded.exp < currentTimestamp) {
         const response = NextResponse.redirect(new URL(`/${locale}/auth/login`, req.url));
         response.cookies.set('token', '', { expires: new Date(0), path: '/' });
         response.cookies.set('refresh_token', '', { expires: new Date(0), path: '/' });

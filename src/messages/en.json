@@ -319,6 +319,23 @@
     "fetchError": "Failed to fetch affiliate forms",
     "noFormsFound": "No affiliate forms found",
     "searchPlaceholder": "Search by username, email, or code"
+  },
+  "adminMenu": {
+    "dashboard": "Dashboard",
+    "user": "Staff",
+    "contact": "Contacts", 
+    "affiliate": "Affiliate Orders"
+  },
+  "affiliatePage": {
+    "affiliateStatistics": "Affiliate Statistics",
+    "totalStaff": "Total Staff",
+    "totalClicks": "Total Clicks",
+    "totalAffiliates": "Total Affiliates",
+    "staffRanking": "Staff Ranking",
+    "affiliateCode": "Affiliate Code",
+    "clicks": "Clicks",
+    "staff": "Staff",
+    "searchPlaceholder": "Search by name or code"
   }
   
 }
