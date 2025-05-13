@@ -312,7 +312,7 @@ export default function MaximaVsTraditionalSection() {
           <div className="md:hidden mb-8 flex space-x-2 justify-center">
             <button
               onClick={() => setActiveTab('traditional')}
-              className={`px-4 py-2 rounded-lg cursor-pointer font-medium transition-all`}
+              className={`px-1 rounded-lg cursor-pointer font-medium transition-all`}
             >
               <span className={`px-4 py-2 cursor-pointer rounded-lg font-medium transition-all ${activeTab === 'traditional'
                   ? mytheme === "light"
@@ -325,7 +325,7 @@ export default function MaximaVsTraditionalSection() {
             </button>
             <button
               onClick={() => setActiveTab('maxima')}
-              className={`px-4 py-2 cursor-pointer rounded-lg font-medium transition-all`}
+              className={`px-1 cursor-pointer rounded-lg font-medium transition-all`}
             >
               <span className={`px-4 py-2 cursor-pointer rounded-lg font-medium transition-all ${activeTab === 'maxima'
                   ? mytheme === "light"

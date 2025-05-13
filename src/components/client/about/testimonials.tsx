@@ -445,7 +445,7 @@ const MaximaTestimonials: React.FC = () => {
 
         <div className="md:hidden">
           <div className="relative">
-            <div className="overflow-hidden rounded-xl">
+            <div className="overflow-hidden rounded-xl md:pb-0 pb-5">
               <div
                 className="flex transition-all duration-500 ease-in-out"
                 style={{ transform: `translateX(-${activeIndex * 100}%)` }}
@@ -529,7 +529,7 @@ const MaximaTestimonials: React.FC = () => {
                   } shadow-md transition-colors`}
                   aria-label="Previous testimonial"
                 >
-                  <span className="material-symbols-outlined">arrow_back</span>
+                  <span className={`material-symbols-outlined ${mytheme === "dark" ? "text-white" : "text-gray-800"}`}>arrow_back</span>
                 </button>
                 <button
                   onClick={nextSlide}
@@ -540,7 +540,7 @@ const MaximaTestimonials: React.FC = () => {
                   } shadow-md transition-colors`}
                   aria-label="Next testimonial"
                 >
-                  <span className="material-symbols-outlined">arrow_forward</span>
+                  <span className={`material-symbols-outlined ${mytheme === "dark" ? "text-white" : "text-gray-800"}`}>arrow_forward</span>
                 </button>
               </div>
 

@@ -526,6 +526,7 @@ export default function Posts() {
                         hoverable
                         className={`h-full border-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 ${mytheme === "light" ? "bg-white" : "bg-gray-800"
                           }`}
+                        onClick={() => handleReadMore(featuredPosts[0].id)}
                         cover={
                           <div className="relative overflow-hidden h-80">
                             <Image
@@ -599,6 +600,7 @@ export default function Posts() {
                               hoverable
                               className={`border-0 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 ${mytheme === "light" ? "bg-white" : "bg-gray-800"
                                 }`}
+                              onClick={() => handleReadMore(post.id)}
                             >
                               <Row gutter={16}>
                                 <Col xs={24} sm={8}>
@@ -765,6 +767,7 @@ export default function Posts() {
                           hoverable
                           className={`h-full border-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 ${mytheme === "light" ? "bg-white" : "bg-gray-800"
                             }`}
+                          onClick={() => handleReadMore(post.id)}
                           cover={
                             <div className="relative overflow-hidden h-48">
                               <Image

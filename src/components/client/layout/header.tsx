@@ -237,7 +237,7 @@ export default function Home() {
   const getBannerImage = () => {
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     if (isMobile) {
-      return mytheme === 'light' ? IMAGES.Banner10 : IMAGES.Banner1Mb;
+      return mytheme === 'light' ? IMAGES.Banner9Mb : IMAGES.Banner1Mb;
     }
     return mytheme === 'light' ? IMAGES.Banner9 : IMAGES.Banner1;
   };

@@ -82,7 +82,7 @@ interface Post {
   content: string;
   published: boolean;
   media: { url: string }[];
-  category: string;
+  category: string[]; // Đổi từ string thành string[]
   author: string;
   authorAvatar?: string;
   readTime: number;
@@ -212,6 +212,16 @@ async function getPostDetail(locale: string, postId: string): Promise<{ post: Po
       const categoryKey = `category_${postIndex}` as keyof Translation;
 
       if (translation[titleKey] && translation[descriptionKey]) {
+        let categoriesList: string[] = ["investment"];
+        try {
+          const parsedCategories: string[] = JSON.parse(translation[categoryKey] as string);
+          if (Array.isArray(parsedCategories) && parsedCategories.length > 0) {
+            categoriesList = parsedCategories;
+          }
+        } catch (error) {
+          console.warn(`Failed to parse category for post ${postIndex}:`, error);
+        }
+
         selectedPost = {
           id: postId,
           title: translation[titleKey] as string,
@@ -221,7 +231,7 @@ async function getPostDetail(locale: string, postId: string): Promise<{ post: Po
           media: translation[imageKey]
             ? [{ url: `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${translation[imageKey]}` }]
             : [{ url: "/placeholder.jpg" }],
-          category: (translation[categoryKey] as string) || "investment",
+          category: categoriesList, // Đổi thành mảng chuỗi
           author: (translation[authorKey] as string) || "The Maxima",
           authorAvatar: IMAGES.LogoMaxima.src,
           readTime: 8,
@@ -431,7 +441,7 @@ export default function BlogPostModal({ isOpen, postId, onClose }: BlogPostModal
         ) : post ? (
           <div>
             <div
-              className="w-full h-64 sm:h-80 bg-center bg-cover relative"
+              className="w-full md:h-72 h-[430px] sm:h-80 bg-center bg-cover relative"
               style={{
                 backgroundImage: `url(${post.media[0].url})`,
                 backgroundPosition: 'center 30%'
@@ -442,13 +452,21 @@ export default function BlogPostModal({ isOpen, postId, onClose }: BlogPostModal
                 <motion.div
                   variants={itemVariants}
                 >
-                  <Tag
-                    color={mytheme === "light" ? "#F0B200" : "#FFC800"}
-                    className="px-3 py-1 rounded-full text-sm font-medium uppercase tracking-wide mb-3"
-                  >
-                    {categories.find(c => c.key === post.category)?.name || post.category}
-                  </Tag>
-                  <h1 className="text-2xl sm:text-3x pt-5 md:text-4xl font-bold text-white mb-3 leading-tight">
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {post.category.map((catKey) => {
+                      const category = categories.find((c) => c.key === catKey);
+                      return category ? (
+                        <Tag
+                          key={catKey}
+                          color={mytheme === "light" ? "#F0B200" : "#FFC800"}
+                          className="px-3 py-1 rounded-full text-sm font-medium uppercase tracking-wide"
+                        >
+                          {category.name}
+                        </Tag>
+                      ) : null;
+                    })}
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl pt-5 md:text-4xl font-bold text-white mb-3 leading-tight">
                     {post.title}
                   </h1>
                   <p className="text-base sm:text-lg font-bold text-gray-200 mb-4 max-w-3xl">

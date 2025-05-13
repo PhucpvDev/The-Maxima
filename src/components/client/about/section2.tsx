@@ -412,7 +412,7 @@ export default function AboutSection({ data: initialData }: AboutSectionProps) {
                 <div className={`flex border-b ${mytheme === "dark" ? "border-gray-700" : "border-gray-200"}`}>
                   <button
                     onClick={() => setActiveTab("benefits")}
-                    className={`px-4 py-2 font-medium text-base transition-all relative ${
+                    className={`px-4 py-2 cursor-pointer font-medium text-base transition-all relative ${
                       activeTab === "benefits"
                         ? mytheme === "dark"
                           ? "text-white font-semibold"
@@ -436,7 +436,7 @@ export default function AboutSection({ data: initialData }: AboutSectionProps) {
                   {additionalContentLines.length > 0 && (
                     <button
                       onClick={() => setActiveTab("mission")}
-                      className={`px-4 py-2 font-medium text-base transition-all relative ${
+                      className={`px-4 py-2 cursor-pointer  font-medium text-base transition-all relative ${
                         activeTab === "mission"
                           ? mytheme === "dark"
                             ? "text-white font-semibold"

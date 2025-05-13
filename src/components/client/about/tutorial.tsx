@@ -65,7 +65,7 @@ interface RawTutorialData {
 }
 
 interface TutorialProps {
-  id?: string; 
+  id?: string;
 }
 
 async function getTutorial(locale: string): Promise<TutorialData> {
@@ -246,7 +246,7 @@ const staggerContainer = {
   },
 };
 
-export default function Tutorial ({ id }: TutorialProps){
+export default function Tutorial({ id }: TutorialProps) {
   const locale = useLocale();
   const { mytheme } = useSelector((state: RootState) => state.theme);
   const [tutorialData, setTutorialData] = useState<TutorialData | undefined>(undefined);
@@ -311,25 +311,25 @@ export default function Tutorial ({ id }: TutorialProps){
 
   const steps = tutorialData
     ? [
-        {
-          step: tutorialData.step_1,
-          description: tutorialData.description_1,
-          video_url: tutorialData.video_url_1,
-          icon: "app_registration",
-        },
-        {
-          step: tutorialData.step_2,
-          description: tutorialData.description_2,
-          video_url: tutorialData.video_url_2,
-          icon: "account_balance_wallet",
-        },
-        {
-          step: tutorialData.step_3,
-          description: tutorialData.description_3,
-          video_url: tutorialData.video_url_3,
-          icon: "trending_up",
-        },
-      ]
+      {
+        step: tutorialData.step_1,
+        description: tutorialData.description_1,
+        video_url: tutorialData.video_url_1,
+        icon: "app_registration",
+      },
+      {
+        step: tutorialData.step_2,
+        description: tutorialData.description_2,
+        video_url: tutorialData.video_url_2,
+        icon: "account_balance_wallet",
+      },
+      {
+        step: tutorialData.step_3,
+        description: tutorialData.description_3,
+        video_url: tutorialData.video_url_3,
+        icon: "trending_up",
+      },
+    ]
     : [];
 
   if (!tutorialData) {
@@ -343,17 +343,15 @@ export default function Tutorial ({ id }: TutorialProps){
   return (
     <ConfigProvider theme={themeConfig}>
       <section id={id}
-        className={`py-24 relative overflow-hidden font-inter ${
-          mytheme === "light" ? "bg-gradient-to-b from-gray-50 to-white" : "bg-gradient-to-b from-gray-900 to-gray-950"
-        }`}
+        className={`py-24 relative overflow-hidden font-inter ${mytheme === "light" ? "bg-gradient-to-b from-gray-50 to-white" : "bg-gradient-to-b from-gray-900 to-gray-950"
+          }`}
       >
         <div className="absolute inset-0 overflow-hidden">
           <div
             className={`absolute inset-0 opacity-5 ${mytheme === "light" ? "bg-gray-900" : "bg-white"}`}
             style={{
-              backgroundImage: `radial-gradient(circle, ${
-                mytheme === "light" ? "#1a202c" : "#ffffff"
-              } 1px, transparent 1px)`,
+              backgroundImage: `radial-gradient(circle, ${mytheme === "light" ? "#1a202c" : "#ffffff"
+                } 1px, transparent 1px)`,
               backgroundSize: "30px 30px",
             }}
           ></div>
@@ -371,24 +369,21 @@ export default function Tutorial ({ id }: TutorialProps){
           >
             <div className="flex flex-col items-center">
               <div
-                className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 ${
-                  mytheme === "light" ? "bg-blue-100" : "bg-blue-900/30"
-                }`}
+                className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 ${mytheme === "light" ? "bg-blue-100" : "bg-blue-900/30"
+                  }`}
               >
                 <span className="material-symbols-outlined text-3xl text-blue-600">school</span>
               </div>
               <h2
-                className={`text-3xl md:text-4xl font-bold mb-4 ${
-                  mytheme === "light" ? "text-gray-900" : "text-white"
-                }`}
+                className={`text-3xl md:text-4xl font-bold mb-4 ${mytheme === "light" ? "text-gray-900" : "text-white"
+                  }`}
               >
                 {tutorialData.title}
               </h2>
               <div className="w-24 h-1 bg-blue-500 mx-auto mb-6"></div>
               <p
-                className={`text-lg max-w-3xl mx-auto ${
-                  mytheme === "light" ? "text-gray-600" : "text-gray-300"
-                }`}
+                className={`text-lg max-w-3xl mx-auto ${mytheme === "light" ? "text-gray-600" : "text-gray-300"
+                  }`}
               >
                 {tutorialData.subtitle}
               </p>
@@ -408,36 +403,33 @@ export default function Tutorial ({ id }: TutorialProps){
                   <motion.div
                     key={index}
                     variants={fadeInUp}
-                    className={`p-6 rounded-xl cursor-pointer transition-all duration-300 ${
-                      activeVideo === index
+                    className={`p-6 rounded-xl cursor-pointer transition-all duration-300 ${activeVideo === index
                         ? mytheme === "light"
                           ? "bg-blue-50 border-l-4 border-blue-500 shadow-md"
                           : "bg-blue-900/20 border-l-4 border-blue-500 shadow-md shadow-black/10"
                         : mytheme === "light"
                           ? "bg-white border-l-4 border-transparent shadow-sm hover:shadow-md hover:bg-gray-50"
                           : "bg-gray-800 border-l-4 border-transparent shadow-sm shadow-black/5 hover:shadow-md hover:bg-gray-800/80"
-                    }`}
+                      }`}
                     onClick={() => setActiveVideo(index)}
                   >
                     <div className="flex items-start gap-4">
                       <div
-                        className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl ${
-                          activeVideo === index
+                        className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl ${activeVideo === index
                             ? mytheme === "light"
                               ? "bg-blue-500 text-white"
                               : "bg-blue-600 text-white"
                             : mytheme === "light"
                               ? "bg-gray-100 text-gray-500"
                               : "bg-gray-700 text-gray-300"
-                        }`}
+                          }`}
                       >
                         {index + 1}
                       </div>
                       <div>
                         <h3
-                          className={`text-xl font-semibold mb-1 ${
-                            mytheme === "light" ? "text-gray-900" : "text-white"
-                          }`}
+                          className={`text-xl font-semibold mb-1 ${mytheme === "light" ? "text-gray-900" : "text-white"
+                            }`}
                         >
                           {step.step}
                         </h3>
@@ -447,15 +439,14 @@ export default function Tutorial ({ id }: TutorialProps){
                           {step.description}
                         </p>
                         <div
-                          className={`flex items-center gap-2 mt-3 ${
-                            activeVideo === index
+                          className={`flex items-center gap-2 mt-3 ${activeVideo === index
                               ? mytheme === "light"
                                 ? "text-blue-600"
                                 : "text-blue-400"
                               : mytheme === "light"
                                 ? "text-gray-400"
                                 : "text-gray-500"
-                          }`}
+                            }`}
                         >
                           <span className="material-symbols-outlined">{step.icon}</span>
                           <span className="text-sm font-medium">
@@ -468,25 +459,22 @@ export default function Tutorial ({ id }: TutorialProps){
                 ))}
                 <motion.div
                   variants={fadeInUp}
-                  className={`p-6 rounded-xl ${
-                    mytheme === "light"
+                  className={`p-6 rounded-xl ${mytheme === "light"
                       ? "bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-100"
                       : "bg-gradient-to-br from-blue-900/10 to-blue-800/5 border border-blue-900/30"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-start gap-4">
                     <div
-                      className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                        mytheme === "light" ? "bg-green-100" : "bg-green-900/30"
-                      }`}
+                      className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${mytheme === "light" ? "bg-green-100" : "bg-green-900/30"
+                        }`}
                     >
                       <span className="material-symbols-outlined text-green-600">support_agent</span>
                     </div>
                     <div>
                       <h3
-                        className={`text-lg font-semibold mb-1 ${
-                          mytheme === "light" ? "text-gray-900" : "text-white"
-                        }`}
+                        className={`text-lg font-semibold mb-1 ${mytheme === "light" ? "text-gray-900" : "text-white"
+                          }`}
                       >
                         {tutorialData.help_title}
                       </h3>
@@ -513,9 +501,8 @@ export default function Tutorial ({ id }: TutorialProps){
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.5 }}
-                  className={`overflow-hidden rounded-2xl shadow-xl ${
-                    mytheme === "light" ? "shadow-blue-200/60" : "shadow-black/50"
-                  }`}
+                  className={`overflow-hidden rounded-2xl shadow-xl ${mytheme === "light" ? "shadow-blue-200/60" : "shadow-black/50"
+                    }`}
                 >
                   <div className="relative pb-[56.25%] h-0 overflow-hidden">
                     <iframe
@@ -527,68 +514,64 @@ export default function Tutorial ({ id }: TutorialProps){
                   </div>
                 </motion.div>
                 <div
-                  className={`mt-6 p-6 rounded-xl ${
-                    mytheme === "light" ? "bg-white shadow-md" : "bg-gray-800 shadow-lg shadow-black/10"
-                  }`}
+                  className={`mt-6 p-4 sm:p-6 rounded-xl ${mytheme === "light" ? "bg-white shadow-md" : "bg-gray-800 shadow-lg shadow-black/10"
+                    }`}
                 >
-                  <div className="flex items-center gap-3 mb-4">
+                  <div className="flex flex-col sm:flex-row items-center gap-3 mb-4">
                     <div
-                      className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                        mytheme === "light" ? "bg-blue-100" : "bg-blue-900/30"
-                      }`}
+                      className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ${mytheme === "light" ? "bg-blue-100" : "bg-blue-900/30"
+                        }`}
                     >
                       <span className="material-symbols-outlined text-blue-600">videocam</span>
                     </div>
                     <div>
                       <h3
-                        className={`text-xl font-semibold ${
-                          mytheme === "light" ? "text-gray-900" : "text-white"
-                        }`}
+                        className={`text-lg sm:text-xl font-semibold ${mytheme === "light" ? "text-gray-900" : "text-white"
+                          }`}
                       >
                         {steps[activeVideo].step}: {steps[activeVideo].description}
                       </h3>
                       <p
-                        className={`text-sm ${mytheme === "light" ? "text-gray-500" : "text-gray-400"}`}
+                        className={`text-xs sm:text-sm ${mytheme === "light" ? "text-gray-500" : "text-gray-400"
+                          }`}
                       >
                         {activeVideo + 1} {t.of} {steps.length} - {t.video_tutorial}
                       </p>
                     </div>
                   </div>
                   <div
-                    className={`flex justify-between items-center mt-4 pt-4 border-t ${
-                      mytheme === "light" ? "border-gray-100" : "border-gray-700 text-white"
-                    }`}
+                    className={`flex flex-col sm:flex-row justify-between items-center mt-4 pt-4 border-t ${mytheme === "light" ? "border-gray-100" : "border-gray-700 text-white"
+                      }`}
                   >
                     <button
                       onClick={() => setActiveVideo((prev) => Math.max(0, prev - 1))}
                       disabled={activeVideo === 0}
-                      className={`flex items-center cursor-pointer  gap-2 px-4 py-2 rounded-lg font-medium ${
-                        activeVideo === 0
+                      aria-disabled={activeVideo === 0}
+                      className={`min-w-[100px] sm:min-w-[120px] flex items-center cursor-pointer gap-2 px-4 py-2 rounded-lg font-medium text-sm sm:text-base ${activeVideo === 0
                           ? mytheme === "light"
                             ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                             : "bg-gray-800 text-gray-600 cursor-not-allowed"
                           : mytheme === "light"
                             ? "bg-white border border-gray-200 text-gray-800 hover:bg-gray-50"
                             : "bg-gray-800 border border-gray-700 text-white hover:bg-gray-700"
-                      } transition-colors`}
+                        } transition-colors`}
                     >
                       <span className="material-symbols-outlined">arrow_back</span>
                       {t.previous}
                     </button>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 my-2 sm:my-0">
                       {steps.map((_, index) => (
                         <button
                           key={index}
                           onClick={() => setActiveVideo(index)}
-                          className={`w-8 h-2 rounded-full cursor-pointer transition-all ${
-                            activeVideo === index
+                          className={`w-6 h-1 sm:w-8 sm:h-2 rounded-full cursor-pointer transition-all ${activeVideo === index
                               ? mytheme === "light"
                                 ? "bg-blue-500"
                                 : "bg-blue-600"
                               : mytheme === "light"
                                 ? "bg-gray-200 hover:bg-gray-300"
                                 : "bg-gray-700 hover:bg-gray-600"
-                          }`}
+                            }`}
                           aria-label={`${t.go_to_step} ${index + 1}`}
                         />
                       ))}
@@ -596,18 +579,18 @@ export default function Tutorial ({ id }: TutorialProps){
                     <button
                       onClick={() => setActiveVideo((prev) => Math.min(steps.length - 1, prev + 1))}
                       disabled={activeVideo === steps.length - 1}
-                      className={`flex items-center cursor-pointer  gap-2 px-4 py-2 rounded-lg font-medium ${
-                        activeVideo === steps.length - 1
+                      aria-disabled={activeVideo === steps.length - 1}
+                      className={`min-w-[100px] sm:min-w-[120px] flex items-center cursor-pointer gap-2 px-4 py-2 rounded-lg font-medium text-sm sm:text-base ${activeVideo === steps.length - 1
                           ? mytheme === "light"
                             ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                             : "bg-gray-800 text-gray-600 cursor-not-allowed"
                           : mytheme === "light"
                             ? "bg-blue-600 text-white hover:bg-blue-700"
                             : "bg-blue-600 text-white hover:bg-blue-700"
-                      } transition-colors`}
+                        } transition-colors`}
                     >
-                      <span className={`${mytheme === "dark" ? "text-white" : "text-white"}`}>{t.next}</span>
-                      <span className={`material-symbols-outlined ${mytheme === "dark" ? "text-white" : "text-white"}`}>arrow_forward</span>
+                      <span className="text-white">{t.next}</span>
+                      <span className="material-symbols-outlined text-white">arrow_forward</span>
                     </button>
                   </div>
                 </div>
