@@ -60,7 +60,8 @@ interface ClientSayData {
 
 async function getClientSay(locale: string): Promise<ClientSayData> {
   try {
-    const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
+    const lang =
+      locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/client_say?lang=${lang}&fields=*,translations.*`,
       {
@@ -75,7 +76,9 @@ async function getClientSay(locale: string): Promise<ClientSayData> {
     }
 
     const result = await response.json();
-    const data: RawClientSayData = Array.isArray(result.data) ? result.data[0] : result.data;
+    const data: RawClientSayData = Array.isArray(result.data)
+      ? result.data[0]
+      : result.data;
 
     const translation = data.translations.find(
       (t: Translation) => t.languages_code === lang
@@ -86,14 +89,28 @@ async function getClientSay(locale: string): Promise<ClientSayData> {
     const indices = lang === "vi-VN" ? [4, 1, 2, 3] : [1, 2, 3, 4];
 
     const testimonials: Testimonial[] = indices.map((index, i) => {
-      const videoKey = `video_url_${i + 1}` as keyof (Translation | RawClientSayData);
-      const descriptionKey = `description_${index}` as keyof (Translation | RawClientSayData);
-      const locationKey = `location_name_${index}` as keyof (Translation | RawClientSayData);
-      const fallbackDescriptionKey = `description_${i + 1}` as keyof RawClientSayData;
-      const fallbackLocationKey = `location_name_${i + 1}` as keyof RawClientSayData;
+      const videoKey = `video_url_${i + 1}` as keyof (
+        | Translation
+        | RawClientSayData
+      );
+      const descriptionKey = `description_${index}` as keyof (
+        | Translation
+        | RawClientSayData
+      );
+      const locationKey = `location_name_${index}` as keyof (
+        | Translation
+        | RawClientSayData
+      );
+      const fallbackDescriptionKey = `description_${
+        i + 1
+      }` as keyof RawClientSayData;
+      const fallbackLocationKey = `location_name_${
+        i + 1
+      }` as keyof RawClientSayData;
 
       return {
-        video_url: (source[videoKey] as string) || (data[videoKey] as string) || "",
+        video_url:
+          (source[videoKey] as string) || (data[videoKey] as string) || "",
         description:
           (source[descriptionKey] as string) ||
           (data[fallbackDescriptionKey] as string) ||
@@ -117,27 +134,34 @@ async function getClientSay(locale: string): Promise<ClientSayData> {
     console.error("Error fetching Client Say data:", error);
     return {
       title: "OUR CLIENTS SAY",
-      featuredVideo: "https://www.youtube.com/embed/p23vKxuslNA?si=8jkY3iPILbTu0VBM",
+      featuredVideo:
+        "https://www.youtube.com/embed/p23vKxuslNA?si=8jkY3iPILbTu0VBM",
       testimonials: [
         {
-          video_url: "https://www.youtube.com/embed/NVzcKBNjn38?si=ZCQt1mzFff1z0VBL",
+          video_url:
+            "https://www.youtube.com/embed/NVzcKBNjn38?si=ZCQt1mzFff1z0VBL",
           description: "Invested 50,000 USDT, Profits reached more than 200%",
           location_name: "Tung Hua, Malaysia",
         },
         {
-          video_url: "https://www.youtube.com/embed/p23vKxuslNA?si=8jkY3iPILbTu0VBM",
+          video_url:
+            "https://www.youtube.com/embed/p23vKxuslNA?si=8jkY3iPILbTu0VBM",
           description:
             "I invested 10,000 USDT, 4 months I earn about 12,000 USDT, started in...",
           location_name: "Iskandar, Singapore",
         },
         {
-          video_url: "https://www.youtube.com/embed/mwmUk9Fxmuc?si=XP4d0A24slYoOcuZ",
-          description: "Join on 8th May 2024. Now monthly earning around 6 figures",
+          video_url:
+            "https://www.youtube.com/embed/mwmUk9Fxmuc?si=XP4d0A24slYoOcuZ",
+          description:
+            "Join on 8th May 2024. Now monthly earning around 6 figures",
           location_name: "Jimmy, Malaysia",
         },
         {
-          video_url: "https://www.youtube.com/embed/49Vwgi4KQ9M?si=Y8dc6EApPlgjfsgH",
-          description: "I'll introduce to my friends, because the ROI is awesome",
+          video_url:
+            "https://www.youtube.com/embed/49Vwgi4KQ9M?si=Y8dc6EApPlgjfsgH",
+          description:
+            "I'll introduce to my friends, because the ROI is awesome",
           location_name: "Erica, Malaysia",
         },
       ],
@@ -212,7 +236,7 @@ const TestimonialsSection: React.FC = () => {
 
       if (mainVideoRef.current) {
         const currentSrc = mainVideoRef.current.src;
-        mainVideoRef.current.src = '';
+        mainVideoRef.current.src = "";
         setTimeout(() => {
           if (mainVideoRef.current) {
             mainVideoRef.current.src = currentSrc;
@@ -227,15 +251,16 @@ const TestimonialsSection: React.FC = () => {
       colorPrimary: "#FFC800",
       borderRadius: 8,
     },
-    algorithm: mytheme === "dark" ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+    algorithm:
+      mytheme === "dark" ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
   };
 
   if (!data) {
     return (
       <div
-        className={`flex items-center justify-center py-20 ${mytheme === "light" ? "text-gray-800" : "text-gray-200"
-          }`}
-      >
+        className={`flex items-center justify-center py-20 ${
+          mytheme === "light" ? "text-gray-800" : "text-gray-200"
+        }`}>
         <div className="loader w-12 h-12 border-4 border-t-yellow-500 rounded-full animate-spin"></div>
       </div>
     );
@@ -245,12 +270,14 @@ const TestimonialsSection: React.FC = () => {
 
   const extractVideoId = (url: string): string => {
     const match = url.match(/(?:youtube\.com\/embed\/|youtu\.be\/)([^?&]+)/);
-    return match ? match[1] : '';
+    return match ? match[1] : "";
   };
 
   const getVideoThumbnail = (url: string): string => {
     const videoId = extractVideoId(url);
-    return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '';
+    return videoId
+      ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+      : "";
   };
 
   const handleVideoLoad = () => {
@@ -270,32 +297,35 @@ const TestimonialsSection: React.FC = () => {
   };
 
   const prevSlide = () => {
-    setActiveSlide((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    setActiveSlide(
+      (prev) => (prev - 1 + testimonials.length) % testimonials.length
+    );
   };
 
   const formatVideoUrl = (url: string): string => {
-    const separator = url.includes('?') ? '&' : '?';
+    const separator = url.includes("?") ? "&" : "?";
     return `${url}${separator}autoplay=0&controls=1&rel=0&showinfo=0&modestbranding=1&playsinline=1`;
   };
 
   return (
     <ConfigProvider theme={themeConfig}>
       <section
-        className={`py-24 relative overflow-hidden font-inter ${mytheme === "light"
+        className={`py-24 relative overflow-hidden font-inter ${
+          mytheme === "light"
             ? "bg-gradient-to-b from-gray-50 to-white"
             : "bg-gradient-to-b from-gray-900 to-gray-950"
-          }`}
-      >
+        }`}>
         <div className="absolute inset-0 overflow-hidden">
           <div
-            className={`absolute inset-0 opacity-5 ${mytheme === "light" ? "bg-gray-900" : "bg-white"
-              }`}
+            className={`absolute inset-0 opacity-5 ${
+              mytheme === "light" ? "bg-gray-900" : "bg-white"
+            }`}
             style={{
-              backgroundImage: `radial-gradient(circle, ${mytheme === "light" ? "#1a202c" : "#ffffff"
-                } 1px, transparent 1px)`,
+              backgroundImage: `radial-gradient(circle, ${
+                mytheme === "light" ? "#1a202c" : "#ffffff"
+              } 1px, transparent 1px)`,
               backgroundSize: "30px 30px",
-            }}
-          ></div>
+            }}></div>
           <div className="absolute -top-32 -left-32 w-96 h-96 bg-yellow-500 rounded-full opacity-10 blur-3xl"></div>
           <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-blue-600 rounded-full opacity-10 blur-3xl"></div>
         </div>
@@ -306,12 +336,11 @@ const TestimonialsSection: React.FC = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            variants={fadeInUp}
-          >
+            variants={fadeInUp}>
             <h2
-              className={`text-3xl md:text-4xl font-bold mb-4 ${mytheme === "light" ? "text-gray-900" : "text-white"
-                }`}
-            >
+              className={`text-3xl md:text-4xl font-bold mb-4 ${
+                mytheme === "light" ? "text-gray-900" : "text-white"
+              }`}>
               {title}
             </h2>
             <div className="flex items-center justify-center gap-3 mb-6">
@@ -322,17 +351,16 @@ const TestimonialsSection: React.FC = () => {
           </motion.div>
 
           <motion.div
-            className="mb-20"
+            className="md:mb-20"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            variants={fadeIn}
-          >
+            variants={fadeIn}>
             <div className="relative">
               <div
-                className={`relative w-full md:h-full h-[350px] aspect-video rounded-2xl overflow-hidden shadow-2xl ${mytheme === "light" ? "shadow-gray-200/80" : "shadow-black/50"
-                  }`}
-              >
+                className={`relative w-full md:h-full h-[350px] aspect-video rounded-2xl overflow-hidden shadow-2xl ${
+                  mytheme === "light" ? "shadow-gray-200/80" : "shadow-black/50"
+                }`}>
                 {!isVideoLoaded && (
                   <div className="absolute inset-0 flex items-center justify-center bg-gray-900 z-10">
                     <div className="loader w-12 h-12 border-4 border-t-yellow-500 rounded-full animate-spin"></div>
@@ -342,14 +370,16 @@ const TestimonialsSection: React.FC = () => {
                 {videoError === activeSlide ? (
                   <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
                     <Image
-                      src={getVideoThumbnail(testimonials[activeSlide].video_url)}
+                      src={getVideoThumbnail(
+                        testimonials[activeSlide].video_url
+                      )}
                       alt="Video thumbnail"
                       fill
                       className="w-full h-full object-cover"
                       onError={() => {
                         const target = event?.target as HTMLImageElement;
                         if (target) {
-                          target.style.display = 'none';
+                          target.style.display = "none";
                         }
                       }}
                     />
@@ -358,10 +388,11 @@ const TestimonialsSection: React.FC = () => {
                         setVideoError(null);
                         setIsVideoLoaded(false);
                       }}
-                      className="absolute inset-0 flex items-center justify-center"
-                    >
+                      className="absolute inset-0 flex items-center justify-center">
                       <div className="w-20 h-20 bg-black/50 rounded-full flex items-center justify-center">
-                        <span className="material-symbols-outlined text-white text-4xl">play_arrow</span>
+                        <span className="material-symbols-outlined text-white text-4xl">
+                          play_arrow
+                        </span>
                       </div>
                     </button>
                   </div>
@@ -374,26 +405,33 @@ const TestimonialsSection: React.FC = () => {
                     allowFullScreen
                     className="absolute top-0 left-0 w-full h-full"
                     onLoad={handleVideoLoad}
-                    onError={() => handleVideoError(activeSlide)}
-                  ></iframe>
+                    onError={() => handleVideoError(activeSlide)}></iframe>
                 )}
 
                 <div className="absolute top-1/2 left-4 right-4 flex justify-between items-center transform -translate-y-1/2 z-20">
                   <button
                     onClick={prevSlide}
-                    className={`px-2.5 py-2 md:w-[55px] md:h-[55px] cursor-pointer rounded-full bg-black/30 backdrop-blur-md text-white hover:bg-black/50 transform transition-all ${mytheme === "light" ? "hover:shadow-lg" : "hover:shadow-black/30"
-                      }`}
-                    aria-label="Previous testimonial"
-                  >
-                    <span className="material-symbols-outlined text-white">arrow_back</span>
+                    className={`px-2.5 py-2 md:w-[55px] md:h-[55px] cursor-pointer rounded-full bg-black/30 backdrop-blur-md text-white hover:bg-black/50 transform transition-all ${
+                      mytheme === "light"
+                        ? "hover:shadow-lg"
+                        : "hover:shadow-black/30"
+                    }`}
+                    aria-label="Previous testimonial">
+                    <span className="material-symbols-outlined text-white">
+                      arrow_back
+                    </span>
                   </button>
                   <button
                     onClick={nextSlide}
-                    className={`px-2.5 py-2 md:w-[55px] md:h-[55px] cursor-pointer rounded-full bg-black/30 backdrop-blur-md text-white hover:bg-black/50 transform transition-all ${mytheme === "light" ? "hover:shadow-lg" : "hover:shadow-black/30"
-                      }`}
-                    aria-label="Next testimonial"
-                  >
-                    <span className="material-symbols-outlined text-white">arrow_forward</span>
+                    className={`px-2.5 py-2 md:w-[55px] md:h-[55px] cursor-pointer rounded-full bg-black/30 backdrop-blur-md text-white hover:bg-black/50 transform transition-all ${
+                      mytheme === "light"
+                        ? "hover:shadow-lg"
+                        : "hover:shadow-black/30"
+                    }`}
+                    aria-label="Next testimonial">
+                    <span className="material-symbols-outlined text-white">
+                      arrow_forward
+                    </span>
                   </button>
                 </div>
               </div>
@@ -402,43 +440,44 @@ const TestimonialsSection: React.FC = () => {
                   <button
                     key={index}
                     onClick={() => goToSlide(index)}
-                    className={`h-1.5 rounded-full cursor-pointer transition-all duration-300 ${activeSlide === index
+                    className={`h-1.5 rounded-full cursor-pointer transition-all duration-300 ${
+                      activeSlide === index
                         ? "w-12 bg-yellow-500"
                         : "w-8 bg-gray-300 dark:bg-gray-700"
-                      }`}
-                    aria-label={`Go to testimonial ${index + 1}`}
-                  ></button>
+                    }`}
+                    aria-label={`Go to testimonial ${index + 1}`}></button>
                 ))}
               </div>
             </div>
           </motion.div>
 
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-4 gap-6"
+            className="grid hidden md:block grid-cols-1 md:grid-cols-4 gap-6"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            variants={staggerContainer}
-          >
+            variants={staggerContainer}>
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={index}
                 variants={fadeInUp}
-                className={`rounded-xl overflow-hidden cursor-pointer transform transition-all duration-300 ${activeSlide === index
+                className={`rounded-xl overflow-hidden cursor-pointer transform transition-all duration-300 ${
+                  activeSlide === index
                     ? mytheme === "light"
                       ? "ring-2 ring-yellow-500 scale-105 shadow-xl"
                       : "ring-2 ring-yellow-500 scale-105 shadow-xl shadow-black/30"
                     : mytheme === "light"
-                      ? "hover:shadow-lg"
-                      : "hover:shadow-lg hover:shadow-black/20"
-                  }`}
-                onClick={() => goToSlide(index)}
-              >
+                    ? "hover:shadow-lg"
+                    : "hover:shadow-lg hover:shadow-black/20"
+                }`}
+                onClick={() => goToSlide(index)}>
                 <div className="relative aspect-video">
                   <div
-                    className={`absolute inset-0 ${activeSlide === index ? "bg-black/0" : "bg-black/40 pointer-events-none"
-                      } transition-colors duration-300`}
-                  ></div>
+                    className={`absolute inset-0 ${
+                      activeSlide === index
+                        ? "bg-black/0"
+                        : "bg-black/40 pointer-events-none"
+                    } transition-colors duration-300`}></div>
 
                   {activeSlide !== index ? (
                     <div className="relative w-full h-full">
@@ -449,24 +488,26 @@ const TestimonialsSection: React.FC = () => {
                         fill
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                          const iframe = target.nextSibling as HTMLIFrameElement;
+                          target.style.display = "none";
+                          const iframe =
+                            target.nextSibling as HTMLIFrameElement;
                           if (iframe) {
-                            iframe.style.display = 'block';
+                            iframe.style.display = "block";
                           }
                         }}
                       />
                       <iframe
-                        style={{ display: 'none' }}
+                        style={{ display: "none" }}
                         src={formatVideoUrl(testimonial.video_url)}
                         title={`Testimonial video ${index + 1}`}
                         className="w-full h-full"
                         allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                      ></iframe>
+                        allowFullScreen></iframe>
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="w-12 h-12 bg-black/50 rounded-full flex items-center justify-center">
-                          <span className="material-symbols-outlined text-white text-2xl">play_arrow</span>
+                          <span className="material-symbols-outlined text-white text-2xl">
+                            play_arrow
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -479,30 +520,29 @@ const TestimonialsSection: React.FC = () => {
                       title={`Testimonial video ${index + 1}`}
                       className="w-full h-full"
                       allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                    ></iframe>
+                      allowFullScreen></iframe>
                   )}
                 </div>
                 <div
-                  className={`p-4 ${activeSlide === index
+                  className={`p-4 ${
+                    activeSlide === index
                       ? mytheme === "light"
                         ? "bg-yellow-50"
                         : "bg-yellow-900/20"
                       : mytheme === "light"
-                        ? "bg-white"
-                        : "bg-gray-900"
-                    }`}
-                >
+                      ? "bg-white"
+                      : "bg-gray-900"
+                  }`}>
                   <p
-                    className={`text-sm line-clamp-2 ${mytheme === "light" ? "text-gray-700" : "text-gray-300"
-                      }`}
-                  >
+                    className={`text-sm line-clamp-2 ${
+                      mytheme === "light" ? "text-gray-700" : "text-gray-300"
+                    }`}>
                     {testimonial.description}
                   </p>
                   <p
-                    className={`text-xs font-medium mt-2 ${mytheme === "light" ? "text-gray-900" : "text-white"
-                      }`}
-                  >
+                    className={`text-xs font-medium mt-2 ${
+                      mytheme === "light" ? "text-gray-900" : "text-white"
+                    }`}>
                     {testimonial.location_name}
                   </p>
                 </div>

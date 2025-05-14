@@ -1,14 +1,13 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { ConfigProvider, theme as antdTheme } from "antd"
-import { useSelector } from "react-redux"
-import { useLocale } from "next-intl"
-import { useRouter } from "next/navigation"
-import { RootState } from "@/redux/store"
-import BlogPostModal from "@/components/client/posts/blogPostModal"
-import Image from "next/image"
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { ConfigProvider, theme as antdTheme } from "antd";
+import { useSelector } from "react-redux";
+import { useLocale } from "next-intl";
+import { useRouter } from "next/navigation";
+import { RootState } from "@/redux/store";
+import Image from "next/image";
 
 interface Translation {
   id: number;
@@ -80,7 +79,10 @@ interface FallbackPost {
   author: string;
 }
 
-const buttonTranslations: Record<string, { viewDetails: string; viewMore: string }> = {
+const buttonTranslations: Record<
+  string,
+  { viewDetails: string; viewMore: string }
+> = {
   "en-US": {
     viewDetails: "View Details",
     viewMore: "View More",
@@ -95,13 +97,19 @@ const buttonTranslations: Record<string, { viewDetails: string; viewMore: string
   },
 };
 
-const translationFallbacks: Record<string, FallbackPost[]> = {
-};
+const translationFallbacks: Record<string, FallbackPost[]> = {};
 
-async function getPosts(locale: string): Promise<{ posts: Post[]; title: string }> {
+async function getPosts(
+  locale: string
+): Promise<{ posts: Post[]; title: string }> {
   const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
   const fallback = translationFallbacks[lang] || translationFallbacks["en-US"];
-  let title = lang === "vi-VN" ? "Tin tức & Blog" : lang === "zh-CN" ? "新闻与博客" : "Blog & News";
+  let title =
+    lang === "vi-VN"
+      ? "Tin tức & Blog"
+      : lang === "zh-CN"
+      ? "新闻与博客"
+      : "Blog & News";
 
   try {
     const response = await fetch(
@@ -119,10 +127,14 @@ async function getPosts(locale: string): Promise<{ posts: Post[]; title: string 
 
     const result = await response.json();
 
-    const data: ApiResponse[] = Array.isArray(result.data) ? result.data : [result.data];
+    const data: ApiResponse[] = Array.isArray(result.data)
+      ? result.data
+      : [result.data];
 
     const posts: Post[] = data.flatMap((item) => {
-      const translation = item.translations.find((t) => t.languages_code === lang);
+      const translation = item.translations.find(
+        (t) => t.languages_code === lang
+      );
       if (!translation) {
         return [];
       }
@@ -143,16 +155,22 @@ async function getPosts(locale: string): Promise<{ posts: Post[]; title: string 
           description: translation[descriptionKey] as string,
           published: item.status === "published",
           media: translation[imageKey]
-            ? [{ url: `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${translation[imageKey]}` }]
+            ? [
+                {
+                  url: `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${translation[imageKey]}`,
+                },
+              ]
             : [{ url: "/placeholder.jpg" }],
-          author: translation[authorKey] as string || "Unknown Author",
+          author: (translation[authorKey] as string) || "Unknown Author",
         };
 
         return post;
       });
     });
 
-    const filteredPosts = posts.filter((post) => post.title && post.description);
+    const filteredPosts = posts.filter(
+      (post) => post.title && post.description
+    );
 
     return {
       posts: filteredPosts.slice(0, 6),
@@ -176,16 +194,16 @@ export default function Posts() {
   const locale = useLocale();
   const router = useRouter();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPostId, setSelectedPostId] = useState<string>("");
-
   const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
-  const { viewDetails, viewMore } = buttonTranslations[lang] || buttonTranslations["en-US"];
+  const { viewDetails, viewMore } =
+    buttonTranslations[lang] || buttonTranslations["en-US"];
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const { posts: fetchedPosts, title: fetchedTitle } = await getPosts(locale);
+        const { posts: fetchedPosts, title: fetchedTitle } = await getPosts(
+          locale
+        );
         setPosts(fetchedPosts);
         setTitle(fetchedTitle);
         setLoading(false);
@@ -206,28 +224,20 @@ export default function Posts() {
     token: {
       colorPrimary: "#FFC800",
     },
-    algorithm: mytheme === "dark" ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+    algorithm:
+      mytheme === "dark" ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
   };
 
   const handleViewDetails = (postId: string) => {
-    setSelectedPostId(postId);
-    setIsModalOpen(true);
-  };
-
-  const handleViewRelatedPost = (postId: string) => {
-    setSelectedPostId(postId);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+    router.push(`/posts/${postId}`);
   };
 
   if (loading) {
     return (
       <div
-        className={`flex justify-center items-center h-screen ${mytheme === "light" ? "text-gray-800" : "text-gray-200"
-          }`}
-      >
+        className={`flex justify-center items-center h-screen ${
+          mytheme === "light" ? "text-gray-800" : "text-gray-200"
+        }`}>
         Loading...
       </div>
     );
@@ -236,9 +246,9 @@ export default function Posts() {
   if (error) {
     return (
       <div
-        className={`flex justify-center items-center h-screen ${mytheme === "light" ? "text-red-500" : "text-red-400"
-          }`}
-      >
+        className={`flex justify-center items-center h-screen ${
+          mytheme === "light" ? "text-red-500" : "text-red-400"
+        }`}>
         Error: {error}
       </div>
     );
@@ -295,15 +305,15 @@ export default function Posts() {
   return (
     <ConfigProvider theme={themeConfig}>
       <motion.div
-        className={`relative overflow-hidden py-16 md:py-20 ${mytheme === "light"
-          ? "bg-gradient-to-b from-slate-50 to-gray-100"
-          : "bg-gradient-to-b from-gray-900 to-gray-950"
-          }`}
+        className={`relative overflow-hidden py-16 md:py-20 ${
+          mytheme === "light"
+            ? "bg-gradient-to-b from-slate-50 to-gray-100"
+            : "bg-gradient-to-b from-gray-900 to-gray-950"
+        }`}
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
-      >
+        viewport={{ once: true, amount: 0.2 }}>
         <div className="max-w-7xl mx-auto z-10 relative px-4">
           <motion.div className="mb-8 relative overflow-hidden">
             <motion.div
@@ -313,13 +323,13 @@ export default function Posts() {
               transition={{ duration: 1 }}
             />
             <motion.p
-              className={`relative text-4xl pb-10 font-bold text-center py-3 mx-auto bg-clip-text text-transparent ${mytheme === "light"
-                ? "bg-gradient-to-r from-[#1a1a1a] to-[#555555]"
-                : "bg-gradient-to-r from-white to-[#FFC800]"
-                }`}
+              className={`relative text-4xl pb-10 font-bold text-center py-3 mx-auto bg-clip-text text-transparent ${
+                mytheme === "light"
+                  ? "bg-gradient-to-r from-[#1a1a1a] to-[#555555]"
+                  : "bg-gradient-to-r from-white to-[#FFC800]"
+              }`}
               variants={textVariants}
-              custom={0}
-            >
+              custom={0}>
               {title}
             </motion.p>
             <div className="flex justify-center items-center gap-3 -mt-6 mb-3">
@@ -346,57 +356,62 @@ export default function Posts() {
 
           {posts.length === 0 ? (
             <div
-              className={`flex justify-center items-center h-64 ${mytheme === "light" ? "text-gray-800" : "text-gray-200"
-                }`}
-            >
+              className={`flex justify-center items-center h-64 ${
+                mytheme === "light" ? "text-gray-800" : "text-gray-200"
+              }`}>
               No posts available.
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {posts[0] && (
-                <motion.div className="md:col-span-1 overflow-hidden" variants={childVariants}>
+                <motion.div
+                  className="md:col-span-1 overflow-hidden"
+                  variants={childVariants}>
                   <Image
                     src={getImageUrl(posts[0])}
-                    alt={posts[0]?.title || ''}
+                    alt={posts[0]?.title || ""}
                     width={400}
                     height={192}
                     className="w-full object-cover h-48 rounded-xl shadow-md"
                   />
                   <div className="pt-4">
                     <motion.h2
-                      className={`text-lg font-bold ${mytheme === "light" ? "text-gray-900" : "text-gray-100"
-                        } mb-2`}
+                      className={`text-lg font-bold ${
+                        mytheme === "light" ? "text-gray-900" : "text-gray-100"
+                      } mb-2`}
                       variants={textVariants}
-                      custom={1}
-                    >
+                      custom={1}>
                       {posts[0]?.title}
                     </motion.h2>
                     <motion.p
-                      className={`text-[15px] ${mytheme === "light" ? "text-gray-700" : "text-gray-300"
-                        } mb-2`}
+                      className={`text-[15px] ${
+                        mytheme === "light" ? "text-gray-700" : "text-gray-300"
+                      } mb-2`}
                       variants={textVariants}
-                      custom={2}
-                    >
+                      custom={2}>
                       {posts[0]?.description?.substring(0, 100)}...
                     </motion.p>
                     <motion.p
-                      className={`text-[14px] ${mytheme === "light" ? "text-gray-500" : "text-gray-400"
-                        }`}
+                      className={`text-[14px] ${
+                        mytheme === "light" ? "text-gray-500" : "text-gray-400"
+                      }`}
                       variants={textVariants}
-                      custom={3}
-                    >
+                      custom={3}>
                       {posts[0]?.author}
                     </motion.p>
                     <div className="p-1 rounded-lg text-white">
                       <motion.button
-                        className={`px-5 py-1.5 cursor-pointer bg-yellow-600 ${mytheme === "light"
-                          ? "from-blue-500 to-indigo-600"
-                          : "bg-yellow-600"
-                          } text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg flex items-center justify-center`}
-                        whileHover={{ scale: 1.05, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
+                        className={`px-5 py-1.5 cursor-pointer bg-yellow-600 ${
+                          mytheme === "light"
+                            ? "from-blue-500 to-indigo-600"
+                            : "bg-yellow-600"
+                        } text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg flex items-center justify-center`}
+                        whileHover={{
+                          scale: 1.05,
+                          boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                        }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => handleViewDetails(posts[0].id)}
-                      >
+                        onClick={() => handleViewDetails(posts[0].id)}>
                         <span className="text-white">{viewDetails}</span>
                         <motion.svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -404,8 +419,11 @@ export default function Posts() {
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
-                          transition={{ type: "spring", stiffness: 300, damping: 10 }}
-                        >
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 10,
+                          }}>
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -420,49 +438,54 @@ export default function Posts() {
               )}
 
               {posts[1] && (
-                <motion.div className="md:col-span-1 overflow-hidden" variants={childVariants}>
+                <motion.div
+                  className="md:col-span-1 overflow-hidden"
+                  variants={childVariants}>
                   <Image
                     src={getImageUrl(posts[1])}
-                    alt={posts[0]?.title || ''}
+                    alt={posts[1]?.title || ""}
                     width={400}
                     height={192}
                     className="w-full object-cover h-48 rounded-xl shadow-md"
                   />
                   <div className="pt-4">
                     <motion.p
-                      className={`text-lg font-medium ${mytheme === "light" ? "text-gray-900" : "text-gray-100"
-                        } mb-2`}
+                      className={`text-lg font-medium ${
+                        mytheme === "light" ? "text-gray-900" : "text-gray-100"
+                      } mb-2`}
                       variants={textVariants}
-                      custom={1}
-                    >
+                      custom={1}>
                       {posts[1]?.title}
                     </motion.p>
                     <motion.p
-                      className={`text-[15px] ${mytheme === "light" ? "text-gray-700" : "text-gray-300"
-                        } mb-2`}
+                      className={`text-[15px] ${
+                        mytheme === "light" ? "text-gray-700" : "text-gray-300"
+                      } mb-2`}
                       variants={textVariants}
-                      custom={2}
-                    >
+                      custom={2}>
                       {posts[1]?.description?.substring(0, 100)}...
                     </motion.p>
                     <motion.p
-                      className={`text-[14px] ${mytheme === "light" ? "text-gray-500" : "text-gray-400"
-                        }`}
+                      className={`text-[14px] ${
+                        mytheme === "light" ? "text-gray-500" : "text-gray-400"
+                      }`}
                       variants={textVariants}
-                      custom={3}
-                    >
+                      custom={3}>
                       {posts[1]?.author}
                     </motion.p>
                     <div className="p-1 rounded-lg text-white">
                       <motion.button
-                        className={`px-5 py-1.5 cursor-pointer bg-yellow-600 ${mytheme === "light"
-                          ? "from-blue-500 to-indigo-600"
-                          : "bg-yellow-600"
-                          } text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg flex items-center justify-center`}
-                        whileHover={{ scale: 1.05, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
+                        className={`px-5 py-1.5 cursor-pointer bg-yellow-600 ${
+                          mytheme === "light"
+                            ? "from-blue-500 to-indigo-600"
+                            : "bg-yellow-600"
+                        } text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg flex items-center justify-center`}
+                        whileHover={{
+                          scale: 1.05,
+                          boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                        }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => handleViewDetails(posts[1].id)}
-                      >
+                        onClick={() => handleViewDetails(posts[1].id)}>
                         <span>{viewDetails}</span>
                         <motion.svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -470,8 +493,11 @@ export default function Posts() {
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
-                          transition={{ type: "spring", stiffness: 300, damping: 10 }}
-                        >
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 10,
+                          }}>
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -492,8 +518,7 @@ export default function Posts() {
                       key={post.id || index}
                       className="rounded overflow-hidden mb-4 flex gap-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 p-2 transition-colors rounded-lg"
                       variants={childVariants}
-                      onClick={() => handleViewDetails(post.id)}
-                    >
+                      onClick={() => handleViewDetails(post.id)}>
                       <div className="w-4/6">
                         <Image
                           src={getImageUrl(post)}
@@ -505,11 +530,13 @@ export default function Posts() {
                       </div>
                       <div className="w-3/5">
                         <motion.p
-                          className={`text-[15px] font-bold line-clamp-3 ${mytheme === "light" ? "text-gray-800" : "text-gray-200"
-                            }`}
+                          className={`text-[15px] font-bold line-clamp-3 ${
+                            mytheme === "light"
+                              ? "text-gray-800"
+                              : "text-gray-200"
+                          }`}
                           variants={textVariants}
-                          custom={1}
-                        >
+                          custom={1}>
                           {post.title}
                         </motion.p>
                       </div>
@@ -523,27 +550,23 @@ export default function Posts() {
           {posts.length > 0 && (
             <div className="p-1 mt-10 flex justify-center text-center mx-auto rounded-lg text-white">
               <motion.button
-                className={`px-15 py-3 cursor-pointer bg-yellow-600 ${mytheme === "light"
-                  ? "from-blue-500 to-indigo-600"
-                  : "bg-yellow-600 "
-                  } text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg flex items-center justify-center`}
-                whileHover={{ scale: 1.05, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
+                className={`px-15 py-3 cursor-pointer bg-yellow-600 ${
+                  mytheme === "light"
+                    ? "from-blue-500 to-indigo-600"
+                    : "bg-yellow-600 "
+                } text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg flex items-center justify-center`}
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => router.push(`/${locale}/posts`)}
-              >
+                onClick={() => router.push(`/${locale}/posts`)}>
                 <span>{viewMore}</span>
               </motion.button>
             </div>
           )}
         </div>
       </motion.div>
-
-      <BlogPostModal
-        isOpen={isModalOpen}
-        postId={selectedPostId}
-        onClose={handleCloseModal}
-        onViewRelatedPost={handleViewRelatedPost}
-      />
     </ConfigProvider>
   );
 }

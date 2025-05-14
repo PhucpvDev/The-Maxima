@@ -1,7 +1,8 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react"
-import { motion } from "framer-motion"
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import {
   Row,
   Col,
@@ -15,19 +16,17 @@ import {
   Skeleton,
   Pagination,
   Empty,
-} from "antd"
+} from "antd";
 import {
   SearchOutlined,
   ArrowRightOutlined,
   FireOutlined,
   ClockCircleOutlined,
   UserOutlined,
-} from "@ant-design/icons"
-import { useSelector } from "react-redux"
-import { useLocale } from "next-intl"
-import BlogPostModal from "@/components/client/posts/blogPostModal"
-import Image from "next/image"
-
+} from "@ant-design/icons";
+import { useSelector } from "react-redux";
+import { useLocale } from "next-intl";
+import Image from "next/image";
 
 const { Title, Paragraph } = Typography;
 const { Meta } = Card;
@@ -143,28 +142,97 @@ async function getPosts(locale: string): Promise<{
   subtitle: string;
   categories: Category[];
 }> {
-  const lang = locale === "vi" || locale === "vi-VN" ? "vi-VN" : locale === "zh" || locale === "zh-CN" ? "zh-CN" : "en-US";
+  const lang =
+    locale === "vi" || locale === "vi-VN"
+      ? "vi-VN"
+      : locale === "zh" || locale === "zh-CN"
+      ? "zh-CN"
+      : "en-US";
   const fallback = translationFallbacks[lang] || translationFallbacks["en-US"];
 
   const defaultCategories: Category[] = [
-    { key: "all", name: lang === "vi-VN" ? "Tất cả" : lang === "zh-CN" ? "全部" : "All" },
-    { key: "investment", name: lang === "vi-VN" ? "Đầu tư" : lang === "zh-CN" ? "投资" : "Investment" },
-    { key: "finance", name: lang === "vi-VN" ? "Tài chính" : lang === "zh-CN" ? "金融" : "Finance" },
-    { key: "crypto", name: lang === "vi-VN" ? "Tiền ảo" : lang === "zh-CN" ? "加密货币" : "Cryptocurrency" },
-    { key: "blockchain", name: lang === "vi-VN" ? "Blockchain" : lang === "zh-CN" ? "区块链" : "Blockchain" },
-    { key: "technology", name: lang === "vi-VN" ? "Công nghệ" : lang === "zh-CN" ? "技术" : "Technology" },
-    { key: "affiliate", name: lang === "vi-VN" ? "Affiliate" : lang === "zh-CN" ? "联盟营销" : "Affiliate" },
-    { key: "startup", name: lang === "vi-VN" ? "Khởi nghiệp" : lang === "zh-CN" ? "创业" : "Startup" },
-    { key: "digitalmarketing", name: lang === "vi-VN" ? "Marketing số" : lang === "zh-CN" ? "数字营销" : "Digital Marketing" },
+    {
+      key: "all",
+      name: lang === "vi-VN" ? "Tất cả" : lang === "zh-CN" ? "全部" : "All",
+    },
+    {
+      key: "investment",
+      name:
+        lang === "vi-VN" ? "Đầu tư" : lang === "zh-CN" ? "投资" : "Investment",
+    },
+    {
+      key: "finance",
+      name:
+        lang === "vi-VN" ? "Tài chính" : lang === "zh-CN" ? "金融" : "Finance",
+    },
+    {
+      key: "crypto",
+      name:
+        lang === "vi-VN"
+          ? "Tiền ảo"
+          : lang === "zh-CN"
+          ? "加密货币"
+          : "Cryptocurrency",
+    },
+    {
+      key: "blockchain",
+      name:
+        lang === "vi-VN"
+          ? "Blockchain"
+          : lang === "zh-CN"
+          ? "区块链"
+          : "Blockchain",
+    },
+    {
+      key: "technology",
+      name:
+        lang === "vi-VN"
+          ? "Công nghệ"
+          : lang === "zh-CN"
+          ? "技术"
+          : "Technology",
+    },
+    {
+      key: "affiliate",
+      name:
+        lang === "vi-VN"
+          ? "Affiliate"
+          : lang === "zh-CN"
+          ? "联盟营销"
+          : "Affiliate",
+    },
+    {
+      key: "startup",
+      name:
+        lang === "vi-VN"
+          ? "Khởi nghiệp"
+          : lang === "zh-CN"
+          ? "创业"
+          : "Startup",
+    },
+    {
+      key: "digitalmarketing",
+      name:
+        lang === "vi-VN"
+          ? "Marketing số"
+          : lang === "zh-CN"
+          ? "数字营销"
+          : "Digital Marketing",
+    },
   ];
 
-  let title = lang === "vi-VN" ? "Tin tức & Blog" : lang === "zh-CN" ? "新闻与博客" : "Blog & News";
+  let title =
+    lang === "vi-VN"
+      ? "Tin tức & Blog"
+      : lang === "zh-CN"
+      ? "新闻与博客"
+      : "Blog & News";
   let subtitle =
     lang === "vi-VN"
       ? "Khám phá các bài viết mới nhất và thông tin hữu ích từ đội ngũ chuyên gia của chúng tôi"
       : lang === "zh-CN"
-        ? "探索我们专家团队的最新文章和有用信息"
-        : "Explore the latest articles and helpful information from our team of experts";
+      ? "探索我们专家团队的最新文章和有用信息"
+      : "Explore the latest articles and helpful information from our team of experts";
 
   try {
     const response = await fetch(
@@ -180,10 +248,14 @@ async function getPosts(locale: string): Promise<{
     }
 
     const result = await response.json();
-    const data: ApiResponse[] = Array.isArray(result.data) ? result.data : [result.data];
+    const data: ApiResponse[] = Array.isArray(result.data)
+      ? result.data
+      : [result.data];
 
     const posts: Post[] = data.flatMap((item) => {
-      const translation = item.translations.find((t) => t.languages_code === lang);
+      const translation = item.translations.find(
+        (t) => t.languages_code === lang
+      );
       if (!translation) return [];
 
       title = translation.title || title;
@@ -192,64 +264,92 @@ async function getPosts(locale: string): Promise<{
       if (translation.category) {
         try {
           const apiCategories: Category[] = JSON.parse(translation.category);
-          if (Array.isArray(apiCategories) && apiCategories.every(cat => cat.key && cat.name)) {
+          if (
+            Array.isArray(apiCategories) &&
+            apiCategories.every((cat) => cat.key && cat.name)
+          ) {
             categories = apiCategories;
           } else {
-            console.warn("Translation categories are invalid, using default categories");
+            console.warn(
+              "Translation categories are invalid, using default categories"
+            );
           }
         } catch (error) {
           console.warn("Failed to parse translation categories:", error);
         }
       } else {
-        console.warn("No category field in translation, using default categories");
+        console.warn(
+          "No category field in translation, using default categories"
+        );
       }
-      return [1, 2, 3, 4, 5, 6].map((index) => {
-        const titleKey = `post_title_${index}` as keyof Translation;
-        const descriptionKey = `post_description_${index}` as keyof Translation;
-        const contentKey = `post_content_${index}` as keyof Translation;
-        const imageKey = `post_image_${index}` as keyof Translation;
-        const authorKey = `author_${index}` as keyof Translation;
-        const categoryKey = `category_${index}` as keyof Translation;
+      return [1, 2, 3, 4, 5, 6]
+        .map((index) => {
+          const titleKey = `post_title_${index}` as keyof Translation;
+          const descriptionKey =
+            `post_description_${index}` as keyof Translation;
+          const contentKey = `post_content_${index}` as keyof Translation;
+          const imageKey = `post_image_${index}` as keyof Translation;
+          const authorKey = `author_${index}` as keyof Translation;
+          const categoryKey = `category_${index}` as keyof Translation;
 
-        let categoriesList: string[] = ["investment"];
-        try {
-          const parsedCategories: string[] = JSON.parse(translation[categoryKey] as string);
-          if (Array.isArray(parsedCategories) && parsedCategories.length > 0) {
-            categoriesList = parsedCategories;
+          let categoriesList: string[] = ["investment"];
+          try {
+            const parsedCategories: string[] = JSON.parse(
+              translation[categoryKey] as string
+            );
+            if (
+              Array.isArray(parsedCategories) &&
+              parsedCategories.length > 0
+            ) {
+              categoriesList = parsedCategories;
+            }
+          } catch (error) {
+            console.warn(`Failed to parse category for post ${index}:`, error);
           }
-        } catch (error) {
-          console.warn(`Failed to parse category for post ${index}:`, error);
-        }
 
-        const post: Post = {
-          id: `${item.id}-${index}`,
-          title: translation[titleKey] as string,
-          description: translation[descriptionKey] as string,
-          content: translation[contentKey] as string || "<p>Content not available.</p>",
-          published: item.status === "published",
-          media: translation[imageKey]
-            ? [{ url: `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${translation[imageKey]}` }]
-            : [{ url: "https://via.placeholder.com/300" }],
-          category: categoriesList, // Store array of category keys
-          author: translation[authorKey] as string || "The Maxima",
-          readTime: Math.floor(Math.random() * 10) + 3,
-          featured: index <= 3,
-          liked: false,
-        };
+          const post: Post = {
+            id: `${item.id}-${index}`,
+            title: translation[titleKey] as string,
+            description: translation[descriptionKey] as string,
+            content:
+              (translation[contentKey] as string) ||
+              "<p>Content not available.</p>",
+            published: item.status === "published",
+            media: translation[imageKey]
+              ? [
+                  {
+                    url: `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${translation[imageKey]}`,
+                  },
+                ]
+              : [{ url: "https://via.placeholder.com/300" }],
+            category: categoriesList, // Store array of category keys
+            author: (translation[authorKey] as string) || "The Maxima",
+            readTime: Math.floor(Math.random() * 10) + 3,
+            featured: index <= 3,
+            liked: false,
+          };
 
-        return post.title && post.description && post.content ? post : null;
-      }).filter((post): post is Post => post !== null);
+          return post.title && post.description && post.content ? post : null;
+        })
+        .filter((post): post is Post => post !== null);
     });
 
-    const firstTranslation = data[0]?.translations.find((t) => t.languages_code === lang);
+    const firstTranslation = data[0]?.translations.find(
+      (t) => t.languages_code === lang
+    );
     let categories: Category[] = defaultCategories;
     if (firstTranslation?.category) {
       try {
         const apiCategories: Category[] = JSON.parse(firstTranslation.category);
-        if (Array.isArray(apiCategories) && apiCategories.every(cat => cat.key && cat.name)) {
+        if (
+          Array.isArray(apiCategories) &&
+          apiCategories.every((cat) => cat.key && cat.name)
+        ) {
           categories = apiCategories;
         } else {
-          console.warn("Translation categories are invalid, using default categories");
+          console.warn(
+            "Translation categories are invalid, using default categories"
+          );
         }
       } catch (error) {
         console.warn("Failed to parse translation categories:", error);
@@ -265,6 +365,7 @@ async function getPosts(locale: string): Promise<{
 export default function Posts() {
   const locale = useLocale();
   const { mytheme } = useSelector((state: RootState) => state.theme);
+  const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -276,8 +377,6 @@ export default function Posts() {
   const [subtitle, setSubtitle] = useState(
     "Explore the latest articles and helpful information from our team of experts"
   );
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const pageSize = 6;
 
   useEffect(() => {
@@ -318,9 +417,13 @@ export default function Posts() {
     return result;
   }, [activeCategory, searchQuery, posts]);
 
-  const featuredPosts = useMemo(() => filteredPosts.filter((post) => post.featured).slice(0, 3), [filteredPosts]);
+  const featuredPosts = useMemo(
+    () => filteredPosts.filter((post) => post.featured).slice(0, 3),
+    [filteredPosts]
+  );
   const paginatedPosts = useMemo(
-    () => filteredPosts.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    () =>
+      filteredPosts.slice((currentPage - 1) * pageSize, currentPage * pageSize),
     [filteredPosts, currentPage]
   );
 
@@ -338,19 +441,12 @@ export default function Posts() {
     setCurrentPage(page);
   }, []);
 
-  const handleReadMore = useCallback((postId: string) => {
-    setSelectedPostId(postId);
-    setIsModalOpen(true);
-  }, []);
-
-  const handleCloseModal = useCallback(() => {
-    setIsModalOpen(false);
-    setSelectedPostId(null);
-  }, []);
-
-  const handleViewRelatedPost = useCallback((postId: string) => {
-    setSelectedPostId(postId);
-  }, []);
+  const handleReadMore = useCallback(
+    (postId: string) => {
+      router.push(`/posts/${postId}`);
+    },
+    [router]
+  );
 
   const themeConfig = {
     token: {
@@ -361,14 +457,19 @@ export default function Posts() {
       colorBgBase: mytheme === "dark" ? "#1A1A1A" : "#F9FAFB",
       colorIcon: mytheme === "dark" ? "#E0E0E0" : "#1F2A44",
     },
-    algorithm: mytheme === "dark" ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+    algorithm:
+      mytheme === "dark" ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
   };
 
   const getImageUrl = (post: Post): string =>
     post.media?.[0]?.url || "https://via.placeholder.com/300";
 
   const getLocalizedText = (en: string, vi: string, zh: string) =>
-    locale === "vi" || locale === "vi-VN" ? vi : locale === "zh" || locale === "zh-CN" ? zh : en;
+    locale === "vi" || locale === "vi-VN"
+      ? vi
+      : locale === "zh" || locale === "zh-CN"
+      ? zh
+      : en;
 
   const renderFeaturedSkeleton = () => (
     <Row gutter={[24, 24]}>
@@ -409,9 +510,9 @@ export default function Posts() {
   return (
     <ConfigProvider theme={themeConfig}>
       <div
-        className={`min-h-screen pt-12 pb-24 ${mytheme === "light" ? "bg-gray-50" : "bg-gray-900"
-          }`}
-      >
+        className={`min-h-screen pt-12 pb-24 ${
+          mytheme === "light" ? "bg-gray-50" : "bg-gray-900"
+        }`}>
         <style jsx>{`
           .tags-container {
             display: flex;
@@ -442,61 +543,80 @@ export default function Posts() {
             className="text-center mb-16"
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
+            transition={{ duration: 0.8 }}>
             <Title
               level={1}
-              className={`text-5xl font-extrabold mb-2 ${mytheme === "light" ? "text-gray-900" : "text-gray-100"
-                }`}
-            >
+              className={`text-5xl font-extrabold mb-2 ${
+                mytheme === "light" ? "text-gray-900" : "text-gray-100"
+              }`}>
               {title}
             </Title>
             <div className="flex justify-center items-center gap-4 mb-6">
               <motion.div
-                className={`h-0.5 w-16 rounded-full ${mytheme === "light" ? "bg-yellow-600" : "bg-yellow-600"
-                  }`}
+                className={`h-0.5 w-16 rounded-full ${
+                  mytheme === "light" ? "bg-yellow-600" : "bg-yellow-600"
+                }`}
                 initial={{ width: 0 }}
                 animate={{ width: 64 }}
                 transition={{ delay: 0.3, duration: 0.7 }}
               />
               <motion.div
-                className={`h-2 w-2 rounded-full ${mytheme === "light" ? "bg-yellow-600" : "bg-yellow-600"}`}
+                className={`h-2 w-2 rounded-full ${
+                  mytheme === "light" ? "bg-yellow-600" : "bg-yellow-600"
+                }`}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.4, duration: 0.3 }}
               />
               <motion.div
-                className={`h-0.5 w-16 rounded-full ${mytheme === "light" ? "bg-yellow-600" : "bg-yellow-600"
-                  }`}
+                className={`h-0.5 w-16 rounded-full ${
+                  mytheme === "light" ? "bg-yellow-600" : "bg-yellow-600"
+                }`}
                 initial={{ width: 0 }}
                 animate={{ width: 64 }}
                 transition={{ delay: 0.3, duration: 0.7 }}
               />
             </div>
             <Paragraph
-              className={`text-lg max-w-3xl mx-auto ${mytheme === "light" ? "text-gray-600" : "text-gray-300"
-                }`}
-            >
+              className={`text-lg max-w-3xl mx-auto ${
+                mytheme === "light" ? "text-gray-600" : "text-gray-300"
+              }`}>
               <span className="text-xl">{subtitle}</span>
             </Paragraph>
           </motion.div>
 
-          <motion.div className="mb-20" variants={containerVariants} initial="hidden" animate="visible">
+          <motion.div
+            className="mb-20"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible">
             <div className="flex items-center mb-8 text-yellow-600">
               <span
-                className={`flex items-center justify-center w-12 h-12 -mt-2 rounded-full ${mytheme === "light" ? "bg-yellow-100" : "bg-yellow-900/30"
+                className={`flex items-center justify-center w-12 h-12 -mt-2 rounded-full ${
+                  mytheme === "light" ? "bg-yellow-100" : "bg-yellow-900/30"
+                }`}>
+                <FireOutlined
+                  className={`text-xl ${
+                    mytheme === "light" ? "text-yellow-600" : "text-yellow-500"
                   }`}
-              >
-                <FireOutlined className={`text-xl ${mytheme === "light" ? "text-yellow-600" : "text-yellow-500"}`} />
+                />
               </span>
               <Title
                 level={3}
-                className={`ml-3 mb-0 text-2xl font-bold ${mytheme === "light" ? "text-gray-900" : "text-gray-200"
-                  }`}
-              >
-                {getLocalizedText("Featured Posts", "Bài Viết Nổi Bật", "精选文章")}
+                className={`ml-3 mb-0 text-2xl font-bold ${
+                  mytheme === "light" ? "text-gray-900" : "text-gray-200"
+                }`}>
+                {getLocalizedText(
+                  "Featured Posts",
+                  "Bài Viết Nổi Bật",
+                  "精选文章"
+                )}
               </Title>
-              <div className={`flex-1 h-px ml-4 ${mytheme === "light" ? "bg-gray-200" : "bg-gray-700"}`} />
+              <div
+                className={`flex-1 h-px ml-4 ${
+                  mytheme === "light" ? "bg-gray-200" : "bg-gray-700"
+                }`}
+              />
             </div>
 
             {loading ? (
@@ -524,8 +644,9 @@ export default function Posts() {
                     <motion.div variants={itemVariants}>
                       <Card
                         hoverable
-                        className={`h-full border-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 ${mytheme === "light" ? "bg-white" : "bg-gray-800"
-                          }`}
+                        className={`h-full border-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 ${
+                          mytheme === "light" ? "bg-white" : "bg-gray-800"
+                        }`}
                         onClick={() => handleReadMore(featuredPosts[0].id)}
                         cover={
                           <div className="relative overflow-hidden h-80">
@@ -537,51 +658,71 @@ export default function Posts() {
                             />
                             <div className="absolute top-4 left-4 tags-container">
                               {featuredPosts[0].category.map((catKey) => {
-                                const category = categories.find((c) => c.key === catKey);
+                                const category = categories.find(
+                                  (c) => c.key === catKey
+                                );
                                 return category ? (
                                   <Tag
                                     key={catKey}
-                                    color={mytheme === "light" ? "yellow" : "gold"}
-                                    className="category-tag bg-yellow-50 text-yellow-700"
-                                  >
+                                    color={
+                                      mytheme === "light" ? "yellow" : "gold"
+                                    }
+                                    className="category-tag bg-yellow-50 text-yellow-700">
                                     {category.name}
                                   </Tag>
                                 ) : null;
                               })}
                             </div>
                             <div
-                              className={`absolute bottom-0 left-0 w-full px-6 py-4 ${mytheme === "light"
-                                ? "bg-gradient-to-t from-black/50 to-transparent"
-                                : "bg-gradient-to-t from-black/80 to-transparent"
-                                }`}
-                            >
-                              <Title level={4} className="text-white mb-0 line-clamp-2 drop-shadow-md">
-                                <span className="text-white">{featuredPosts[0].title}</span>
+                              className={`absolute bottom-0 left-0 w-full px-6 py-4 ${
+                                mytheme === "light"
+                                  ? "bg-gradient-to-t from-black/50 to-transparent"
+                                  : "bg-gradient-to-t from-black/80 to-transparent"
+                              }`}>
+                              <Title
+                                level={4}
+                                className="text-white mb-0 line-clamp-2 drop-shadow-md">
+                                <span className="text-white">
+                                  {featuredPosts[0].title}
+                                </span>
                               </Title>
                             </div>
                           </div>
                         }
-                        bodyStyle={{ padding: "24px" }}
-                      >
+                        bodyStyle={{ padding: "24px" }}>
                         <Meta
                           description={
                             <div>
                               <div className="flex flex-wrap items-center gap-4 text-sm mb-4">
                                 <div className="flex items-center">
                                   <UserOutlined className="mr-1 text-lg" />
-                                  <span className={`${mytheme === "light" ? "text-gray-800" : "text-white"}`}>{featuredPosts[0].author}</span>
+                                  <span
+                                    className={`${
+                                      mytheme === "light"
+                                        ? "text-gray-800"
+                                        : "text-white"
+                                    }`}>
+                                    {featuredPosts[0].author}
+                                  </span>
                                 </div>
                               </div>
-                              <Paragraph ellipsis={{ rows: 3 }} className="mb-5 text-base">
+                              <Paragraph
+                                ellipsis={{ rows: 3 }}
+                                className="mb-5 text-base">
                                 {featuredPosts[0].description}
                               </Paragraph>
                               <Button
                                 type="primary"
                                 className="rounded-full px-6 text-base font-medium shadow-md bg-yellow-600 hover:bg-yellow-700"
                                 icon={<ArrowRightOutlined />}
-                                onClick={() => handleReadMore(featuredPosts[0].id)}
-                              >
-                                {getLocalizedText("Read More", "Đọc tiếp", "继续阅读")}
+                                onClick={() =>
+                                  handleReadMore(featuredPosts[0].id)
+                                }>
+                                {getLocalizedText(
+                                  "Read More",
+                                  "Đọc tiếp",
+                                  "继续阅读"
+                                )}
                               </Button>
                             </div>
                           }
@@ -598,10 +739,10 @@ export default function Posts() {
                           <motion.div variants={itemVariants}>
                             <Card
                               hoverable
-                              className={`border-0 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 ${mytheme === "light" ? "bg-white" : "bg-gray-800"
-                                }`}
-                              onClick={() => handleReadMore(post.id)}
-                            >
+                              className={`border-0 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 ${
+                                mytheme === "light" ? "bg-white" : "bg-gray-800"
+                              }`}
+                              onClick={() => handleReadMore(post.id)}>
                               <Row gutter={16}>
                                 <Col xs={24} sm={8}>
                                   <div className="relative overflow-hidden h-[186px] rounded-l-xl">
@@ -613,13 +754,18 @@ export default function Posts() {
                                     />
                                     <div className="absolute top-2 left-2 tags-container">
                                       {post.category.map((catKey) => {
-                                        const category = categories.find((c) => c.key === catKey);
+                                        const category = categories.find(
+                                          (c) => c.key === catKey
+                                        );
                                         return category ? (
                                           <Tag
                                             key={catKey}
-                                            color={mytheme === "light" ? "yellow" : "gold"}
-                                            className="category-tag bg-yellow-50 text-yellow-700"
-                                          >
+                                            color={
+                                              mytheme === "light"
+                                                ? "yellow"
+                                                : "gold"
+                                            }
+                                            className="category-tag bg-yellow-50 text-yellow-700">
                                             {category.name}
                                           </Tag>
                                         ) : null;
@@ -629,7 +775,9 @@ export default function Posts() {
                                 </Col>
                                 <Col xs={24} sm={16}>
                                   <div className="pt-3 sm:pt-0">
-                                    <Title level={5} className="mb-2 line-clamp-1">
+                                    <Title
+                                      level={5}
+                                      className="mb-2 line-clamp-1">
                                       {post.title}
                                     </Title>
                                     <div className="flex items-center flex-wrap gap-3 text-sm mb-3">
@@ -638,16 +786,21 @@ export default function Posts() {
                                         <span>{post.author}</span>
                                       </div>
                                     </div>
-                                    <Paragraph ellipsis={{ rows: 3 }} className="text-sm mb-3">
+                                    <Paragraph
+                                      ellipsis={{ rows: 3 }}
+                                      className="text-sm mb-3">
                                       {post.description}
                                     </Paragraph>
                                     <Button
                                       type="primary"
                                       className="rounded-full px-6 text-base font-medium shadow-md bg-yellow-600 hover:bg-yellow-700"
                                       icon={<ArrowRightOutlined />}
-                                      onClick={() => handleReadMore(post.id)}
-                                    >
-                                      {getLocalizedText("Read More", "Đọc tiếp", "继续阅读")}
+                                      onClick={() => handleReadMore(post.id)}>
+                                      {getLocalizedText(
+                                        "Read More",
+                                        "Đọc tiếp",
+                                        "继续阅读"
+                                      )}
                                     </Button>
                                   </div>
                                 </Col>
@@ -667,12 +820,13 @@ export default function Posts() {
             className="mb-16"
             variants={fadeInUpVariants}
             initial="hidden"
-            animate="visible"
-          >
+            animate="visible">
             <div
-              className={`rounded-xl p-6 ${mytheme === "light" ? "bg-white shadow-lg" : "bg-gray-800 shadow-lg"
-                }`}
-            >
+              className={`rounded-xl p-6 ${
+                mytheme === "light"
+                  ? "bg-white shadow-lg"
+                  : "bg-gray-800 shadow-lg"
+              }`}>
               <Row gutter={[16, 16]} justify="space-between" align="middle">
                 <Col xs={24} md={8}>
                   <Input
@@ -681,7 +835,15 @@ export default function Posts() {
                       "Tìm kiếm bài viết...",
                       "搜索文章..."
                     )}
-                    prefix={<SearchOutlined className={`text-lg ${mytheme === "light" ? "text-yellow-600" : "text-gray-300"}`} />}
+                    prefix={
+                      <SearchOutlined
+                        className={`text-lg ${
+                          mytheme === "light"
+                            ? "text-yellow-600"
+                            : "text-gray-300"
+                        }`}
+                      />
+                    }
                     allowClear
                     size="large"
                     onChange={handleSearch}
@@ -690,53 +852,106 @@ export default function Posts() {
                 </Col>
                 <Col xs={24} md={16}>
                   <div
-                    className={`rounded-full p-2 ${mytheme === "light" ? "bg-yellow-50" : "bg-gray-800"
-                      } overflow-x-auto`}
-                  >
-                    <div className="flex flex-nowrap space-x-2">
-                      {categories.map((category) => (
-                        <motion.div
-                          key={category.key}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          <Button
-                            type={activeCategory === category.key ? "primary" : "text"}
-                            className={`rounded-full whitespace-nowrap text-base font-medium ${activeCategory === category.key
-                              ? "shadow-md bg-yellow-600 hover:bg-yellow-700"
-                              : mytheme === "light"
-                                ? "text-yellow-700 bg-yellow-100 hover:bg-yellow-200"
-                                : "text-gray-300"
+                    className={`rounded-full p-2 ${
+                      mytheme === "light" ? "bg-yellow-50" : "bg-gray-800"
+                    } overflow-x-auto`}>
+                    {loading ? (
+                      // Skeleton loading cho danh mục
+                      <div className="flex flex-nowrap space-x-2">
+                        {[...Array(5)].map((_, index) => (
+                          <Skeleton.Button
+                            key={`category-skeleton-${index}`}
+                            active
+                            size="large"
+                            shape="round"
+                            className="min-w-[100px]"
+                          />
+                        ))}
+                      </div>
+                    ) : error ? (
+                      // Hiển thị thông báo lỗi
+                      <div className="text-center text-red-500">
+                        {getLocalizedText(
+                          "Failed to load categories",
+                          "Không thể tải danh mục",
+                          "无法加载分类"
+                        )}
+                      </div>
+                    ) : categories.length === 0 ? (
+                      // Hiển thị khi không có danh mục
+                      <div className="text-center text-gray-500">
+                        {getLocalizedText(
+                          "No categories available",
+                          "Không có danh mục nào",
+                          "没有可用的分类"
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex flex-nowrap space-x-2">
+                        {categories.map((category) => (
+                          <motion.div
+                            key={category.key}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}>
+                            <Button
+                              type={
+                                activeCategory === category.key
+                                  ? "primary"
+                                  : "text"
+                              }
+                              className={`rounded-full whitespace-nowrap text-base font-medium ${
+                                activeCategory === category.key
+                                  ? "shadow-md bg-yellow-600 hover:bg-yellow-700"
+                                  : mytheme === "light"
+                                  ? "text-yellow-700 bg-yellow-100 hover:bg-yellow-200"
+                                  : "text-gray-300"
                               }`}
-                            onClick={() => handleCategoryChange(category.key)}
-                          >
-                            {category.name}
-                          </Button>
-                        </motion.div>
-                      ))}
-                    </div>
+                              onClick={() =>
+                                handleCategoryChange(category.key)
+                              }>
+                              {category.name}
+                            </Button>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </Col>
               </Row>
             </div>
           </motion.div>
 
-          <motion.div variants={containerVariants} initial="hidden" animate="visible">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible">
             <div className="flex items-center mb-10 text-yellow-600">
               <div
-                className={`flex items-center justify-center w-12 h-12 -mt-2 rounded-full ${mytheme === "light" ? "bg-yellow-100" : "bg-yellow-900/30"
+                className={`flex items-center justify-center w-12 h-12 -mt-2 rounded-full ${
+                  mytheme === "light" ? "bg-yellow-100" : "bg-yellow-900/30"
+                }`}>
+                <ClockCircleOutlined
+                  className={`text-xl ${
+                    mytheme === "light" ? "text-yellow-600" : "text-yellow-500"
                   }`}
-              >
-                <ClockCircleOutlined className={`text-xl ${mytheme === "light" ? "text-yellow-600" : "text-yellow-500"}`} />
+                />
               </div>
               <Title
                 level={3}
-                className={`ml-3 mb-0 text-2xl font-bold ${mytheme === "light" ? "text-gray-900" : "text-gray-200"
-                  }`}
-              >
-                {getLocalizedText("Latest Posts", "Bài Viết Mới Nhất", "最新文章")}
+                className={`ml-3 mb-0 text-2xl font-bold ${
+                  mytheme === "light" ? "text-gray-900" : "text-gray-200"
+                }`}>
+                {getLocalizedText(
+                  "Latest Posts",
+                  "Bài Viết Mới Nhất",
+                  "最新文章"
+                )}
               </Title>
-              <div className={`flex-1 h-px ml-4 ${mytheme === "light" ? "bg-gray-200" : "bg-gray-700"}`} />
+              <div
+                className={`flex-1 h-px ml-4 ${
+                  mytheme === "light" ? "bg-gray-200" : "bg-gray-700"
+                }`}
+              />
             </div>
 
             {loading ? (
@@ -765,8 +980,9 @@ export default function Posts() {
                       <motion.div variants={itemVariants}>
                         <Card
                           hoverable
-                          className={`h-full border-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 ${mytheme === "light" ? "bg-white" : "bg-gray-800"
-                            }`}
+                          className={`h-full border-0 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 ${
+                            mytheme === "light" ? "bg-white" : "bg-gray-800"
+                          }`}
                           onClick={() => handleReadMore(post.id)}
                           cover={
                             <div className="relative overflow-hidden h-48">
@@ -778,23 +994,29 @@ export default function Posts() {
                               />
                               <div className="absolute top-3 left-3 tags-container">
                                 {post.category.map((catKey) => {
-                                  const category = categories.find((c) => c.key === catKey);
+                                  const category = categories.find(
+                                    (c) => c.key === catKey
+                                  );
                                   return category ? (
                                     <Tag
                                       key={catKey}
-                                      color={mytheme === "light" ? "yellow" : "gold"}
-                                      className="category-tag bg-yellow-50 text-yellow-700"
-                                    >
+                                      color={
+                                        mytheme === "light" ? "yellow" : "gold"
+                                      }
+                                      className="category-tag bg-yellow-50 text-yellow-700">
                                       {category.name}
                                     </Tag>
                                   ) : null;
                                 })}
                               </div>
                             </div>
-                          }
-                        >
+                          }>
                           <Meta
-                            title={<Title level={5} className="mb-3 line-clamp-2">{post.title}</Title>}
+                            title={
+                              <Title level={5} className="mb-3 line-clamp-2">
+                                {post.title}
+                              </Title>
+                            }
                             description={
                               <div>
                                 <div className="flex flex-wrap items-center gap-3 text-sm mb-4">
@@ -803,16 +1025,21 @@ export default function Posts() {
                                     <span>{post.author}</span>
                                   </div>
                                 </div>
-                                <Paragraph ellipsis={{ rows: 2 }} className="mb-5">
+                                <Paragraph
+                                  ellipsis={{ rows: 2 }}
+                                  className="mb-5">
                                   {post.description}
                                 </Paragraph>
                                 <Button
                                   type="primary"
                                   className="rounded-full px-5 shadow-md bg-yellow-600 hover:bg-yellow-700"
                                   icon={<ArrowRightOutlined />}
-                                  onClick={() => handleReadMore(post.id)}
-                                >
-                                  {getLocalizedText("Read More", "Đọc tiếp", "继续阅读")}
+                                  onClick={() => handleReadMore(post.id)}>
+                                  {getLocalizedText(
+                                    "Read More",
+                                    "Đọc tiếp",
+                                    "继续阅读"
+                                  )}
                                 </Button>
                               </div>
                             }
@@ -830,7 +1057,9 @@ export default function Posts() {
                       total={filteredPosts.length}
                       onChange={handlePageChange}
                       showSizeChanger={false}
-                      className={mytheme === "light" ? "ant-pagination-light" : ""}
+                      className={
+                        mytheme === "light" ? "ant-pagination-light" : ""
+                      }
                     />
                   </div>
                 )}
@@ -839,15 +1068,6 @@ export default function Posts() {
           </motion.div>
         </div>
       </div>
-
-      {selectedPostId && (
-        <BlogPostModal
-          isOpen={isModalOpen}
-          postId={selectedPostId}
-          onClose={handleCloseModal}
-          onViewRelatedPost={handleViewRelatedPost}
-        />
-      )}
     </ConfigProvider>
   );
 }

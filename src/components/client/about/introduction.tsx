@@ -516,7 +516,7 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
           >
             <button
               onClick={() => setActiveTeamMember(null)}
-              className="absolute top-0 cursor-pointer hover:bg-gray-100 right-4 z-30 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full p-2 text-gray-700 hover:text-red-600 dark:text-gray-300 dark:hover:text-red-400 transition-colors"
+              className="absolute md:top-0 top-2 cursor-pointer hover:bg-gray-100 right-2 z-30 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full p-2 text-gray-700 hover:text-red-600 dark:text-gray-300 dark:hover:text-red-400 transition-colors"
               aria-label={locale === "vi" ? "Đóng hồ sơ" : locale === "zh" ? "关闭简介" : "Close profile"}
             >
               <svg className={`w-6 h-6 ${mytheme === "dark" ? "text-white" : "text-gray-800"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
