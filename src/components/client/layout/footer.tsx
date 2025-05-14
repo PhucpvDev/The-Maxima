@@ -47,7 +47,7 @@ export default function FooterSection() {
       <ConfigProvider theme={themeConfig}>
         <div
           className={`border-t py-4 ${
-            mytheme === "light" ? "border-gray-800 bg-white" : "border-gray-700 bg-[#1a1a1a]"
+            mytheme === "light" ? "border-gray-800 bg-white" : "border-gray-700 bg-gray-800"
           }`}
         >
           <div className="max-w-7xl mx-auto px-4">

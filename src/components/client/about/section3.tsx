@@ -199,7 +199,7 @@ export default function MaximaSuperWalletSection() {
   return (
     <ConfigProvider theme={themeConfig}>
       <div
-        className={`relative py-20 md:py-28 overflow-hidden font-inter ${mytheme === "light"
+        className={`relative py-14 md:py-18 overflow-hidden font-inter ${mytheme === "light"
             ? "bg-gradient-to-b from-gray-50 to-white"
             : "bg-gradient-to-b from-gray-900 to-gray-950"
           }`}

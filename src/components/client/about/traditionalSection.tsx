@@ -301,7 +301,7 @@ export default function MaximaVsTraditionalSection() {
     <ConfigProvider theme={themeConfig}>
       <div
         id="become-ib"
-        className={`py-20 md:py-28 relative overflow-hidden font-inter ${
+        className={`py-10 md:py-18 relative overflow-hidden font-inter ${
           mytheme === "light" ? "bg-gray-50" : "bg-gray-950"
         }`}>
         <div className="absolute inset-0 overflow-hidden">
@@ -385,7 +385,7 @@ export default function MaximaVsTraditionalSection() {
               viewport={{ once: true, amount: 0.1 }}
               variants={staggerContainer}>
               <div
-                className={`px-6 py-6 ${
+                className={`px-3 py-3 ${
                   mytheme === "light"
                     ? "bg-gradient-to-r from-red-500 to-red-600"
                     : "bg-gradient-to-r from-red-700 to-red-800"
@@ -400,7 +400,7 @@ export default function MaximaVsTraditionalSection() {
                 </motion.p>
               </div>
 
-              <div className="p-6 space-y-6 h-full">
+              <div className="p-3 space-y-6 h-full">
                 {traditional_points.length > 0 ? (
                   traditional_points.map((point, index) => (
                     <motion.div
@@ -483,7 +483,7 @@ export default function MaximaVsTraditionalSection() {
               viewport={{ once: true, amount: 0.1 }}
               variants={staggerContainer}>
               <div
-                className={`px-6 py-6 ${
+                className={`px-3 py-3 ${
                   mytheme === "light"
                     ? "bg-gradient-to-r from-green-500 to-green-600"
                     : "bg-gradient-to-r from-green-700 to-green-800"
@@ -498,7 +498,7 @@ export default function MaximaVsTraditionalSection() {
                 </motion.p>
               </div>
 
-              <div className="p-6 space-y-6 h-full">
+              <div className="p-3 space-y-6 h-full">
                 {maxima_points.length > 0 ? (
                   maxima_points.map((point, index) => (
                     <motion.div

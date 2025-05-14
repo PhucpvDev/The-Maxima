@@ -198,7 +198,6 @@ const MaximaTestimonials: React.FC = () => {
   const dataFetchedRef = useRef(false);
   const slideShowInitializedRef = useRef(false);
 
-  // Memoize nextSlide and prevSlide to avoid recreating on each render
   const nextSlide = useCallback(() => {
     if (testimonialData) {
       setActiveIndex((prevIndex) => (prevIndex + 1) % testimonialData.testimonials.length);
@@ -217,18 +216,16 @@ const MaximaTestimonials: React.FC = () => {
     setActiveIndex(index);
   };
 
-  // Setup and cleanup slide show
   const setupSlideShow = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
 
     intervalRef.current = setInterval(() => {
-      // Only check document.hidden if document is defined (client-side)
       if (typeof document !== "undefined" && !document.hidden) {
         nextSlide();
       } else {
-        nextSlide(); // Fallback for server or when document.hidden is unavailable
+        nextSlide(); 
       }
     }, 6000);
 
@@ -242,7 +239,6 @@ const MaximaTestimonials: React.FC = () => {
     };
   }, [nextSlide]);
 
-  // Manage data fetching
   if (!dataFetchedRef.current) {
     dataFetchedRef.current = true;
     getTestimonials(locale)
@@ -256,19 +252,15 @@ const MaximaTestimonials: React.FC = () => {
       });
   }
 
-  // Manage theme and auto slideshow in useEffect to ensure client-side execution
   useEffect(() => {
-    // Set theme
     if (typeof document !== "undefined" && mytheme) {
       document.documentElement.setAttribute("data-theme", mytheme);
     }
 
-    // Setup slideshow
     if (testimonialData && !loading && !slideShowInitializedRef.current) {
       setupSlideShow();
     }
 
-    // Cleanup
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -297,7 +289,7 @@ const MaximaTestimonials: React.FC = () => {
 
   return (
     <section
-      className={`py-24 relative overflow-hidden font-inter ${
+      className={`py-14 md:py-18 relative overflow-hidden font-inter ${
         mytheme === "light"
           ? "bg-gradient-to-br from-blue-50 to-white"
           : "bg-gradient-to-br from-gray-900 to-gray-950"
@@ -397,7 +389,7 @@ const MaximaTestimonials: React.FC = () => {
                   <span className="material-symbols-outlined text-5xl">format_quote</span>
                 </div>
 
-                <div className="p-8 pt-12 pb-6 flex-grow">
+                <div className="p-4 pt-12 flex-grow">
                   <p
                     className={`text-lg leading-relaxed mb-6 ${
                       mytheme === "light" ? "text-gray-700" : "text-gray-300"

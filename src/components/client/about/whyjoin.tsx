@@ -243,7 +243,7 @@ export default function WhyJoinMaxima() {
     <ConfigProvider theme={themeConfig}>
       <div dangerouslySetInnerHTML={{ __html: fontStyle }} />
       <div id="how"
-        className={`relative overflow-hidden py-16 md:py-20 ${mytheme === "light"
+        className={`relative overflow-hidden py-10 md:py-18 ${mytheme === "light"
             ? "bg-gradient-to-b from-slate-50 to-gray-100"
             : "bg-gradient-to-b from-gray-900 to-gray-950"
           }`}

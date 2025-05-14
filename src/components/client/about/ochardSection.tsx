@@ -226,7 +226,7 @@ export default function AppleOrchardSection() {
   return (
     <ConfigProvider theme={themeConfig}>
       <section
-        className={`py-20 relative overflow-hidden font-inter ${
+        className={`py-14 md:py-18 relative overflow-hidden font-inter ${
           mytheme === "light"
             ? "bg-gradient-to-b from-gray-50 to-white"
             : "bg-gradient-to-b from-gray-900 to-gray-950"
@@ -297,7 +297,7 @@ export default function AppleOrchardSection() {
                 {features.map((feature, index) => (
                   <motion.div
                     key={index}
-                    className={`p-5 rounded-xl transition-all duration-300 ${
+                    className={`p-3 rounded-xl transition-all duration-300 ${
                       highlightedFeature === index
                         ? mytheme === "light"
                           ? "bg-yellow-50 shadow-lg"

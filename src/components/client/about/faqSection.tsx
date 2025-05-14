@@ -120,7 +120,7 @@ export default function FAQSection ({ id }: FAQSectionProps)  {
 
   return (
     <ConfigProvider theme={themeConfig}>
-      <section id={id}  className={`py-24 relative font-inter ${
+      <section id={id}  className={`py-14 md:py-18 relative font-inter ${
         mytheme === "light" 
           ? "bg-gradient-to-b from-blue-50 to-gray-50" 
           : "bg-gradient-to-b from-gray-900 to-gray-950"
@@ -224,7 +224,7 @@ export default function FAQSection ({ id }: FAQSectionProps)  {
                       } transition-all duration-200`}
                     >
                       <button
-                        className={`w-full text-left cursor-pointer px-6 py-5 flex items-center justify-between ${
+                        className={`w-full text-left cursor-pointer px-3 py-2 flex items-center justify-between ${
                           expandedIndex === index 
                             ? mytheme === "light"
                               ? "border-b border-gray-200"
@@ -261,7 +261,7 @@ export default function FAQSection ({ id }: FAQSectionProps)  {
                             initial="hidden"
                             animate="visible"
                             exit="hidden"
-                            className={`px-6 py-5 ${
+                            className={`px-3 py-5 ${
                               mytheme === "light" ? "text-gray-600" : "text-gray-300"
                             }`}
                           >

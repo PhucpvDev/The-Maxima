@@ -343,7 +343,7 @@ export default function Tutorial({ id }: TutorialProps) {
   return (
     <ConfigProvider theme={themeConfig}>
       <section id={id}
-        className={`py-24 relative overflow-hidden font-inter ${mytheme === "light" ? "bg-gradient-to-b from-gray-50 to-white" : "bg-gradient-to-b from-gray-900 to-gray-950"
+        className={`py-12 md:py-18 relative overflow-hidden font-inter ${mytheme === "light" ? "bg-gradient-to-b from-gray-50 to-white" : "bg-gradient-to-b from-gray-900 to-gray-950"
           }`}
       >
         <div className="absolute inset-0 overflow-hidden">

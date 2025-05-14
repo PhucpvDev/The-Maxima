@@ -386,8 +386,8 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
   }
 
   return (
-    <div className="py-20 bg-gradient-to-b from-slate-50 to-white dark:from-gray-900 dark:to-gray-950">
-      <div className="container mx-auto px-4 max-w-7xl">
+    <div className="md:py-18 py-14 bg-gradient-to-b from-slate-50 to-white dark:from-gray-900 dark:to-gray-950">
+      <div className="container mx-auto px-3 max-w-7xl">
         <div className="flex flex-col items-center mb-16 text-center">
           <div className="flex items-center justify-center mb-4">
             <div className="h-1 w-10 bg-yellow-600 rounded mr-2"></div>
@@ -454,7 +454,7 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
                           <h3 className="text-2xl font-bold">{member.name}</h3>
                         </div>
                       </div>
-                      <div className="p-6">
+                      <div className="p-3">
                         <p className="text-gray-600 dark:text-gray-300 pb-4 line-clamp-3">{member.bio}</p>
                         <button
                           onClick={() => setActiveTeamMember(member)}
@@ -477,7 +477,7 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
 
           <button
             onClick={goToNext}
-            className="absolute right-0 cursor-pointer  top-1/2 transform -translate-y-1/2 z-20 bg-white dark:bg-gray-800 rounded-full p-2 md:p-3 shadow-lg text-yellow-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors"
+            className="absolute right-0 cursor-pointer top-1/2 transform -translate-y-1/2 z-20 bg-white dark:bg-gray-800 rounded-full p-2 md:p-3 shadow-lg text-yellow-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors"
             aria-label={locale === "vi" ? "Thành viên tiếp theo" : locale === "zh" ? "下一成员" : "Next team member"}
           >
             <svg className={`w-6 h-6 ${mytheme === "dark" ? "text-white" : "text-gray-800"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -486,7 +486,7 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
           </button>
         </div>
 
-        <div className="flex justify-center md:mt-6 space-x-2">
+        <div className="flex justify-center md:mt-6 -mt-18 space-x-2">
           {teamMembers.map((_, index) => (
             <button
               key={index}

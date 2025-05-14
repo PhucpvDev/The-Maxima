@@ -212,7 +212,7 @@ export default function AboutSection({ data: initialData }: AboutSectionProps) {
     <ConfigProvider theme={themeConfig}>
       <section
         id="about"
-        className={`py-24 relative overflow-hidden font-inter ${
+        className={`md:py18 py-14 relative overflow-hidden font-inter ${
           mytheme === "dark"
             ? "bg-gradient-to-b from-gray-900 to-gray-950"
             : "bg-gradient-to-b from-slate-50 to-white"
@@ -281,7 +281,7 @@ export default function AboutSection({ data: initialData }: AboutSectionProps) {
                 <motion.div
                   key={index}
                   variants={fadeInUp}
-                  className={`mb-6 p-6 rounded-xl ${
+                  className={`mb-4 p-3 rounded-xl ${
                     mytheme === "dark"
                       ? "bg-gray-800/50 shadow-lg hover:shadow-xl shadow-black/10 hover:shadow-black/20"
                       : "bg-white shadow-md hover:shadow-lg"

@@ -18,8 +18,6 @@ import {
 import {
   ArrowLeftOutlined,
   UserOutlined,
-  HeartOutlined,
-  HeartFilled,
   ShareAltOutlined,
   CopyOutlined,
   TagsOutlined,
@@ -27,6 +25,7 @@ import {
 import { useSelector } from "react-redux";
 import { useLocale } from "next-intl";
 import { IMAGES } from "@/constants/client/theme";
+import { NextPage } from "next";
 import Head from "next/head";
 import Posts from "@/components/client/about/posts";
 
@@ -345,11 +344,11 @@ async function getPostDetail(
   }
 }
 
-export default function BlogPostDetail({
-  params,
-}: {
+interface PostPageProps {
   params: { postId: string };
-}) {
+}
+
+const BlogPostDetail: NextPage<PostPageProps> = ({ params }) => {
   const { postId } = params;
   const locale = useLocale();
   const router = useRouter();
@@ -358,7 +357,6 @@ export default function BlogPostDetail({
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [liked, setLiked] = useState(false);
 
   const translations = {
     back: locale === "vi" ? "Quay lại" : locale === "zh" ? "返回" : "Back",
@@ -394,7 +392,6 @@ export default function BlogPostDetail({
         const { post, categories } = await getPostDetail(locale, postId);
         if (post) {
           setPost(post);
-          setLiked(post.liked || false);
           setCategories(categories);
         } else {
           setError("Post not found");
@@ -409,19 +406,11 @@ export default function BlogPostDetail({
     if (postId) fetchPostDetail();
   }, [postId, locale]);
 
-  const handleLike = () => {
-    setLiked(!liked);
-  };
-
   const handleCopyLink = () => {
     if (typeof window !== "undefined") {
       const url = `${window.location.origin}/${locale}/posts/${postId}`;
       navigator.clipboard.writeText(url);
     }
-  };
-
-  const handleViewRelatedPost = (relatedPostId: string) => {
-    router.push(`/posts/${relatedPostId}`);
   };
 
   const socialOptions = [
@@ -587,18 +576,14 @@ export default function BlogPostDetail({
                       className={`shadow-md border-0 rounded-xl overflow-hidden mb-6 ${
                         mytheme === "light" ? "bg-white" : "bg-gray-800/90"
                       }`}
-                      bodyStyle={{ padding: "24px" }}>
+                      styles={{ body: { padding: "24px" } }}>
                       <div
                         className={`post-content prose max-w-none ${
                           mytheme === "dark" ? "prose-invert" : ""
                         }`}
-                        style={{
-                          lineHeight: "1.8",
-                          fontSize: "1.05rem",
-                        }}
+                        style={{ lineHeight: "1.8", fontSize: "1.05rem" }}
                         dangerouslySetInnerHTML={{ __html: post.content }}
                       />
-
                       <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div className="flex flex-wrap items-center gap-4">
@@ -654,12 +639,12 @@ export default function BlogPostDetail({
                       </div>
                     </Card>
                   </div>
-
                   <div className="md:col-span-4">
                     <Card
                       className={`shadow-md border-0 rounded-xl mb-6 ${
                         mytheme === "light" ? "bg-white" : "bg-gray-800/90"
-                      }`}>
+                      }`}
+                      styles={{ body: { padding: "24px" } }}>
                       <div className="flex items-center flex-wrap gap-2">
                         <TagsOutlined className="mr-2 text-lg" />
                         {post.tags?.map((tag, index) => (
@@ -685,4 +670,6 @@ export default function BlogPostDetail({
       </motion.div>
     </ConfigProvider>
   );
-}
+};
+
+export default BlogPostDetail;

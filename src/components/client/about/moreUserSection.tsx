@@ -173,7 +173,7 @@ export default function BannerSection() {
 
   return (
     <section
-      className={`py-24 relative overflow-hidden font-inter ${
+      className={`py-14 md:py-18 relative overflow-hidden font-inter ${
         mytheme === "light"
           ? "bg-gradient-to-b from-blue-50 to-slate-50"
           : "bg-gradient-to-b from-gray-900 to-gray-950"
@@ -210,7 +210,7 @@ export default function BannerSection() {
           variants={staggerContainer}
         >
           <motion.div
-            className={`mb-12 py-12 px-8 rounded-2xl shadow-xl ${
+            className={`py-12 px-8 rounded-2xl shadow-xl ${
               mytheme === "light"
                 ? "bg-white/80 backdrop-blur-md"
                 : "bg-gray-900/80 backdrop-blur-md"

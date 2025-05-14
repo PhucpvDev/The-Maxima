@@ -192,17 +192,6 @@ const fadeInUp = {
   },
 };
 
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.1,
-    },
-  },
-};
-
 const TestimonialsSection: React.FC = () => {
   const locale = useLocale();
   const { mytheme } = useSelector((state: RootState) => state.theme);
@@ -210,7 +199,6 @@ const TestimonialsSection: React.FC = () => {
   const [activeSlide, setActiveSlide] = useState<number>(0);
   const [isVideoLoaded, setIsVideoLoaded] = useState<boolean>(false);
   const [videoError, setVideoError] = useState<number | null>(null);
-  const videosRef = useRef<(HTMLIFrameElement | null)[]>([]);
   const mainVideoRef = useRef<HTMLIFrameElement | null>(null);
 
   useEffect(() => {
@@ -310,7 +298,7 @@ const TestimonialsSection: React.FC = () => {
   return (
     <ConfigProvider theme={themeConfig}>
       <section
-        className={`py-24 relative overflow-hidden font-inter ${
+        className={`py-14 md:py-16 relative overflow-hidden font-inter ${
           mytheme === "light"
             ? "bg-gradient-to-b from-gray-50 to-white"
             : "bg-gradient-to-b from-gray-900 to-gray-950"
@@ -351,7 +339,7 @@ const TestimonialsSection: React.FC = () => {
           </motion.div>
 
           <motion.div
-            className="md:mb-20"
+            className=""
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -449,105 +437,6 @@ const TestimonialsSection: React.FC = () => {
                 ))}
               </div>
             </div>
-          </motion.div>
-
-          <motion.div
-            className="grid hidden md:block grid-cols-1 md:grid-cols-4 gap-6"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={staggerContainer}>
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={index}
-                variants={fadeInUp}
-                className={`rounded-xl overflow-hidden cursor-pointer transform transition-all duration-300 ${
-                  activeSlide === index
-                    ? mytheme === "light"
-                      ? "ring-2 ring-yellow-500 scale-105 shadow-xl"
-                      : "ring-2 ring-yellow-500 scale-105 shadow-xl shadow-black/30"
-                    : mytheme === "light"
-                    ? "hover:shadow-lg"
-                    : "hover:shadow-lg hover:shadow-black/20"
-                }`}
-                onClick={() => goToSlide(index)}>
-                <div className="relative aspect-video">
-                  <div
-                    className={`absolute inset-0 ${
-                      activeSlide === index
-                        ? "bg-black/0"
-                        : "bg-black/40 pointer-events-none"
-                    } transition-colors duration-300`}></div>
-
-                  {activeSlide !== index ? (
-                    <div className="relative w-full h-full">
-                      <Image
-                        src={getVideoThumbnail(testimonial.video_url)}
-                        alt={`Testimonial ${index + 1} thumbnail`}
-                        className="w-full h-full object-cover"
-                        fill
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = "none";
-                          const iframe =
-                            target.nextSibling as HTMLIFrameElement;
-                          if (iframe) {
-                            iframe.style.display = "block";
-                          }
-                        }}
-                      />
-                      <iframe
-                        style={{ display: "none" }}
-                        src={formatVideoUrl(testimonial.video_url)}
-                        title={`Testimonial video ${index + 1}`}
-                        className="w-full h-full"
-                        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen></iframe>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-12 h-12 bg-black/50 rounded-full flex items-center justify-center">
-                          <span className="material-symbols-outlined text-white text-2xl">
-                            play_arrow
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <iframe
-                      ref={(el: HTMLIFrameElement | null) => {
-                        videosRef.current[index] = el;
-                      }}
-                      src={formatVideoUrl(testimonial.video_url)}
-                      title={`Testimonial video ${index + 1}`}
-                      className="w-full h-full"
-                      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen></iframe>
-                  )}
-                </div>
-                <div
-                  className={`p-4 ${
-                    activeSlide === index
-                      ? mytheme === "light"
-                        ? "bg-yellow-50"
-                        : "bg-yellow-900/20"
-                      : mytheme === "light"
-                      ? "bg-white"
-                      : "bg-gray-900"
-                  }`}>
-                  <p
-                    className={`text-sm line-clamp-2 ${
-                      mytheme === "light" ? "text-gray-700" : "text-gray-300"
-                    }`}>
-                    {testimonial.description}
-                  </p>
-                  <p
-                    className={`text-xs font-medium mt-2 ${
-                      mytheme === "light" ? "text-gray-900" : "text-white"
-                    }`}>
-                    {testimonial.location_name}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
           </motion.div>
         </div>
 

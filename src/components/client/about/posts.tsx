@@ -305,7 +305,7 @@ export default function Posts() {
   return (
     <ConfigProvider theme={themeConfig}>
       <motion.div
-        className={`relative overflow-hidden py-16 md:py-20 ${
+        className={`relative overflow-hidden py-12 md:py-18 ${
           mytheme === "light"
             ? "bg-gradient-to-b from-slate-50 to-gray-100"
             : "bg-gradient-to-b from-gray-900 to-gray-950"

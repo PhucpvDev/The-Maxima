@@ -480,7 +480,7 @@ export default function AffiliatePage() {
                     </motion.div>
 
                     <motion.div
-                        className={`rounded-xl p-8 shadow-2xl custom-ant-styles ${mytheme === "light"
+                        className={`rounded-xl p-4 shadow-2xl custom-ant-styles ${mytheme === "light"
                             ? "bg-white shadow-blue-200/60"
                             : "bg-gray-800/80 shadow-black/50"
                             }`}
@@ -605,7 +605,7 @@ export default function AffiliatePage() {
                                     />
                                 </Form.Item>
 
-                                <Form.Item className="mb-0 flex item-center justify-center">
+                                <Form.Item className=" flex item-center justify-center">
                                     <motion.div
                                         variants={buttonVariants}
                                         initial="idle"
@@ -616,7 +616,7 @@ export default function AffiliatePage() {
                                             type="primary"
                                             htmlType="submit"
                                             loading={isSubmitting}
-                                            className={`w-56 text-black font-bold h-10 px-6 rounded-full mt-6 ${mytheme === "light"
+                                            className={`w-56 text-black font-bold rounded-full mt-6 ${mytheme === "light"
                                                 ? "bg-yellow-500 hover:bg-yellow-600"
                                                 : "bg-yellow-500 hover:bg-yellow-600"
                                                 }`}

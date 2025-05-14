@@ -120,7 +120,7 @@ export default function ContactSection({ id }: ContactProps) {
   }
 
   return (
-    <section id={id} className="relative py-20 font-inter overflow-hidden bg-gradient-to-b from-gray-900 via-blue-950 to-black">
+    <section id={id} className="relative py-12 md:py-20 font-inter overflow-hidden bg-gradient-to-b from-gray-900 via-blue-950 to-black">
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-blue-950/40 z-0"></div>
 
@@ -269,7 +269,7 @@ export default function ContactSection({ id }: ContactProps) {
           </motion.div>
 
           <motion.div variants={fadeInUp}>
-            <div className="bg-white/5 backdrop-blur-md rounded-2xl p-8 shadow-xl">
+            <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 shadow-xl">
               <h3 className="text-2xl font-bold text-white mb-2">{contactData?.get_in_touch_title}</h3>
               <p className="text-lg text-gray-300 mb-2">{contactData?.training_center}</p>
               <p className="mb-6 text-gray-400">{contactData?.feedback_note}</p>

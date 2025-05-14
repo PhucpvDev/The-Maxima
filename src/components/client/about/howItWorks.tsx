@@ -274,7 +274,7 @@ export default function HowItWorks ({ id }: HowItWorksProps) {
 
   return (
     <ConfigProvider theme={themeConfig}>
-      <div  id={id} className={`py-12 md:py-24 px-4 md:px-8 font-inter ${
+      <div  id={id} className={`py-12 md:py-18 px-4 md:px-8 font-inter ${
         mytheme === "light"
           ? "bg-gradient-to-b from-slate-50 to-gray-100"
           : "bg-gradient-to-b from-gray-900 to-gray-950"
@@ -417,7 +417,7 @@ export default function HowItWorks ({ id }: HowItWorksProps) {
                     <div className={`w-5/12 ${
                       index % 2 === 0 ? "pr-16 text-right" : "pl-16 text-left"
                     }`}>
-                      <div className={`p-6 rounded-xl shadow-xl transform transition-transform duration-300 ${
+                      <div className={`p-4 rounded-xl shadow-xl transform transition-transform duration-300 ${
                         activeStep === index ? "scale-105" : "scale-100"
                       } ${
                         mytheme === "light" 
@@ -460,7 +460,7 @@ export default function HowItWorks ({ id }: HowItWorksProps) {
           variants={fadeInUp}
         >
           <motion.div 
-            className={`p-6 md:p-8  text-white rounded-xl md:rounded-2xl shadow-lg md:shadow-2xl ${
+            className={`p-2 md:p-3 text-white rounded-xl md:rounded-2xl shadow-lg md:shadow-2xl ${
               mytheme === "light"
                 ? "bg-gradient-to-br from-white to-gray-50 border border-yellow-100"
                 : "bg-gradient-to-br from-gray-800 to-gray-900 border border-yellow-900"
