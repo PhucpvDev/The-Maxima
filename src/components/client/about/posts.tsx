@@ -365,8 +365,9 @@ export default function Posts() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {posts[0] && (
                 <motion.div
-                  className="md:col-span-1 overflow-hidden"
-                  variants={childVariants}>
+                  className="md:col-span-1 overflow-hidden cursor-pointer"
+                  variants={childVariants}
+                  onClick={() => handleViewDetails(posts[0].id)}>
                   <Image
                     src={getImageUrl(posts[0])}
                     alt={posts[0]?.title || ""}
@@ -439,8 +440,10 @@ export default function Posts() {
 
               {posts[1] && (
                 <motion.div
-                  className="md:col-span-1 overflow-hidden"
-                  variants={childVariants}>
+                  className="md:col-span-1 overflow-hidden cursor-pointer"  
+                  variants={childVariants}
+                  onClick={() => handleViewDetails(posts[1].id)}
+                  >
                   <Image
                     src={getImageUrl(posts[1])}
                     alt={posts[1]?.title || ""}

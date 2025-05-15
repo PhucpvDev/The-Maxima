@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react"
-import { Modal } from "antd"
-import { useLocale } from "next-intl"
-import Image from "next/image"
-import { useSelector } from "react-redux"
+import React, { useState, useCallback, useRef } from "react";
+import { Modal } from "antd";
+import { useLocale } from "next-intl";
+import Image from "next/image";
+import { useSelector } from "react-redux";
 
 interface TeamMemberTranslation {
   id: number;
@@ -64,7 +64,10 @@ interface TeamSliderProps {
   id?: string;
 }
 
-const translationFallbacks: Record<string, { hero_section_title: string; title: string; subtitle: string }> = {
+const translationFallbacks: Record<
+  string,
+  { hero_section_title: string; title: string; subtitle: string }
+> = {
   "en-US": {
     hero_section_title: "Our Team",
     title: "Meet Our Exceptional Team",
@@ -85,7 +88,10 @@ const translationFallbacks: Record<string, { hero_section_title: string; title: 
   },
 };
 
-function safeJsonParse<T extends string[]>(jsonString: string | null | undefined, fallback: T = ([] as unknown as T)): T {
+function safeJsonParse<T extends string[]>(
+  jsonString: string | null | undefined,
+  fallback: T = [] as unknown as T
+): T {
   if (!jsonString) return fallback;
   try {
     return JSON.parse(jsonString);
@@ -93,7 +99,11 @@ function safeJsonParse<T extends string[]>(jsonString: string | null | undefined
     console.error(error);
 
     console.warn("Failed to parse JSON string:", jsonString);
-    if (typeof jsonString === "string" && jsonString.includes("[") && jsonString.includes("]")) {
+    if (
+      typeof jsonString === "string" &&
+      jsonString.includes("[") &&
+      jsonString.includes("]")
+    ) {
       try {
         const cleanedStr = jsonString
           .replace(/'/g, '"')
@@ -134,26 +144,48 @@ async function getTeamMembers(locale: string): Promise<{
     const result = await response.json();
     const data: ApiResponse = result.data;
 
-    const translation = data.translations.find((t: TeamMemberTranslation) => t.languages_code === lang) || {
-      languages_code: lang
-    } as TeamMemberTranslation;
+    const translation =
+      data.translations.find(
+        (t: TeamMemberTranslation) => t.languages_code === lang
+      ) ||
+      ({
+        languages_code: lang,
+      } as TeamMemberTranslation);
 
     const teamMembers: TeamMember[] = Array.from({ length: 5 }, (_, i) => {
       const index = i + 1;
       return {
         id: index,
-        name: String(translation[`name_${index}` as keyof TeamMemberTranslation] || `Unknown ${index}`),
-        role: String(translation[`role_${index}` as keyof TeamMemberTranslation] || "Unknown"),
-        bio: String(translation[`bio_${index}` as keyof TeamMemberTranslation] || ""),
-        description: String(translation[`description_${index}` as keyof TeamMemberTranslation] || ""),
-        avatar: String(translation[`avatar_${index}` as keyof TeamMemberTranslation] || "/team/default.jpg"),
-        skills: safeJsonParse(String(translation[`skills_${index}` as keyof TeamMemberTranslation]), []),
+        name: String(
+          translation[`name_${index}` as keyof TeamMemberTranslation] ||
+            `Unknown ${index}`
+        ),
+        role: String(
+          translation[`role_${index}` as keyof TeamMemberTranslation] ||
+            "Unknown"
+        ),
+        bio: String(
+          translation[`bio_${index}` as keyof TeamMemberTranslation] || ""
+        ),
+        description: String(
+          translation[`description_${index}` as keyof TeamMemberTranslation] ||
+            ""
+        ),
+        avatar: String(
+          translation[`avatar_${index}` as keyof TeamMemberTranslation] ||
+            "/team/default.jpg"
+        ),
+        skills: safeJsonParse(
+          String(translation[`skills_${index}` as keyof TeamMemberTranslation]),
+          []
+        ),
       };
     });
 
     return {
       teamMembers,
-      hero_section_title: translation.hero_section_title || fallback.hero_section_title,
+      hero_section_title:
+        translation.hero_section_title || fallback.hero_section_title,
       title: translation.title || fallback.title,
       subtitle: translation.subtitle || fallback.subtitle,
     };
@@ -163,99 +195,138 @@ async function getTeamMembers(locale: string): Promise<{
       teamMembers: [
         {
           id: 1,
-          name: lang === "vi-VN" ? "Alex Johnson" : lang === "zh-CN" ? "亚历克斯·约翰逊" : "Alex Johnson",
-          role: lang === "vi-VN" ? "Giám đốc Điều hành & Nhà sáng lập" : lang === "zh-CN" ? "首席执行官兼创始人" : "CEO & Founder",
+          name:
+            lang === "vi-VN"
+              ? "Alex Johnson"
+              : lang === "zh-CN"
+              ? "亚历克斯·约翰逊"
+              : "Alex Johnson",
+          role:
+            lang === "vi-VN"
+              ? "Giám đốc Điều hành & Nhà sáng lập"
+              : lang === "zh-CN"
+              ? "首席执行官兼创始人"
+              : "CEO & Founder",
           bio:
             lang === "vi-VN"
               ? "Nhà khởi nghiệp có tầm nhìn với hơn 10 năm trong công nghệ tài chính. Đam mê tạo ra các giải pháp trao quyền cho nhà giao dịch."
               : lang === "zh-CN"
-                ? "具有超过10年金融科技经验的企业家。热衷于创建赋予交易者权力的解决方案。"
-                : "Entrepreneurial visionary with 10+ years in finance technology. Passionate about creating solutions that empower traders.",
+              ? "具有超过10年金融科技经验的企业家。热衷于创建赋予交易者权力的解决方案。"
+              : "Entrepreneurial visionary with 10+ years in finance technology. Passionate about creating solutions that empower traders.",
           description:
             lang === "vi-VN"
               ? "Với kinh nghiệm sâu rộng trong lĩnh vực của mình, Alex Johnson đã đóng vai trò quan trọng trong việc phát triển các giải pháp và chiến lược sáng tạo, thúc đẩy công ty tiến xa hơn."
               : lang === "zh-CN"
-                ? "凭借其领域的丰富经验，亚历克斯·约翰逊在开发创新解决方案和战略方面发挥了重要作用，推动公司向前发展。"
-                : "With extensive experience in their field, Alex Johnson has been instrumental in developing innovative solutions and strategies that have propelled our company forward.",
+              ? "凭借其领域的丰富经验，亚历克斯·约翰逊在开发创新解决方案和战略方面发挥了重要作用，推动公司向前发展。"
+              : "With extensive experience in their field, Alex Johnson has been instrumental in developing innovative solutions and strategies that have propelled our company forward.",
           avatar: "/team/alex.jpg",
-          skills:
-            lang === "vi-VN"
-              ? ["Lãnh đạo", "Chiến lược", "Đầu tư"]
-              : lang === "zh-CN"
-                ? ["领导力", "战略", "投资"]
-                : ["Leadership", "Strategy", "Investment"],
+          skills: ["Leadership", "Strategy", "Investment"],
         },
         {
           id: 2,
-          name: lang === "vi-VN" ? "Sarah Chen" : lang === "zh-CN" ? "莎拉·陈" : "Sarah Chen",
-          role: lang === "vi-VN" ? "Giám đốc Công nghệ" : lang === "zh-CN" ? "首席技术官" : "Chief Technology Officer",
+          name:
+            lang === "vi-VN"
+              ? "Sarah Chen"
+              : lang === "zh-CN"
+              ? "莎拉·陈"
+              : "Sarah Chen",
+          role:
+            lang === "vi-VN"
+              ? "Giám đốc Công nghệ"
+              : lang === "zh-CN"
+              ? "首席技术官"
+              : "Chief Technology Officer",
           bio:
             lang === "vi-VN"
               ? "Cựu kỹ sư Google chuyên về thuật toán AI và hệ thống giao dịch. Dẫn dắt sự đổi mới kỹ thuật của chúng tôi."
               : lang === "zh-CN"
-                ? "前谷歌工程师，专注于人工智能算法和交易系统。领导我们的技术创新。"
-                : "Former Google engineer with specialization in AI algorithms and trading systems. Leads our technical innovation.",
+              ? "前谷歌工程师，专注于人工智能算法和交易系统。领导我们的技术创新。"
+              : "Former Google engineer with specialization in AI algorithms and trading systems. Leads our technical innovation.",
           description:
             lang === "vi-VN"
               ? "Với kinh nghiệm sâu rộng trong lĩnh vực của mình, Sarah Chen đã đóng vai trò quan trọng trong việc phát triển các giải pháp và chiến lược sáng tạo."
               : lang === "zh-CN"
-                ? "凭借其领域的丰富经验，莎拉·陈在开发创新解决方案和战略方面发挥了重要作用。"
-                : "With extensive experience in their field, Sarah Chen has been instrumental in developing innovative solutions and strategies.",
+              ? "凭借其领域的丰富经验，莎拉·陈在开发创新解决方案和战略方面发挥了重要作用。"
+              : "With extensive experience in their field, Sarah Chen has been instrumental in developing innovative solutions and strategies.",
           avatar: "/team/sarah.jpg",
           skills:
             lang === "vi-VN"
               ? ["AI", "Kiến trúc phần mềm", "Blockchain"]
               : lang === "zh-CN"
-                ? ["人工智能", "软件架构", "区块链"]
-                : ["AI", "Software Architecture", "Blockchain"],
+              ? ["人工智能", "软件架构", "区块链"]
+              : ["AI", "Software Architecture", "Blockchain"],
         },
         {
           id: 3,
-          name: lang === "vi-VN" ? "Michael Patel" : lang === "zh-CN" ? "迈克尔·帕特尔" : "Michael Patel",
-          role: lang === "vi-VN" ? "Trưởng phòng Giao dịch" : lang === "zh-CN" ? "交易主管" : "Head of Trading",
+          name:
+            lang === "vi-VN"
+              ? "Michael Patel"
+              : lang === "zh-CN"
+              ? "迈克尔·帕特尔"
+              : "Michael Patel",
+          role:
+            lang === "vi-VN"
+              ? "Trưởng phòng Giao dịch"
+              : lang === "zh-CN"
+              ? "交易主管"
+              : "Head of Trading",
           bio:
             lang === "vi-VN"
               ? "15 năm kinh nghiệm trong giao dịch định lượng. Từng quản lý 2 tỷ USD tài sản tại Goldman Sachs."
               : lang === "zh-CN"
-                ? "拥有15年量化交易经验。曾在高盛管理20亿美元的资产。"
-                : "15 years of experience in quantitative trading. Previously managed $2B in assets at Goldman Sachs.",
+              ? "拥有15年量化交易经验。曾在高盛管理20亿美元的资产。"
+              : "15 years of experience in quantitative trading. Previously managed $2B in assets at Goldman Sachs.",
           description:
             lang === "vi-VN"
               ? "Với kinh nghiệm sâu rộng, Michael Patel đã đóng vai trò quan trọng trong việc phát triển các giải pháp sáng tạo."
               : lang === "zh-CN"
-                ? "凭借丰富的经验，迈克尔·帕特尔在开发创新解决方案方面发挥了重要作用。"
-                : "With extensive experience, Michael Patel has been instrumental in developing innovative solutions.",
+              ? "凭借丰富的经验，迈克尔·帕特尔在开发创新解决方案方面发挥了重要作用。"
+              : "With extensive experience, Michael Patel has been instrumental in developing innovative solutions.",
           avatar: "/team/michael.jpg",
           skills:
             lang === "vi-VN"
-              ? ["Giao dịch thuật toán", "Quản lý rủi ro", "Phân tích thị trường"]
+              ? [
+                  "Giao dịch thuật toán",
+                  "Quản lý rủi ro",
+                  "Phân tích thị trường",
+                ]
               : lang === "zh-CN"
-                ? ["算法交易", "风险管理", "市场分析"]
-                : ["Algorithmic Trading", "Risk Management", "Market Analysis"],
+              ? ["算法交易", "风险管理", "市场分析"]
+              : ["Algorithmic Trading", "Risk Management", "Market Analysis"],
         },
         {
           id: 4,
-          name: lang === "vi-VN" ? "Emily Rodriguez" : lang === "zh-CN" ? "艾米丽·罗德里格斯" : "Emily Rodriguez",
-          role: lang === "vi-VN" ? "Quản lý Thành công Khách hàng" : lang === "zh-CN" ? "客户成功经理" : "Customer Success Manager",
+          name:
+            lang === "vi-VN"
+              ? "Emily Rodriguez"
+              : lang === "zh-CN"
+              ? "艾米丽·罗德里格斯"
+              : "Emily Rodriguez",
+          role:
+            lang === "vi-VN"
+              ? "Quản lý Thành công Khách hàng"
+              : lang === "zh-CN"
+              ? "客户成功经理"
+              : "Customer Success Manager",
           bio:
             lang === "vi-VN"
               ? "Chuyên đảm bảo khách hàng đạt được mục tiêu đầu tư. Chuyên gia về trải nghiệm khách hàng và tư vấn tài chính."
               : lang === "zh-CN"
-                ? "致力于确保客户实现投资目标。客户体验和财务咨询专家。"
-                : "Dedicated to ensuring our clients achieve their investment goals. Expert in customer experience and financial advising.",
+              ? "致力于确保客户实现投资目标。客户体验和财务咨询专家。"
+              : "Dedicated to ensuring our clients achieve their investment goals. Expert in customer experience and financial advising.",
           description:
             lang === "vi-VN"
               ? "Với kinh nghiệm sâu rộng, Emily Rodriguez đã đóng vai trò quan trọng trong việc phát triển các giải pháp sáng tạo."
               : lang === "zh-CN"
-                ? "凭借丰富的经验，艾米丽·罗德里格斯在开发创新解决方案方面发挥了重要作用。"
-                : "With extensive experience, Emily Rodriguez has been instrumental in developing innovative solutions.",
+              ? "凭借丰富的经验，艾米丽·罗德里格斯在开发创新解决方案方面发挥了重要作用。"
+              : "With extensive experience, Emily Rodriguez has been instrumental in developing innovative solutions.",
           avatar: "/team/emily.jpg",
           skills:
             lang === "vi-VN"
               ? ["Quan hệ khách hàng", "Tư vấn tài chính", "Đào tạo"]
               : lang === "zh-CN"
-                ? ["客户关系", "财务咨询", "培训"]
-                : ["Client Relations", "Financial Advisory", "Training"],
+              ? ["客户关系", "财务咨询", "培训"]
+              : ["Client Relations", "Financial Advisory", "Training"],
         },
       ],
       hero_section_title: fallback.hero_section_title,
@@ -268,15 +339,22 @@ async function getTeamMembers(locale: string): Promise<{
 export default function TeamSlider({ initialData }: TeamSliderProps) {
   const locale = useLocale();
   const { mytheme } = useSelector((state: RootState) => state.theme);
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(initialData?.teamMembers || []);
-  const [heroSectionTitle, setHeroSectionTitle] = useState<string>(
-    initialData?.hero_section_title || translationFallbacks["en-US"].hero_section_title
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(
+    initialData?.teamMembers || []
   );
-  const [title, setTitle] = useState<string>(initialData?.title || translationFallbacks["en-US"].title);
+  const [heroSectionTitle, setHeroSectionTitle] = useState<string>(
+    initialData?.hero_section_title ||
+      translationFallbacks["en-US"].hero_section_title
+  );
+  const [title, setTitle] = useState<string>(
+    initialData?.title || translationFallbacks["en-US"].title
+  );
   const [subtitle, setSubtitle] = useState<string>(
     initialData?.subtitle || translationFallbacks["en-US"].subtitle
   );
-  const [activeTeamMember, setActiveTeamMember] = useState<TeamMember | null>(null);
+  const [activeTeamMember, setActiveTeamMember] = useState<TeamMember | null>(
+    null
+  );
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isLoading, setIsLoading] = useState(!initialData);
@@ -298,12 +376,20 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
   const goToPrev = useCallback(() => {
     if (isAnimating || isLoading || !teamMembers.length) return;
     setIsAnimating(true);
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + teamMembers.length) % teamMembers.length);
+    setCurrentIndex(
+      (prevIndex) => (prevIndex - 1 + teamMembers.length) % teamMembers.length
+    );
     setTimeout(() => setIsAnimating(false), 500);
   }, [isAnimating, isLoading, teamMembers.length]);
 
   const setupSlideshow = useCallback(() => {
-    if (slideshowPausedRef.current || isLoading || !teamMembers.length || activeTeamMember) return;
+    if (
+      slideshowPausedRef.current ||
+      isLoading ||
+      !teamMembers.length ||
+      activeTeamMember
+    )
+      return;
 
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -333,7 +419,12 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
     });
   }
 
-  if (!isLoading && teamMembers.length > 0 && !activeTeamMember && !timerRef.current) {
+  if (
+    !isLoading &&
+    teamMembers.length > 0 &&
+    !activeTeamMember &&
+    !timerRef.current
+  ) {
     setupSlideshow();
   }
 
@@ -368,7 +459,10 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
   const getSlidePosition = (index: number) => {
     if (index === currentIndex) {
       return "center";
-    } else if (index === (currentIndex - 1 + teamMembers.length) % teamMembers.length) {
+    } else if (
+      index ===
+      (currentIndex - 1 + teamMembers.length) % teamMembers.length
+    ) {
       return "left";
     } else if (index === (currentIndex + 1) % teamMembers.length) {
       return "right";
@@ -380,7 +474,9 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
   if (isLoading) {
     return (
       <div className="py-20 text-center">
-        <p className="text-lg text-gray-600 dark:text-gray-300">Loading team members...</p>
+        <p className="text-lg text-gray-600 dark:text-gray-300">
+          Loading team members...
+        </p>
       </div>
     );
   }
@@ -391,27 +487,50 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
         <div className="flex flex-col items-center mb-16 text-center">
           <div className="flex items-center justify-center mb-4">
             <div className="h-1 w-10 bg-yellow-600 rounded mr-2"></div>
-            <span className={`font-bold uppercase tracking-wider text-sm ${mytheme === "dark" ? "text-gray-400" : "text-gray-500"
+            <span
+              className={`font-bold uppercase tracking-wider text-sm ${
+                mytheme === "dark" ? "text-gray-400" : "text-gray-500"
               }`}>
               {heroSectionTitle}
             </span>
             <div className="h-1 w-10 bg-yellow-600 rounded ml-2"></div>
           </div>
-          <h1 className={`text-4xl md:text-5xl font-bold pb-6 ${mytheme === "dark" ? "text-white" : "text-gray-800"
+          <h1
+            className={`text-4xl md:text-5xl font-bold pb-6 ${
+              mytheme === "dark" ? "text-white" : "text-gray-800"
             }`}>
             {title}
           </h1>
-          <p className={`text-lg text-gray-600 dark:text-gray-300 max-w-3xl mb-8`}>{subtitle}</p>
+          <p
+            className={`text-lg text-gray-600 dark:text-gray-300 max-w-3xl mb-8`}>
+            {subtitle}
+          </p>
         </div>
 
         <div className="relative px-4">
           <button
             onClick={goToPrev}
             className="absolute left-0 cursor-pointer  top-1/2 transform -translate-y-1/2 z-20 bg-white dark:bg-gray-800 rounded-full p-2 md:p-3 shadow-lg text-yellow-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors"
-            aria-label={locale === "vi" ? "Thành viên trước" : locale === "zh" ? "上一成员" : "Previous team member"}
-          >
-            <svg className={`w-6 h-6 ${mytheme === "dark" ? "text-white" : "text-gray-800"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            aria-label={
+              locale === "vi"
+                ? "Thành viên trước"
+                : locale === "zh"
+                ? "上一成员"
+                : "Previous team member"
+            }>
+            <svg
+              className={`w-6 h-6 ${
+                mytheme === "dark" ? "text-white" : "text-gray-800"
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
 
@@ -420,8 +539,7 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
             className="overflow-hidden relative h-[600px] mx-auto md:p-10"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
+            onTouchEnd={handleTouchEnd}>
             <div className="relative w-full h-full">
               {teamMembers.map((member, index) => {
                 const position = getSlidePosition(index);
@@ -429,16 +547,28 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
                   <div
                     key={member.id}
                     className={`absolute transition-all duration-500 ease-in-out top-0 w-full max-w-md mx-auto 
-                      ${position === "center" ? "left-1/2 -translate-x-1/2 z-10 opacity-100 scale-100" : ""} 
-                      ${position === "left" ? "left-0 -translate-x-1/2 z-0 opacity-40 scale-85" : ""} 
-                      ${position === "right" ? "right-0 translate-x-1/2 z-0 opacity-40 scale-85" : ""} 
-                      ${position === "hidden" ? "opacity-0 scale-75 -z-10" : ""}`}
-                  >
+                      ${
+                        position === "center"
+                          ? "left-1/2 -translate-x-1/2 z-10 opacity-100 scale-100"
+                          : ""
+                      } 
+                      ${
+                        position === "left"
+                          ? "left-0 -translate-x-1/2 z-0 opacity-40 scale-85"
+                          : ""
+                      } 
+                      ${
+                        position === "right"
+                          ? "right-0 translate-x-1/2 z-0 opacity-40 scale-85"
+                          : ""
+                      } 
+                      ${
+                        position === "hidden" ? "opacity-0 scale-75 -z-10" : ""
+                      }`}>
                     <div
                       className={`bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform 
                         ${position === "center" ? "hover:scale-105" : ""} 
-                        border border-gray-100 dark:border-gray-700 h-full`}
-                    >
+                        border border-gray-100 dark:border-gray-700 h-full`}>
                       <div className="relative h-80 overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent z-10"></div>
                         <div className="h-full w-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center">
@@ -455,16 +585,30 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
                         </div>
                       </div>
                       <div className="p-3">
-                        <p className="text-gray-600 dark:text-gray-300 pb-4 line-clamp-3">{member.bio}</p>
+                        <p className="text-gray-600 dark:text-gray-300 pb-4 line-clamp-3">
+                          {member.bio}
+                        </p>
                         <button
                           onClick={() => setActiveTeamMember(member)}
-                          className="w-full cursor-pointer  py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center"
-                        >
+                          className="w-full cursor-pointer  py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center">
                           <span className="text-white cursor-pointer">
-                            {locale === "vi" ? "Xem Hồ Sơ" : locale === "zh" ? "查看简介" : "View Profile"}
+                            {locale === "vi"
+                              ? "Xem Hồ Sơ"
+                              : locale === "zh"
+                              ? "查看简介"
+                              : "View Profile"}
                           </span>
-                          <svg className="w-4 h-4 ml-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          <svg
+                            className="w-4 h-4 ml-2 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
                           </svg>
                         </button>
                       </div>
@@ -478,10 +622,26 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
           <button
             onClick={goToNext}
             className="absolute right-0 cursor-pointer top-1/2 transform -translate-y-1/2 z-20 bg-white dark:bg-gray-800 rounded-full p-2 md:p-3 shadow-lg text-yellow-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors"
-            aria-label={locale === "vi" ? "Thành viên tiếp theo" : locale === "zh" ? "下一成员" : "Next team member"}
-          >
-            <svg className={`w-6 h-6 ${mytheme === "dark" ? "text-white" : "text-gray-800"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            aria-label={
+              locale === "vi"
+                ? "Thành viên tiếp theo"
+                : locale === "zh"
+                ? "下一成员"
+                : "Next team member"
+            }>
+            <svg
+              className={`w-6 h-6 ${
+                mytheme === "dark" ? "text-white" : "text-gray-800"
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
         </div>
@@ -491,11 +651,18 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full cursor-pointer transition-all duration-300 ${index === currentIndex
-                ? "bg-yellow-600 w-8"
-                : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
-                }`}
-              aria-label={locale === "vi" ? `Đi đến slide ${index + 1}` : locale === "zh" ? `转到幻灯片 ${index + 1}` : `Go to slide ${index + 1}`}
+              className={`w-3 h-3 rounded-full cursor-pointer transition-all duration-300 ${
+                index === currentIndex
+                  ? "bg-yellow-600 w-8"
+                  : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
+              }`}
+              aria-label={
+                locale === "vi"
+                  ? `Đi đến slide ${index + 1}`
+                  : locale === "zh"
+                  ? `转到幻灯片 ${index + 1}`
+                  : `Go to slide ${index + 1}`
+              }
             />
           ))}
         </div>
@@ -508,19 +675,33 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
           centered
           width="90%"
           style={{ maxWidth: "1240px" }}
-          className="team-member-modal"
-        >
+          className="team-member-modal">
           <div
             className="bg-white dark:bg-gray-800 rounded-2xl w-full overflow-hidden relative animate-scale-in"
-            style={{ animation: "scale-in 0.3s ease-out forwards" }}
-          >
+            style={{ animation: "scale-in 0.3s ease-out forwards" }}>
             <button
               onClick={() => setActiveTeamMember(null)}
               className="absolute md:top-0 top-2 cursor-pointer hover:bg-gray-100 right-2 z-30 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full p-2 text-gray-700 hover:text-red-600 dark:text-gray-300 dark:hover:text-red-400 transition-colors"
-              aria-label={locale === "vi" ? "Đóng hồ sơ" : locale === "zh" ? "关闭简介" : "Close profile"}
-            >
-              <svg className={`w-6 h-6 ${mytheme === "dark" ? "text-white" : "text-gray-800"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              aria-label={
+                locale === "vi"
+                  ? "Đóng hồ sơ"
+                  : locale === "zh"
+                  ? "关闭简介"
+                  : "Close profile"
+              }>
+              <svg
+                className={`w-6 h-6 ${
+                  mytheme === "dark" ? "text-white" : "text-gray-800"
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
 
@@ -540,10 +721,16 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
                       />
                     </div>
                   </div>
-                  <h2 className="text-3xl font-bold text-center mb-2">{activeTeamMember?.name}</h2>
+                  <h2 className="text-3xl font-bold text-center mb-2">
+                    {activeTeamMember?.name}
+                  </h2>
                   <div className="w-full mt-10">
                     <p className="text-sm uppercase tracking-wider text-blue-200 mb-3 font-bold">
-                      {locale === "vi" ? "Mô tả" : locale === "zh" ? "描述" : "Description"}
+                      {locale === "vi"
+                        ? "Mô tả"
+                        : locale === "zh"
+                        ? "描述"
+                        : "Description"}
                     </p>
                     <p className="text-white text-base dark:text-gray-300 leading-relaxed">
                       {activeTeamMember?.bio}
@@ -556,7 +743,11 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
                 <div className="mb-8">
                   <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
                     <span className="bg-blue-100 dark:bg-blue-900/30 text-yellow-600 dark:text-blue-400 p-2 rounded-full mr-3">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24">
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -565,9 +756,15 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
                         />
                       </svg>
                     </span>
-                    {locale === "vi" ? `Giới thiệu về ${activeTeamMember?.name}` : locale === "zh" ? `关于 ${activeTeamMember?.name}` : `About ${activeTeamMember?.name}`}
+                    {locale === "vi"
+                      ? `Giới thiệu về ${activeTeamMember?.name}`
+                      : locale === "zh"
+                      ? `关于 ${activeTeamMember?.name}`
+                      : `About ${activeTeamMember?.name}`}
                   </h2>
-                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{activeTeamMember?.description}</p>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                    {activeTeamMember?.description}
+                  </p>
                 </div>
               </div>
             </div>
@@ -593,4 +790,3 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
     </div>
   );
 }
-

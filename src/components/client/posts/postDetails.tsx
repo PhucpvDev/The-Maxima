@@ -504,8 +504,10 @@ const BlogPostDetail: NextPage<PostPageProps> = ({ params }) => {
         />
       </Head>
       <motion.div
-        className={`min-h-screen ${
-          mytheme === "light" ? "bg-gray-50" : "bg-gray-900"
+        className={`min-h-screen  ${
+          mytheme === "light"
+            ? "bg-gradient-to-b from-slate-50 to-gray-100"
+            : "bg-gradient-to-b from-gray-900 to-gray-950"
         }`}
         variants={pageVariants}
         initial="hidden"
@@ -518,7 +520,7 @@ const BlogPostDetail: NextPage<PostPageProps> = ({ params }) => {
           ) : post ? (
             <>
               <div
-                className="w-full h-full mt-3 sm:h-80 bg-center bg-cover relative rounded-xl"
+                className="w-full mt-3 h-80 bg-center bg-cover relative rounded-xl"
                 style={{
                   backgroundImage: `url(${post.media[0].url})`,
                   backgroundPosition: "center 30%",
@@ -527,7 +529,7 @@ const BlogPostDetail: NextPage<PostPageProps> = ({ params }) => {
                   className={`absolute inset-0 rounded-xl ${
                     mytheme === "light" ? "bg-black/50" : "bg-black/70"
                   }`}></div>
-                <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-8">
+                <div className="absolute inset-0 flex flex-col justify-end p-3 sm:p-4">
                   <motion.div variants={itemVariants}>
                     <div className="flex flex-wrap gap-2 mb-3">
                       {post.category.map((catKey) => {
@@ -663,10 +665,10 @@ const BlogPostDetail: NextPage<PostPageProps> = ({ params }) => {
                   </div>
                 </div>
               </div>
-              <Posts />
             </>
           ) : null}
         </div>
+        <Posts />
       </motion.div>
     </ConfigProvider>
   );
