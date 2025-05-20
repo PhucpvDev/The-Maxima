@@ -94,6 +94,7 @@
     "roleRequired": "Please select a role",
     "rolePlaceholder": "Select role",
     "avatarLabel": "Avatar",
+    "codeAffPlaceholder": "Please select a affiliate",
     "avatarRequired": "Please upload an avatar",
     "avatarUploadButton": "Upload Avatar",
     "addButton": "Add",

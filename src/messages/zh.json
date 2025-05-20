@@ -94,6 +94,7 @@
     "roleRequired": "请选择角色",
     "rolePlaceholder": "选择角色",
     "avatarLabel": "头像",
+    "codeAffPlaceholder": "请添加联盟代码",
     "avatarRequired": "请上传头像",
     "avatarUploadButton": "上传头像",
     "addButton": "添加",

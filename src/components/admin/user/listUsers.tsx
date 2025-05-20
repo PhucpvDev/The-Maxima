@@ -20,7 +20,6 @@ import {
   MoreOutlined,
   TeamOutlined,
   UserOutlined,
-  MailOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useTranslations } from 'next-intl';
@@ -465,24 +464,6 @@ export default function Users() {
       ),
     },
     {
-      title: t('columnEmail'),
-      dataIndex: 'email',
-      key: 'email',
-      render: (text: string) => (
-        <Space>
-          <MailOutlined />
-          <span>{text || '-'}</span>
-        </Space>
-      ),
-    },
-    {
-      title: t('columnRole'),
-      key: 'role',
-      render: (_: unknown, record: User) => (
-        <span className="capitalize">{record.role?.name || '-'}</span>
-      ),
-    },
-    {
       title: t('columnAffiliateId'),
       key: 'affiliateId',
       render: (_: unknown, record: User) => {
@@ -656,7 +637,7 @@ export default function Users() {
           />
         ) : (
           <div className="text-center text-xl p-8">
-            <p>{t('noUsersFound')}</p>
+            <p></p>
           </div>
         )
       ) : (

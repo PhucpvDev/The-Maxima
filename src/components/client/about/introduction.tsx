@@ -37,6 +37,7 @@ interface TeamMemberTranslation {
   avatar_2: string;
   avatar_3: string;
   avatar_4: string;
+  showMemberIntro: string;
 }
 
 interface TeamMember {
@@ -123,6 +124,7 @@ async function getTeamMembers(locale: string): Promise<{
   hero_section_title: string;
   title: string;
   subtitle: string;
+  showMemberIntro: string;
 }> {
   const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
   const fallback = translationFallbacks[lang] || translationFallbacks["en-US"];
@@ -137,11 +139,13 @@ async function getTeamMembers(locale: string): Promise<{
       }
     );
 
+
     if (!response.ok) {
       throw new Error("Failed to fetch team members");
     }
 
     const result = await response.json();
+
     const data: ApiResponse = result.data;
 
     const translation =
@@ -158,22 +162,22 @@ async function getTeamMembers(locale: string): Promise<{
         id: index,
         name: String(
           translation[`name_${index}` as keyof TeamMemberTranslation] ||
-            `Unknown ${index}`
+          `Unknown ${index}`
         ),
         role: String(
           translation[`role_${index}` as keyof TeamMemberTranslation] ||
-            "Unknown"
+          "Unknown"
         ),
         bio: String(
           translation[`bio_${index}` as keyof TeamMemberTranslation] || ""
         ),
         description: String(
           translation[`description_${index}` as keyof TeamMemberTranslation] ||
-            ""
+          ""
         ),
         avatar: String(
           translation[`avatar_${index}` as keyof TeamMemberTranslation] ||
-            "/team/default.jpg"
+          "/team/default.jpg"
         ),
         skills: safeJsonParse(
           String(translation[`skills_${index}` as keyof TeamMemberTranslation]),
@@ -188,6 +192,7 @@ async function getTeamMembers(locale: string): Promise<{
         translation.hero_section_title || fallback.hero_section_title,
       title: translation.title || fallback.title,
       subtitle: translation.subtitle || fallback.subtitle,
+      showMemberIntro: result.data.showMemberIntro
     };
   } catch (error) {
     console.error("Error fetching team members:", error);
@@ -199,26 +204,26 @@ async function getTeamMembers(locale: string): Promise<{
             lang === "vi-VN"
               ? "Alex Johnson"
               : lang === "zh-CN"
-              ? "亚历克斯·约翰逊"
-              : "Alex Johnson",
+                ? "亚历克斯·约翰逊"
+                : "Alex Johnson",
           role:
             lang === "vi-VN"
               ? "Giám đốc Điều hành & Nhà sáng lập"
               : lang === "zh-CN"
-              ? "首席执行官兼创始人"
-              : "CEO & Founder",
+                ? "首席执行官兼创始人"
+                : "CEO & Founder",
           bio:
             lang === "vi-VN"
               ? "Nhà khởi nghiệp có tầm nhìn với hơn 10 năm trong công nghệ tài chính. Đam mê tạo ra các giải pháp trao quyền cho nhà giao dịch."
               : lang === "zh-CN"
-              ? "具有超过10年金融科技经验的企业家。热衷于创建赋予交易者权力的解决方案。"
-              : "Entrepreneurial visionary with 10+ years in finance technology. Passionate about creating solutions that empower traders.",
+                ? "具有超过10年金融科技经验的企业家。热衷于创建赋予交易者权力的解决方案。"
+                : "Entrepreneurial visionary with 10+ years in finance technology. Passionate about creating solutions that empower traders.",
           description:
             lang === "vi-VN"
               ? "Với kinh nghiệm sâu rộng trong lĩnh vực của mình, Alex Johnson đã đóng vai trò quan trọng trong việc phát triển các giải pháp và chiến lược sáng tạo, thúc đẩy công ty tiến xa hơn."
               : lang === "zh-CN"
-              ? "凭借其领域的丰富经验，亚历克斯·约翰逊在开发创新解决方案和战略方面发挥了重要作用，推动公司向前发展。"
-              : "With extensive experience in their field, Alex Johnson has been instrumental in developing innovative solutions and strategies that have propelled our company forward.",
+                ? "凭借其领域的丰富经验，亚历克斯·约翰逊在开发创新解决方案和战略方面发挥了重要作用，推动公司向前发展。"
+                : "With extensive experience in their field, Alex Johnson has been instrumental in developing innovative solutions and strategies that have propelled our company forward.",
           avatar: "/team/alex.jpg",
           skills: ["Leadership", "Strategy", "Investment"],
         },
@@ -228,33 +233,33 @@ async function getTeamMembers(locale: string): Promise<{
             lang === "vi-VN"
               ? "Sarah Chen"
               : lang === "zh-CN"
-              ? "莎拉·陈"
-              : "Sarah Chen",
+                ? "莎拉·陈"
+                : "Sarah Chen",
           role:
             lang === "vi-VN"
               ? "Giám đốc Công nghệ"
               : lang === "zh-CN"
-              ? "首席技术官"
-              : "Chief Technology Officer",
+                ? "首席技术官"
+                : "Chief Technology Officer",
           bio:
             lang === "vi-VN"
               ? "Cựu kỹ sư Google chuyên về thuật toán AI và hệ thống giao dịch. Dẫn dắt sự đổi mới kỹ thuật của chúng tôi."
               : lang === "zh-CN"
-              ? "前谷歌工程师，专注于人工智能算法和交易系统。领导我们的技术创新。"
-              : "Former Google engineer with specialization in AI algorithms and trading systems. Leads our technical innovation.",
+                ? "前谷歌工程师，专注于人工智能算法和交易系统。领导我们的技术创新。"
+                : "Former Google engineer with specialization in AI algorithms and trading systems. Leads our technical innovation.",
           description:
             lang === "vi-VN"
               ? "Với kinh nghiệm sâu rộng trong lĩnh vực của mình, Sarah Chen đã đóng vai trò quan trọng trong việc phát triển các giải pháp và chiến lược sáng tạo."
               : lang === "zh-CN"
-              ? "凭借其领域的丰富经验，莎拉·陈在开发创新解决方案和战略方面发挥了重要作用。"
-              : "With extensive experience in their field, Sarah Chen has been instrumental in developing innovative solutions and strategies.",
+                ? "凭借其领域的丰富经验，莎拉·陈在开发创新解决方案和战略方面发挥了重要作用。"
+                : "With extensive experience in their field, Sarah Chen has been instrumental in developing innovative solutions and strategies.",
           avatar: "/team/sarah.jpg",
           skills:
             lang === "vi-VN"
               ? ["AI", "Kiến trúc phần mềm", "Blockchain"]
               : lang === "zh-CN"
-              ? ["人工智能", "软件架构", "区块链"]
-              : ["AI", "Software Architecture", "Blockchain"],
+                ? ["人工智能", "软件架构", "区块链"]
+                : ["AI", "Software Architecture", "Blockchain"],
         },
         {
           id: 3,
@@ -262,37 +267,37 @@ async function getTeamMembers(locale: string): Promise<{
             lang === "vi-VN"
               ? "Michael Patel"
               : lang === "zh-CN"
-              ? "迈克尔·帕特尔"
-              : "Michael Patel",
+                ? "迈克尔·帕特尔"
+                : "Michael Patel",
           role:
             lang === "vi-VN"
               ? "Trưởng phòng Giao dịch"
               : lang === "zh-CN"
-              ? "交易主管"
-              : "Head of Trading",
+                ? "交易主管"
+                : "Head of Trading",
           bio:
             lang === "vi-VN"
               ? "15 năm kinh nghiệm trong giao dịch định lượng. Từng quản lý 2 tỷ USD tài sản tại Goldman Sachs."
               : lang === "zh-CN"
-              ? "拥有15年量化交易经验。曾在高盛管理20亿美元的资产。"
-              : "15 years of experience in quantitative trading. Previously managed $2B in assets at Goldman Sachs.",
+                ? "拥有15年量化交易经验。曾在高盛管理20亿美元的资产。"
+                : "15 years of experience in quantitative trading. Previously managed $2B in assets at Goldman Sachs.",
           description:
             lang === "vi-VN"
               ? "Với kinh nghiệm sâu rộng, Michael Patel đã đóng vai trò quan trọng trong việc phát triển các giải pháp sáng tạo."
               : lang === "zh-CN"
-              ? "凭借丰富的经验，迈克尔·帕特尔在开发创新解决方案方面发挥了重要作用。"
-              : "With extensive experience, Michael Patel has been instrumental in developing innovative solutions.",
+                ? "凭借丰富的经验，迈克尔·帕特尔在开发创新解决方案方面发挥了重要作用。"
+                : "With extensive experience, Michael Patel has been instrumental in developing innovative solutions.",
           avatar: "/team/michael.jpg",
           skills:
             lang === "vi-VN"
               ? [
-                  "Giao dịch thuật toán",
-                  "Quản lý rủi ro",
-                  "Phân tích thị trường",
-                ]
+                "Giao dịch thuật toán",
+                "Quản lý rủi ro",
+                "Phân tích thị trường",
+              ]
               : lang === "zh-CN"
-              ? ["算法交易", "风险管理", "市场分析"]
-              : ["Algorithmic Trading", "Risk Management", "Market Analysis"],
+                ? ["算法交易", "风险管理", "市场分析"]
+                : ["Algorithmic Trading", "Risk Management", "Market Analysis"],
         },
         {
           id: 4,
@@ -300,38 +305,39 @@ async function getTeamMembers(locale: string): Promise<{
             lang === "vi-VN"
               ? "Emily Rodriguez"
               : lang === "zh-CN"
-              ? "艾米丽·罗德里格斯"
-              : "Emily Rodriguez",
+                ? "艾米丽·罗德里格斯"
+                : "Emily Rodriguez",
           role:
             lang === "vi-VN"
               ? "Quản lý Thành công Khách hàng"
               : lang === "zh-CN"
-              ? "客户成功经理"
-              : "Customer Success Manager",
+                ? "客户成功经理"
+                : "Customer Success Manager",
           bio:
             lang === "vi-VN"
               ? "Chuyên đảm bảo khách hàng đạt được mục tiêu đầu tư. Chuyên gia về trải nghiệm khách hàng và tư vấn tài chính."
               : lang === "zh-CN"
-              ? "致力于确保客户实现投资目标。客户体验和财务咨询专家。"
-              : "Dedicated to ensuring our clients achieve their investment goals. Expert in customer experience and financial advising.",
+                ? "致力于确保客户实现投资目标。客户体验和财务咨询专家。"
+                : "Dedicated to ensuring our clients achieve their investment goals. Expert in customer experience and financial advising.",
           description:
             lang === "vi-VN"
               ? "Với kinh nghiệm sâu rộng, Emily Rodriguez đã đóng vai trò quan trọng trong việc phát triển các giải pháp sáng tạo."
               : lang === "zh-CN"
-              ? "凭借丰富的经验，艾米丽·罗德里格斯在开发创新解决方案方面发挥了重要作用。"
-              : "With extensive experience, Emily Rodriguez has been instrumental in developing innovative solutions.",
+                ? "凭借丰富的经验，艾米丽·罗德里格斯在开发创新解决方案方面发挥了重要作用。"
+                : "With extensive experience, Emily Rodriguez has been instrumental in developing innovative solutions.",
           avatar: "/team/emily.jpg",
           skills:
             lang === "vi-VN"
               ? ["Quan hệ khách hàng", "Tư vấn tài chính", "Đào tạo"]
               : lang === "zh-CN"
-              ? ["客户关系", "财务咨询", "培训"]
-              : ["Client Relations", "Financial Advisory", "Training"],
+                ? ["客户关系", "财务咨询", "培训"]
+                : ["Client Relations", "Financial Advisory", "Training"],
         },
       ],
       hero_section_title: fallback.hero_section_title,
       title: fallback.title,
       subtitle: fallback.subtitle,
+      showMemberIntro: "",
     };
   }
 }
@@ -344,7 +350,7 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
   );
   const [heroSectionTitle, setHeroSectionTitle] = useState<string>(
     initialData?.hero_section_title ||
-      translationFallbacks["en-US"].hero_section_title
+    translationFallbacks["en-US"].hero_section_title
   );
   const [title, setTitle] = useState<string>(
     initialData?.title || translationFallbacks["en-US"].title
@@ -352,6 +358,9 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
   const [subtitle, setSubtitle] = useState<string>(
     initialData?.subtitle || translationFallbacks["en-US"].subtitle
   );
+
+   const [isHidden, setIsHidden] = useState<string>();
+
   const [activeTeamMember, setActiveTeamMember] = useState<TeamMember | null>(
     null
   );
@@ -415,6 +424,7 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
       setHeroSectionTitle(data.hero_section_title);
       setTitle(data.title);
       setSubtitle(data.subtitle);
+      setIsHidden(data.showMemberIntro);
       setIsLoading(false);
     });
   }
@@ -482,23 +492,23 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
   }
 
   return (
-    <div className="md:py-18 py-14 bg-gradient-to-b from-slate-50 to-white dark:from-gray-900 dark:to-gray-950">
-      <div className="container mx-auto px-3 max-w-7xl">
+    <>
+     {isHidden === "true" ? (
+      <div className="md:py-18 py-14 bg-gradient-to-b from-slate-50 to-white dark:from-gray-900 dark:to-gray-950">
+        <div className="container mx-auto px-3 max-w-7xl">
         <div className="flex flex-col items-center mb-16 text-center">
           <div className="flex items-center justify-center mb-4">
             <div className="h-1 w-10 bg-yellow-600 rounded mr-2"></div>
             <span
-              className={`font-bold uppercase tracking-wider text-sm ${
-                mytheme === "dark" ? "text-gray-400" : "text-gray-500"
-              }`}>
+              className={`font-bold uppercase tracking-wider text-sm ${mytheme === "dark" ? "text-gray-400" : "text-gray-500"
+                }`}>
               {heroSectionTitle}
             </span>
             <div className="h-1 w-10 bg-yellow-600 rounded ml-2"></div>
           </div>
           <h1
-            className={`text-4xl md:text-5xl font-bold pb-6 ${
-              mytheme === "dark" ? "text-white" : "text-gray-800"
-            }`}>
+            className={`text-4xl md:text-5xl font-bold pb-6 ${mytheme === "dark" ? "text-white" : "text-gray-800"
+              }`}>
             {title}
           </h1>
           <p
@@ -515,13 +525,12 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
               locale === "vi"
                 ? "Thành viên trước"
                 : locale === "zh"
-                ? "上一成员"
-                : "Previous team member"
+                  ? "上一成员"
+                  : "Previous team member"
             }>
             <svg
-              className={`w-6 h-6 ${
-                mytheme === "dark" ? "text-white" : "text-gray-800"
-              }`}
+              className={`w-6 h-6 ${mytheme === "dark" ? "text-white" : "text-gray-800"
+                }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24">
@@ -547,23 +556,19 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
                   <div
                     key={member.id}
                     className={`absolute transition-all duration-500 ease-in-out top-0 w-full max-w-md mx-auto 
-                      ${
-                        position === "center"
-                          ? "left-1/2 -translate-x-1/2 z-10 opacity-100 scale-100"
-                          : ""
+                      ${position === "center"
+                        ? "left-1/2 -translate-x-1/2 z-10 opacity-100 scale-100"
+                        : ""
                       } 
-                      ${
-                        position === "left"
-                          ? "left-0 -translate-x-1/2 z-0 opacity-40 scale-85"
-                          : ""
+                      ${position === "left"
+                        ? "left-0 -translate-x-1/2 z-0 opacity-40 scale-85"
+                        : ""
                       } 
-                      ${
-                        position === "right"
-                          ? "right-0 translate-x-1/2 z-0 opacity-40 scale-85"
-                          : ""
+                      ${position === "right"
+                        ? "right-0 translate-x-1/2 z-0 opacity-40 scale-85"
+                        : ""
                       } 
-                      ${
-                        position === "hidden" ? "opacity-0 scale-75 -z-10" : ""
+                      ${position === "hidden" ? "opacity-0 scale-75 -z-10" : ""
                       }`}>
                     <div
                       className={`bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform 
@@ -595,8 +600,8 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
                             {locale === "vi"
                               ? "Xem Hồ Sơ"
                               : locale === "zh"
-                              ? "查看简介"
-                              : "View Profile"}
+                                ? "查看简介"
+                                : "View Profile"}
                           </span>
                           <svg
                             className="w-4 h-4 ml-2 text-white"
@@ -626,13 +631,12 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
               locale === "vi"
                 ? "Thành viên tiếp theo"
                 : locale === "zh"
-                ? "下一成员"
-                : "Next team member"
+                  ? "下一成员"
+                  : "Next team member"
             }>
             <svg
-              className={`w-6 h-6 ${
-                mytheme === "dark" ? "text-white" : "text-gray-800"
-              }`}
+              className={`w-6 h-6 ${mytheme === "dark" ? "text-white" : "text-gray-800"
+                }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24">
@@ -651,17 +655,16 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full cursor-pointer transition-all duration-300 ${
-                index === currentIndex
+              className={`w-3 h-3 rounded-full cursor-pointer transition-all duration-300 ${index === currentIndex
                   ? "bg-yellow-600 w-8"
                   : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
-              }`}
+                }`}
               aria-label={
                 locale === "vi"
                   ? `Đi đến slide ${index + 1}`
                   : locale === "zh"
-                  ? `转到幻灯片 ${index + 1}`
-                  : `Go to slide ${index + 1}`
+                    ? `转到幻灯片 ${index + 1}`
+                    : `Go to slide ${index + 1}`
               }
             />
           ))}
@@ -686,13 +689,12 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
                 locale === "vi"
                   ? "Đóng hồ sơ"
                   : locale === "zh"
-                  ? "关闭简介"
-                  : "Close profile"
+                    ? "关闭简介"
+                    : "Close profile"
               }>
               <svg
-                className={`w-6 h-6 ${
-                  mytheme === "dark" ? "text-white" : "text-gray-800"
-                }`}
+                className={`w-6 h-6 ${mytheme === "dark" ? "text-white" : "text-gray-800"
+                  }`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24">
@@ -729,8 +731,8 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
                       {locale === "vi"
                         ? "Mô tả"
                         : locale === "zh"
-                        ? "描述"
-                        : "Description"}
+                          ? "描述"
+                          : "Description"}
                     </p>
                     <p className="text-white text-base dark:text-gray-300 leading-relaxed">
                       {activeTeamMember?.bio}
@@ -759,8 +761,8 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
                     {locale === "vi"
                       ? `Giới thiệu về ${activeTeamMember?.name}`
                       : locale === "zh"
-                      ? `关于 ${activeTeamMember?.name}`
-                      : `About ${activeTeamMember?.name}`}
+                        ? `关于 ${activeTeamMember?.name}`
+                        : `About ${activeTeamMember?.name}`}
                   </h2>
                   <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                     {activeTeamMember?.description}
@@ -788,5 +790,8 @@ export default function TeamSlider({ initialData }: TeamSliderProps) {
         }
       `}</style>
     </div>
+      ) : null}
+
+    </>
   );
 }

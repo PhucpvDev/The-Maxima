@@ -59,7 +59,7 @@ function transformFaqData(data: RawFaqData, locale: string): TransformedFaqData 
 
   const faqs: FaqItem[] = [];
 
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 1000; i++) {
     const questionKey = i === 1 ? 'question' : `question_${i}`;
     const answerKey = i === 1 ? 'answer' : `answer_${i}`;
 

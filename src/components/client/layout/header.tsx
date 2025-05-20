@@ -70,27 +70,63 @@ function AffiliateHandler({
   };
 
   useEffect(() => {
+    const user = searchParams.get("user");
     const aff = searchParams.get("aff");
     const existingAffCode = Cookies.get("aff_code");
 
-    if (aff) {
-      if (aff !== existingAffCode) {
-        Cookies.set("aff_code", aff, { expires: 7 });
-        const newTokenAff = generateTokenAff();
-        Cookies.set("token_aff", newTokenAff, { expires: 7 });
-        setShouldCallAffiliatesClick(true);
+    const fetchAffCodeFromUser = async (user: string) => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/users/by-name/${user}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch affiliate code");
+        }
+
+        const data = await response.json();
+
+        return data.affiliates[0].code;
+      } catch (error) {
+        console.error("Error fetching affiliate code:", error);
+        return null;
+      }
+    };
+
+    const handleAffCode = async () => {
+      let finalAffCode = aff;
+
+      if (user && !aff) {
+        finalAffCode = await fetchAffCodeFromUser(user);
+      }
+
+      if (finalAffCode) {
+        if (finalAffCode !== existingAffCode) {
+          Cookies.set("aff_code", finalAffCode, { expires: 7 });
+          const newTokenAff = generateTokenAff();
+          Cookies.set("token_aff", newTokenAff, { expires: 7 });
+          setShouldCallAffiliatesClick(true);
+        } else {
+          setShouldCallAffiliatesClick(false);
+        }
+        setAffCode(finalAffCode);
       } else {
+        Cookies.remove("aff_code");
+        Cookies.remove("token_aff");
+        setAffCode(null);
         setShouldCallAffiliatesClick(false);
       }
-      setAffCode(aff);
-    } else {
-      Cookies.remove("aff_code");
-      Cookies.remove("token_aff");
-      setAffCode(null);
-      setShouldCallAffiliatesClick(false);
-    }
 
-    onAffCodeChange(affCode, shouldCallAffiliatesClick);
+      onAffCodeChange(finalAffCode, shouldCallAffiliatesClick);
+    };
+
+    handleAffCode();
   }, [searchParams, affCode, shouldCallAffiliatesClick, onAffCodeChange]);
 
   return null;
@@ -356,20 +392,24 @@ export default function Home() {
             mytheme === "light"
               ? "bg-gradient-to-b from-gray-50 to-white"
               : "bg-gradient-to-b from-gray-900 to-gray-950"
-          }`}>
+          }`}
+        >
           <motion.div
             className="relative w-32 h-32 flex flex-col items-center justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}>
+            transition={{ duration: 0.5 }}
+          >
             <motion.div
               className="absolute inset-0 flex items-center justify-center z-20"
               animate={{ scale: [1, 1.05, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}>
+              transition={{ duration: 2, repeat: Infinity }}
+            >
               <div
                 className={`w-16 h-16 rounded-full flex items-center justify-center shadow-lg ${
                   mytheme === "light" ? "bg-white" : "bg-gray-800"
-                }`}>
+                }`}
+              >
                 <Image
                   src={IMAGES.LogoMaxima}
                   alt="Loading Logo"
@@ -382,13 +422,15 @@ export default function Home() {
             <motion.div
               className="absolute inset-0 flex items-center justify-center"
               animate={{ rotate: -360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}>
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            >
               <div className="w-20 h-20 border-4 border-transparent border-b-yellow-500 border-l-yellow-400 rounded-full"></div>
             </motion.div>
             <motion.div
               className="absolute inset-0 flex items-center justify-center"
               animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity }}>
+              transition={{ duration: 1.5, repeat: Infinity }}
+            >
               <div className="w-32 h-32 bg-yellow-400 rounded-full opacity-20"></div>
             </motion.div>
           </motion.div>
@@ -410,7 +452,8 @@ export default function Home() {
           mytheme === "light"
             ? "bg-gradient-to-b from-gray-50 to-white"
             : "bg-gradient-to-b from-gray-900 to-gray-950"
-        }`}>
+        }`}
+      >
         <Suspense fallback={null}>
           <AffiliateHandler onAffCodeChange={handleAffCodeChange} />
         </Suspense>
@@ -425,7 +468,8 @@ export default function Home() {
                 mytheme === "light" ? "#1a202c" : "#ffffff"
               } 1px, transparent 1px)`,
               backgroundSize: "30px 30px",
-            }}></div>
+            }}
+          ></div>
           <div className="absolute -top-32 -left-32 w-96 h-96 bg-yellow-500 rounded-full opacity-10 blur-3xl"></div>
           <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-blue-600 rounded-full opacity-10 blur-3xl"></div>
         </div>
@@ -440,7 +484,8 @@ export default function Home() {
         <div
           className={`absolute inset-0 z-0 ${
             mytheme === "light" ? "bg-black/20" : "bg-black/30"
-          }`}></div>
+          }`}
+        ></div>
 
         <div className="relative z-50">
           <motion.header
@@ -453,14 +498,16 @@ export default function Home() {
             }`}
             initial={{ y: -100 }}
             animate={{ y: 0 }}
-            transition={{ duration: 0.3 }}>
+            transition={{ duration: 0.3 }}
+          >
             <div className="flex justify-between items-center px-4 py-4 mx-auto max-w-7xl w-full">
               <motion.div className="flex items-center" variants={fadeInUp}>
                 <Link href={`/${locale}/`} className="flex items-center">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center mr-2 ${
                       mytheme === "light" ? "bg-gray-100" : "bg-gray-800"
-                    } shadow-md`}>
+                    } shadow-md`}
+                  >
                     <Image
                       src={IMAGES.LogoMaxima}
                       alt="Logo Maxima"
@@ -476,7 +523,8 @@ export default function Home() {
                           ? "text-gray-900"
                           : "text-white"
                         : "text-yellow-500"
-                    }`}>
+                    }`}
+                  >
                     MAXIMA
                   </span>
                 </Link>
@@ -490,7 +538,8 @@ export default function Home() {
                 variants={buttonVariants}
                 initial="rest"
                 whileHover="hover"
-                whileTap="tap">
+                whileTap="tap"
+              >
                 <MenuOutlined
                   style={{
                     fontSize: "18px",
@@ -517,7 +566,8 @@ export default function Home() {
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center mr-2 ${
                         mytheme === "light" ? "bg-gray-100" : "bg-gray-800"
-                      }`}>
+                      }`}
+                    >
                       <Image
                         src={IMAGES.LogoMaxima}
                         alt="Logo Maxima"
@@ -529,16 +579,19 @@ export default function Home() {
                     <span
                       className={`font-semibold ${
                         mytheme === "light" ? "text-gray-900" : "text-white"
-                      }`}>
+                      }`}
+                    >
                       Maxima Menu
                     </span>
                   </div>
-                }>
+                }
+              >
                 <motion.div
                   className="py-4"
                   variants={staggerContainer}
                   initial="hidden"
-                  animate="visible">
+                  animate="visible"
+                >
                   {filteredNavLinks.map((item) => (
                     <motion.div
                       key={item.name}
@@ -557,7 +610,8 @@ export default function Home() {
                             : "bg-yellow-900/20"
                           : ""
                       }`}
-                      onClick={() => handleMenuClick(item.name, item.url)}>
+                      onClick={() => handleMenuClick(item.name, item.url)}
+                    >
                       <motion.a
                         href={
                           item.url === "/posts" || item.url === "/affiliate"
@@ -584,11 +638,13 @@ export default function Home() {
                             e.preventDefault();
                             handleMenuClick(item.name, item.url);
                           }
-                        }}>
+                        }}
+                      >
                         <span
                           className={
                             mytheme === "light" ? "text-gray-800" : "text-white"
-                          }>
+                          }
+                        >
                           {item.name}
                         </span>
                       </motion.a>
@@ -599,7 +655,8 @@ export default function Home() {
                       <span
                         className={`text-base font-medium ${
                           mytheme === "light" ? "text-gray-900" : "text-white"
-                        }`}>
+                        }`}
+                      >
                         Theme
                       </span>
                       <motion.button
@@ -610,7 +667,8 @@ export default function Home() {
                         variants={buttonVariants}
                         initial="rest"
                         whileHover="hover"
-                        whileTap="tap">
+                        whileTap="tap"
+                      >
                         {mytheme === "light" ? (
                           <SunOutlined
                             style={{ fontSize: "16px", color: "#FFC800" }}
@@ -631,7 +689,8 @@ export default function Home() {
                 className="hidden md:block flex-row items-center flex-wrap"
                 variants={staggerContainer}
                 initial="hidden"
-                animate="visible">
+                animate="visible"
+              >
                 {filteredNavLinks.map((item) => (
                   <motion.a
                     key={item.name}
@@ -660,7 +719,8 @@ export default function Home() {
                         handleMenuClick(item.name, item.url);
                       }
                     }}
-                    variants={fadeInUp}>
+                    variants={fadeInUp}
+                  >
                     {item.name}
                   </motion.a>
                 ))}
@@ -668,7 +728,8 @@ export default function Home() {
 
               <motion.div
                 className="hidden md:flex items-center gap-4"
-                variants={fadeInUp}>
+                variants={fadeInUp}
+              >
                 <motion.button
                   className={`w-9 h-9 rounded-full cursor-pointer flex items-center justify-center ${
                     mytheme === "light" ? "bg-gray-100" : "bg-gray-800"
@@ -677,7 +738,8 @@ export default function Home() {
                   variants={buttonVariants}
                   initial="rest"
                   whileHover="hover"
-                  whileTap="tap">
+                  whileTap="tap"
+                >
                   {mytheme === "light" ? (
                     <SunOutlined
                       style={{ fontSize: "20px", color: "#FFC800" }}
@@ -700,12 +762,14 @@ export default function Home() {
                 variants={staggerContainer}
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true, amount: 0.2 }}>
+                viewport={{ once: true, amount: 0.2 }}
+              >
                 <motion.p
                   className={`text-3xl sm:text-4xl md:text-6xl md:w-4xl uppercase font-bold leading-tight tracking-tight ${
                     mytheme === "light" ? "text-white" : "text-white"
                   }`}
-                  variants={fadeInUp}>
+                  variants={fadeInUp}
+                >
                   {headerData?.main_title.split("<br />").map((line, index) => (
                     <span key={index}>
                       {line}
@@ -718,7 +782,8 @@ export default function Home() {
                   className={`text-xl sm:text-2xl md:text-3xl md:w-3xl uppercase font-semibold pt-6 pb-4 ${
                     mytheme === "light" ? "text-white" : "text-gray-200"
                   }`}
-                  variants={fadeInUp}>
+                  variants={fadeInUp}
+                >
                   {headerData?.subtitle}
                 </motion.p>
 
@@ -726,14 +791,16 @@ export default function Home() {
                   className={`text-lg sm:text-xl pb-4 uppercase font-bold ${
                     mytheme === "light" ? "text-white" : "text-gray-300"
                   }`}
-                  variants={fadeInUp}>
+                  variants={fadeInUp}
+                >
                   {headerData?.rate_text}
                 </motion.p>
 
                 <motion.a
                   href={registrationUrl}
                   className="inline-block text-white"
-                  variants={fadeInUp}>
+                  variants={fadeInUp}
+                >
                   <motion.button
                     className={`px-8 py-3 rounded-lg cursor-pointer text-white font-medium text-base shadow-lg ${
                       mytheme === "light"
@@ -743,7 +810,8 @@ export default function Home() {
                     variants={buttonVariants}
                     initial="rest"
                     whileHover="hover"
-                    whileTap="tap">
+                    whileTap="tap"
+                  >
                     {headerData?.cta_button_text}
                   </motion.button>
                 </motion.a>
@@ -754,14 +822,16 @@ export default function Home() {
                 variants={staggerContainer}
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true, amount: 0.2 }}>
+                viewport={{ once: true, amount: 0.2 }}
+              >
                 <motion.div
                   className={`p-6 rounded-2xl shadow-xl pmd:pl-32 ${
                     mytheme === "light"
                       ? "bg-white/80 backdrop-blur-md"
                       : "bg-gray-800/80 backdrop-blur-md"
                   }`}
-                  variants={fadeInUp}>
+                  variants={fadeInUp}
+                >
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {headerData?.stats.map((stat, index) => {
                       const numberMatch = stat.value.match(/^\d{1,3}(,\d{3})*/);
@@ -772,7 +842,8 @@ export default function Home() {
                         <motion.div
                           key={index}
                           className="flex items-center"
-                          variants={fadeInUp}>
+                          variants={fadeInUp}
+                        >
                           <div
                             className={`p-6 rounded-full mr-4 shadow-md ${
                               index === 0
@@ -786,7 +857,8 @@ export default function Home() {
                                 : mytheme === "light"
                                 ? "bg-green-100"
                                 : "bg-green-900/40"
-                            }`}>
+                            }`}
+                          >
                             <Image
                               src={
                                 index === 0
@@ -807,7 +879,8 @@ export default function Home() {
                                 mytheme === "light"
                                   ? "text-gray-700"
                                   : "text-gray-300"
-                              }`}>
+                              }`}
+                            >
                               {stat.label}
                             </span>
                             <p
@@ -815,14 +888,16 @@ export default function Home() {
                                 mytheme === "light"
                                   ? "text-gray-900"
                                   : "text-white"
-                              }`}>
+                              }`}
+                            >
                               {number}{" "}
                               <span
                                 className={`text-base font-bold ${
                                   mytheme === "light"
                                     ? "text-gray-600"
                                     : "text-gray-400"
-                                }`}>
+                                }`}
+                              >
                                 {unit}
                               </span>
                             </p>
