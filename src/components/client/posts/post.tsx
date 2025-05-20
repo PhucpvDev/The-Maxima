@@ -451,7 +451,7 @@ export default function Posts() {
                       {categories.filter((c) => c.parentKey === null).map((parent) => (
                         <TabPane tab={<span className={`px-5 py-2 transition-all duration-300 ${mytheme === "light" ? "text-gray-700 hover:bg-gray-100" : "text-gray-200 hover:bg-gray-700"}`}>{parent.name}</span>} key={parent.key}>
                           <div className={`rounded-xl ${mytheme === "light" ? "bg-white" : ""} overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent`}>
-                            <div className="flex flex-nowrap space-x-3 pb-1">
+                            <div className="flex flex-nowrap space-x-3 pb-1 pt-[1px]">
                               {categories.filter((category) => category.parentKey === parent.key).map((category) => (
                                 <motion.div key={category.key} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                                   <Button

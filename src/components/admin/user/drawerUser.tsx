@@ -22,6 +22,7 @@ interface User {
   id: number;
   email: string | null;
   name: string | null;
+  fullname: string | null; 
   roleId: number | null;
   loginAttempts: number;
   lastLoginAttempt: string;
@@ -61,6 +62,8 @@ interface User {
 
 interface FormValues {
   name: string;
+  email: string;
+  fullname: string; 
   codeAff: string;
 }
 
@@ -81,23 +84,19 @@ const DrawerAddUser: React.FC<DrawerAddUserProps> = ({
   const t = useTranslations('drawerAddUser');
   const [form] = Form.useForm();
 
-  // Hàm tạo email duy nhất
-  const generateUniqueEmail = (name: string) => {
-    const timestamp = Date.now();
-    const random = Math.random().toString(36).substring(2, 8); // Chuỗi ngẫu nhiên 6 ký tự
-    const sanitizedName = (name || 'user').toLowerCase().replace(/[^a-z0-9]/g, ''); // Làm sạch tên
-    return `${sanitizedName}_${timestamp}_${random}@example.com`;
-  };
-
   useEffect(() => {
     if (visible) {
       const initialValues = editingUser
         ? {
             name: editingUser.name || '',
+            email: editingUser.email || '',
+            fullname: editingUser.fullname || '', 
             codeAff: editingUser.affiliates?.length ? editingUser.affiliates[0].code : editingUser.codeAff || '',
           }
         : {
             name: '',
+            email: '',
+            fullname: '',
             codeAff: '',
           };
 
@@ -110,15 +109,23 @@ const DrawerAddUser: React.FC<DrawerAddUserProps> = ({
   const handleFinish = async (values: FormValues): Promise<void> => {
     const formData = new FormData();
     formData.append('name', values.name || '');
+    formData.append('email', values.email || '');
+    formData.append('fullname', values.fullname || ''); 
     formData.append('codeAff', values.codeAff || '');
 
-    // Tạo email duy nhất khi thêm người dùng mới, giữ nguyên email khi chỉnh sửa
-    const email = editingUser ? editingUser.email || 'default@example.com' : generateUniqueEmail(values.name);
-    formData.append('email', email);
-    formData.append('roleId', String(editingUser?.roleId || 4));
     if (!editingUser) {
       formData.append('password', 'Password123@');
       formData.append('confirmPassword', 'Password123@');
+      formData.append('roleId', '4'); 
+      formData.append('avatar', 'https://example.com/default-avatar.png');
+    } else {
+      formData.append('roleId', String(editingUser.roleId || 4));
+      if (editingUser.avatar) {
+        const avatarUrl = typeof editingUser.avatar === 'string' ? editingUser.avatar : editingUser.avatar.url || '';
+        if (avatarUrl) {
+          formData.append('avatar', avatarUrl);
+        }
+      }
     }
 
     for (const [key, value] of formData.entries()) {
@@ -153,6 +160,22 @@ const DrawerAddUser: React.FC<DrawerAddUserProps> = ({
         onFinish={handleFinish}
       >
         <div className="space-y-5">
+           <Form.Item
+            label={
+              <div className="flex items-center">
+                <Text className="text-gray-700 font-medium">{t('fullnameLabel')}</Text>
+              </div>
+            }
+            name="fullname"
+          >
+            <Input
+              placeholder={t('fullnamePlaceholder')}
+              size="large"
+              className="rounded-md border-gray-300 focus:border-blue-500"
+            />
+          </Form.Item>
+
+          
           <Form.Item
             label={
               <div className="flex items-center">
@@ -170,6 +193,29 @@ const DrawerAddUser: React.FC<DrawerAddUserProps> = ({
               placeholder={t('namePlaceholder')}
               size="large"
               className="rounded-md border-gray-300 focus:border-blue-500"
+            />
+          </Form.Item>
+
+          <Form.Item
+            label={
+              <div className="flex items-center">
+                <Text className="text-gray-700 font-medium">{t('emailLabel')}</Text>
+                <InfoCircleOutlined className="ml-2 text-gray-400" />
+              </div>
+            }
+            name="email"
+            rules={[
+              { required: true, message: t('emailRequired') },
+              { type: 'email', message: t('emailInvalid') },
+            ]}
+          >
+            <Input
+              placeholder={t('emailPlaceholder')}
+              size="large"
+              type="email"
+              className="rounded-md border-gray-300 focus:border-blue-500"
+              disabled={!!editingUser}
+              style={editingUser ? { backgroundColor: '#f5f5f5', color: '#666' } : {}}
             />
           </Form.Item>
 

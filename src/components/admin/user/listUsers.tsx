@@ -7,8 +7,6 @@ import {
   Button,
   Space,
   Dropdown,
-  Avatar,
-  Badge,
   Spin,
   Tooltip,
 } from 'antd';
@@ -19,7 +17,7 @@ import {
   DeleteOutlined,
   MoreOutlined,
   TeamOutlined,
-  UserOutlined,
+  MailOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useTranslations } from 'next-intl';
@@ -59,7 +57,6 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Custom interface to type axios-like errors without using AxiosError
 interface AxiosErrorLike {
   response?: {
     data?: ErrorResponse;
@@ -82,6 +79,7 @@ interface User {
   id: number;
   email: string | null;
   name: string | null;
+  fullname: string | null;
   roleId: number | null;
   loginAttempts: number;
   lastLoginAttempt: string;
@@ -139,17 +137,8 @@ export default function Users() {
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
   const { showNotification, contextHolder } = useCustomNotification();
 
-  // Refs to manage state
   const initializedRef = useRef(false);
   const userRoleFetchedRef = useRef(false);
-
-  const getAvatarUrl = (avatar: User['avatar']): string | undefined => {
-    if (!avatar) return undefined;
-    if (typeof avatar === 'string') return avatar;
-    if (avatar.url) return avatar.url;
-    if (avatar.avatar?.url) return avatar.avatar.url;
-    return undefined;
-  };
 
   const fetchCurrentUserRoleFromCookie = useCallback(() => {
     try {
@@ -197,6 +186,7 @@ export default function Users() {
       const mappedUsers = users.map((user: User) => ({
         ...user,
         status: user.loginAttempts < 5 ? 'active' : 'inactive' as 'active' | 'inactive',
+        fullname: user.fullname || '-',
       }));
 
       setUserData(mappedUsers);
@@ -261,7 +251,6 @@ export default function Users() {
         formDataObj[key] = value;
       });
 
-      // Keep roleId as string and validate
       if (formDataObj.roleId) {
         const roleIdNum = Number(formDataObj.roleId);
         if (isNaN(roleIdNum) || roleIdNum <= 0) {
@@ -347,13 +336,11 @@ export default function Users() {
     }
   };
 
-  // Initialize data - replaces useEffect
   if (!initializedRef.current) {
     initializedRef.current = true;
     fetchCurrentUserRoleFromCookie();
   }
 
-  // Handle after currentUserRole is set - replaces useEffect
   if (currentUserRole && !userRoleFetchedRef.current) {
     userRoleFetchedRef.current = true;
     fetchUsers();
@@ -363,6 +350,7 @@ export default function Users() {
   const filteredUsers = userData.filter((user) => {
     const matchesSearch =
       user.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      user.fullname?.toLowerCase().includes(searchText.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchText.toLowerCase()) ||
       user.affiliates.some((affiliate) =>
         affiliate.code.toLowerCase().includes(searchText.toLowerCase())
@@ -451,14 +439,32 @@ export default function Users() {
 
   const columns = [
     {
+      title: t('columnFullName'),
+      dataIndex: 'fullname',
+      key: 'fullname',
+      render: (text: string) => (
+        <Space>
+          <span>{text || '-'}</span>
+        </Space>
+      ),
+    },
+    {
       title: t('columnName'),
       dataIndex: 'name',
       key: 'name',
-      render: (text: string, record: User) => (
+      render: (text: string) => (
         <Space>
-          <Badge dot={record.status === 'active'} color="green">
-            <Avatar src={getAvatarUrl(record.avatar)} icon={<UserOutlined />} size={40} />
-          </Badge>
+          <span>{text || '-'}</span>
+        </Space>
+      ),
+    },
+    {
+      title: t('columnEmail'),
+      dataIndex: 'email',
+      key: 'email',
+      render: (text: string) => (
+        <Space>
+          <MailOutlined />
           <span>{text || '-'}</span>
         </Space>
       ),
@@ -637,7 +643,7 @@ export default function Users() {
           />
         ) : (
           <div className="text-center text-xl p-8">
-            <p></p>
+            <p>{t('noUsersFound')}</p>
           </div>
         )
       ) : (
