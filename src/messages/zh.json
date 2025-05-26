@@ -86,6 +86,7 @@
     "emailPlaceholder": "输入电子邮件",
     "passwordLabel": "密码",
     "codeAffLabel": "关联公司",
+    "nameInvalidFormat": "姓名格式无效",
     "passwordRequired": "请输入密码",
     "passwordMinLength": "密码至少需要6个字符",
     "passwordPlaceholder": "输入密码",

@@ -82,6 +82,7 @@
     "namePlaceholder": "Enter name",
     "emailLabel": "Email",
     "codeAffLabel": "Affiliate",
+    "nameInvalidFormat": "Name can only contain letters, numbers, and underscores",
     "emailRequired": "Please enter the employee's email",
     "emailInvalid": "Please enter a valid email address",
     "emailPlaceholder": "Enter email",

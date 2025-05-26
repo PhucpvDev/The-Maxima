@@ -86,6 +86,7 @@
     "emailPlaceholder": "Nhập email",
     "passwordLabel": "Mật Khẩu",
     "codeAffLabel": "Affiliate",
+    "nameInvalidFormat": "Tên không hợp lệ. Chỉ cho phép chữ cái, số và dấu gạch dưới.",
     "passwordRequired": "Vui lòng nhập mật khẩu",
     "passwordMinLength": "Mật khẩu phải có ít nhất 6 ký tự",
     "passwordPlaceholder": "Nhập mật khẩu",

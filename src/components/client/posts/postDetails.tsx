@@ -33,47 +33,13 @@ const { Text } = Typography;
 
 interface Translation {
   id: number;
-  title: string;
-  subtitle: string;
-  category: string;
-  posts_id: number;
+  post_slug: string;
   languages_code: string;
-  post_title_1: string;
-  post_description_1: string;
-  post_content_1: string;
-  post_image_1: string;
-  post_title_2: string;
-  post_description_2: string;
-  post_content_2: string;
-  post_image_2: string;
-  post_title_3: string;
-  post_description_3: string;
-  post_content_3: string;
-  post_image_3: string;
-  post_title_4: string;
-  post_description_4: string;
-  post_content_4: string;
-  post_image_4: string;
-  post_title_5: string;
-  post_description_5: string;
-  post_content_5: string;
-  post_image_5: string;
-  post_title_6: string;
-  post_description_6: string;
-  post_content_6: string;
-  post_image_6: string;
-  author_1: string;
-  author_2: string;
-  author_3: string;
-  author_4: string;
-  author_5: string;
-  author_6: string;
-  category_1: string;
-  category_2: string;
-  category_3: string;
-  category_4: string;
-  category_5: string;
-  category_6: string;
+  title: string;
+  description: string;
+  content: string;
+  image: string;
+  categories?: number[];
 }
 
 interface Post {
@@ -102,15 +68,27 @@ interface RelatedPost {
   category: string;
 }
 
+interface CategoryTranslation {
+  languages_code: string;
+  title: string;
+}
+
 interface Category {
-  key: string;
-  name: string;
+  key: string; // slug from post_categories
+  name: string; // translated title from post_categories
 }
 
 interface ApiResponse {
-  id: number;
+  slug: string;
+  title: string;
   translations: Translation[];
-  status: string;
+  status?: string;
+}
+
+interface PostCategory {
+  slug: string;
+  title: string;
+  translations: CategoryTranslation[];
 }
 
 interface RootState {
@@ -145,66 +123,50 @@ const itemVariants = {
   },
 };
 
+// Fetch categories from post_categories with translations
+async function fetchCategories(locale: string): Promise<Category[]> {
+  try {
+    const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
+    const response = await fetch(
+      `https://admin.maximagoldhedging.com/items/post_categories?lang=${locale}&fields=slug,title,translations.*`,
+      {
+        headers: { Accept: "application/json" },
+        cache: "no-store",
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`Failed to fetch categories: ${response.statusText}`);
+    }
+    const result = await response.json();
+    return result.data.map((cat: PostCategory) => {
+      const translation = cat.translations?.find(
+        (t: CategoryTranslation) => t.languages_code === lang
+      );
+      return {
+        key: cat.slug,
+        name: translation?.title || cat.title, // Use translated title if available, otherwise fallback to default title
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return [
+      { key: "updates", name: "Updates" },
+      { key: "virtual-currency", name: "Virtual Currency" },
+      { key: "financial-investment", name: "Financial Investment" },
+    ];
+  }
+}
+
 async function getPostDetail(
   locale: string,
-  postId: string
+  postSlug: string
 ): Promise<{ post: Post | null; categories: Category[] }> {
   const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
-  const categories: Category[] = [
-    {
-      key: "investment",
-      name:
-        lang === "vi-VN" ? "Đầu tư" : lang === "zh-CN" ? "投资" : "Investment",
-    },
-    {
-      key: "finance",
-      name:
-        lang === "vi-VN" ? "Tài chính" : lang === "zh-CN" ? "金融" : "Finance",
-    },
-    {
-      key: "analysis",
-      name:
-        lang === "vi-VN" ? "Phân tích" : lang === "zh-CN" ? "分析" : "Analysis",
-    },
-    {
-      key: "crypto",
-      name:
-        lang === "vi-VN"
-          ? "Tiền ảo"
-          : lang === "zh-CN"
-          ? "加密货币"
-          : "Cryptocurrency",
-    },
-    {
-      key: "blockchain",
-      name:
-        lang === "vi-VN"
-          ? "Blockchain"
-          : lang === "zh-CN"
-          ? "区块链"
-          : "Blockchain",
-    },
-    {
-      key: "affiliate",
-      name:
-        lang === "vi-VN"
-          ? "Affiliate"
-          : lang === "zh-CN"
-          ? "联盟营销"
-          : "Affiliate",
-    },
-  ];
+  const categories = await fetchCategories(locale);
 
   try {
-    const [groupId, indexStr] = postId.split("-");
-    const postIndex = parseInt(indexStr, 10);
-
-    if (isNaN(postIndex)) {
-      throw new Error("Invalid post ID format");
-    }
-
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/posts?lang=${lang}&fields=*,translations.*,category`,
+      `https://admin.maximagoldhedging.com/items/post?filter[slug][_eq]=${postSlug}&fields=*,translations.*&lang=${lang}`,
       {
         headers: { Accept: "application/json" },
         cache: "no-store",
@@ -216,125 +178,111 @@ async function getPostDetail(
     }
 
     const result = await response.json();
+
     const data: ApiResponse[] = Array.isArray(result.data)
       ? result.data
-      : [result.data];
+      : [result.data].filter(Boolean);
 
     let selectedPost: Post | null = null;
 
     for (const item of data) {
+      if (item.slug !== postSlug) continue;
+
       const translation = item.translations.find(
         (t) => t.languages_code === lang
       );
-      if (!translation) continue;
-
-      const titleKey = `post_title_${postIndex}` as keyof Translation;
-      const descriptionKey =
-        `post_description_${postIndex}` as keyof Translation;
-      const contentKey = `post_content_${postIndex}` as keyof Translation;
-      const imageKey = `post_image_${postIndex}` as keyof Translation;
-      const authorKey = `author_${postIndex}` as keyof Translation;
-      const categoryKey = `category_${postIndex}` as keyof Translation;
-
-      if (translation[titleKey] && translation[descriptionKey]) {
-        let categoriesList: string[] = ["investment"];
-        try {
-          const parsedCategories: string[] = JSON.parse(
-            translation[categoryKey] as string
-          );
-          if (Array.isArray(parsedCategories) && parsedCategories.length > 0) {
-            categoriesList = parsedCategories;
-          }
-        } catch (error) {
-          console.warn(
-            `Failed to parse category for post ${postIndex}:`,
-            error
-          );
-        }
-
-        selectedPost = {
-          id: postId,
-          title: translation[titleKey] as string,
-          description: translation[descriptionKey] as string,
-          content:
-            (translation[contentKey] as string) ||
-            "<p>Content not available.</p>",
-          published: item.status === "published",
-          media: translation[imageKey]
-            ? [
-                {
-                  url: `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${translation[imageKey]}`,
-                },
-              ]
-            : [{ url: "/placeholder.jpg" }],
-          category: categoriesList,
-          author: (translation[authorKey] as string) || "The Maxima",
-          authorAvatar: IMAGES.LogoMaxima.src,
-          readTime: 8,
-          publishDate: "2025-04-15",
-          featured: postIndex === 1,
-          liked: false,
-          viewCount: 3842,
-          tags: [
-            "investment",
-            "portfolio management",
-            "cryptocurrency",
-            "finance",
-            "risk management",
-          ],
-          relatedPosts: [
-            {
-              id: `${groupId}-${
-                (postIndex % 6) + 1 === postIndex
-                  ? (postIndex % 6) + 2
-                  : (postIndex % 6) + 1
-              }`,
-              title:
-                lang === "vi-VN"
-                  ? "Chiến lược đầu tư dài hạn"
-                  : lang === "zh-CN"
-                  ? "长期投资策略"
-                  : "Long-term Investment Strategies",
-              image:
-                "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f",
-              category: "investment",
-            },
-            {
-              id: `${groupId}-${
-                (postIndex % 6) + 2 === postIndex || (postIndex % 6) + 2 > 6
-                  ? 1
-                  : (postIndex % 6) + 2
-              }`,
-              title:
-                lang === "vi-VN"
-                  ? "Phân tích thị trường tiền điện tử"
-                  : lang === "zh-CN"
-                  ? "加密货币市场分析"
-                  : "Cryptocurrency Market Analysis",
-              image:
-                "https://images.unsplash.com/photo-1518546305927-5a555bb7020d",
-              category: "analysis",
-            },
-            {
-              id: `${groupId}-${
-                (postIndex % 6) + 3 === postIndex || (postIndex % 6) + 3 > 6
-                  ? 2
-                  : (postIndex % 6) + 3
-              }`,
-              title:
-                lang === "vi-VN"
-                  ? "Tài chính cá nhân cho người mới bắt đầu"
-                  : lang === "zh-CN"
-                  ? "个人理财入门"
-                  : "Personal Finance for Beginners",
-              image:
-                "https://images.unsplash.com/photo-1579621970588-a35d0e7ab9b6",
-              category: "finance",
-            },
-          ],
-        };
-        break;
+      if (!translation) {
+        console.warn(`No translation found for language: ${lang}`);
+        continue;
       }
+
+      const categoryKeys = Array.isArray(translation.categories)
+        ? [...new Set(translation.categories.map((catId) => {
+            switch (catId) {
+              case 8:
+                return "updates";
+              case 7:
+                return "virtual-currency";
+              case 6:
+                return "financial-investment";
+              default:
+                return "updates";
+            }
+          }))] 
+        : ["updates"];
+
+      selectedPost = {
+        id: item.slug,
+        title: translation.title,
+        description: translation.description,
+        content: translation.content || "<p>Content not available.</p>",
+        published: item.status === "published" || true,
+        media: translation.image
+          ? [
+              {
+                url: `https://admin.maximagoldhedging.com/assets/${translation.image}`,
+              },
+            ]
+          : [{ url: "/placeholder.jpg" }],
+        category: categoryKeys,
+        author: "The Maxima",
+        authorAvatar: IMAGES.LogoMaxima.src,
+        readTime: 8,
+        publishDate: "2025-04-15",
+        featured: true,
+        liked: false,
+        viewCount: 3842,
+        tags: [
+          "investment",
+          "portfolio management",
+          "cryptocurrency",
+          "finance",
+          "risk management",
+        ],
+        relatedPosts: [
+          {
+            id: "e2cc9905-81a0-4ee3-9cf6-11d66fff88c8",
+            title:
+              lang === "vi-VN"
+                ? "Tiêu đề mẫu số 1"
+                : lang === "zh-CN"
+                ? "样本标题 #1"
+                : "Sample Title #1",
+            image:
+              "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f",
+            category: "updates",
+          },
+          {
+            id: "45724a92-e382-4449-996b-d78f7489a1df",
+            title:
+              lang === "vi-VN"
+                ? "Bài viết mẫu số 2"
+                : lang === "zh-CN"
+                ? "示例文章2"
+                : "Sample essay number 2",
+            image:
+              "https://images.unsplash.com/photo-1518546305927-5a555bb7020d",
+            category: "updates",
+          },
+          {
+            id: "e2cc9905-81a0-4ee3-9cf6-11d66fff88c8",
+            title:
+              lang === "vi-VN"
+                ? "Tài chính cá nhân cho người mới bắt đầu"
+                : lang === "zh-CN"
+                ? "个人理财入门"
+                : "Personal Finance for Beginners",
+            image:
+              "https://images.unsplash.com/photo-1579621970588-a35d0e7ab9b6",
+            category: "virtual-currency",
+          },
+        ],
+      };
+      break;
+    }
+
+    if (!selectedPost) {
+      console.warn("No post found for slug:", postSlug);
     }
 
     return { post: selectedPost, categories };
@@ -483,7 +431,7 @@ const BlogPostDetail: NextPage<PostPageProps> = ({ params }) => {
         />
         <meta
           name="keywords"
-          content={post ? post.tags?.join(", ") : "blog, finance, investment"}
+          content={post ? post.category.join(", ") : "blog, finance, investment"}
         />
         <meta property="og:title" content={post ? post.title : "Blog Post"} />
         <meta
@@ -504,7 +452,7 @@ const BlogPostDetail: NextPage<PostPageProps> = ({ params }) => {
         />
       </Head>
       <motion.div
-        className={`min-h-screen  ${
+        className={`min-h-screen ${
           mytheme === "light"
             ? "bg-gradient-to-b from-slate-50 to-gray-100"
             : "bg-gradient-to-b from-gray-900 to-gray-950"
@@ -531,21 +479,6 @@ const BlogPostDetail: NextPage<PostPageProps> = ({ params }) => {
                   }`}></div>
                 <div className="absolute inset-0 flex flex-col justify-end p-3 sm:p-4">
                   <motion.div variants={itemVariants}>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {post.category.map((catKey) => {
-                        const category = categories.find(
-                          (c) => c.key === catKey
-                        );
-                        return category ? (
-                          <Tag
-                            key={catKey}
-                            color={mytheme === "light" ? "#F0B200" : "#FFC800"}
-                            className="px-3 py-1 rounded-full text-sm font-medium uppercase tracking-wide">
-                            {category.name}
-                          </Tag>
-                        ) : null;
-                      })}
-                    </div>
                     <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 leading-tight">
                       {post.title}
                     </h1>
@@ -599,7 +532,7 @@ const BlogPostDetail: NextPage<PostPageProps> = ({ params }) => {
                             </span>
                           </div>
                           <div className="flex items-center gap-3">
-                            <Divider type="vertical" className="h-6" />
+                            <Divider type="vertical" />
                             <Dropdown
                               menu={{
                                 items: socialOptions.map((option, index) => ({
@@ -607,9 +540,9 @@ const BlogPostDetail: NextPage<PostPageProps> = ({ params }) => {
                                   label: (
                                     <Button
                                       type="text"
+                                      className="hover:text-gray-400"
                                       icon={option.icon}
-                                      onClick={option.onClick}
-                                      style={{ color: option.color }}>
+                                      onClick={option.onClick}>
                                       <span
                                         className={`${
                                           mytheme === "light"
@@ -624,8 +557,8 @@ const BlogPostDetail: NextPage<PostPageProps> = ({ params }) => {
                               }}>
                               <Button
                                 type="text"
-                                icon={<ShareAltOutlined />}
-                                className="hover:text-blue-500">
+                                className="hover:text-blue-500"
+                                icon={<ShareAltOutlined />}>
                                 <span
                                   className={`${
                                     mytheme === "light"
@@ -649,17 +582,23 @@ const BlogPostDetail: NextPage<PostPageProps> = ({ params }) => {
                       styles={{ body: { padding: "24px" } }}>
                       <div className="flex items-center flex-wrap gap-2">
                         <TagsOutlined className="mr-2 text-lg" />
-                        {post.tags?.map((tag, index) => (
-                          <Tag
-                            key={index}
-                            className={`rounded-full px-3 py-1 text-sm capitalize cursor-pointer transition-all ${
-                              mytheme === "light"
-                                ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                            }`}>
-                            {tag}
-                          </Tag>
-                        ))}
+                        {post.category.map((categorySlug, index) => {
+                          const category = categories.find(
+                            (cat) => cat.key === categorySlug
+                          );
+                          return category ? (
+                            <Tag
+                              key={`category-${index}`}
+                              className={`rounded-full px-3 py-1 capitalize cursor-pointer transition-all ${
+                                mytheme === "light"
+                                  ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                  : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                              }`}
+                            >
+                              {category.name}
+                            </Tag>
+                          ) : null;
+                        })}
                       </div>
                     </Card>
                   </div>

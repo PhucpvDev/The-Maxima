@@ -72,20 +72,17 @@ export default function AffiliatePage() {
     const [isLoading, setIsLoading] = useState(true);
     const [currentLocale, setCurrentLocale] = useState(locale);
     
-    // Refs for managing effects
     const themeSetRef = useRef(false);
     const dataFetchedRef = useRef(false);
     
     const [form] = Form.useForm();
 
-    // Handle locale change
     if (currentLocale !== locale) {
         setCurrentLocale(locale);
         form.resetFields();
         setFormSubmitted(false);
     }
 
-    // Setup theme effect
     if (!themeSetRef.current) {
         document.documentElement.setAttribute("data-theme", mytheme);
         themeSetRef.current = true;
@@ -94,7 +91,6 @@ export default function AffiliatePage() {
         document.documentElement.setAttribute("data-theme", mytheme);
     }
 
-    // Fetch content handler - uses useCallback to memoize function
     const fetchContent = useCallback(async () => {
         setIsLoading(true);
         try {
@@ -307,21 +303,21 @@ export default function AffiliatePage() {
     const getPlaceholders = () => {
         if (locale === "vi") {
             return {
-                username: "https://admin.maximagoldhedging.com/affiliate-1/[tên người dùng]",
+                username: "Nhập tên người dùng",
                 referralLink: "Sao chép & Dán từ liên kết Lời mời Maxima",
                 referralId: "Ví dụ: 66128169",
                 email: "Nhập email của bạn"
             };
         } else if (locale === "zh") {
             return {
-                username: "www.themaximaexperience.world/affiliate-1/[用户名]",
+                username: "输入用户名",
                 referralLink: "从Maxima邀请链接复制和粘贴",
                 referralId: "例如：66128169",
                 email: "输入您的电子邮件"
             };
         } else {
             return {
-                username: "www.themaximaexperience.world/affiliate-1/[username]",
+                username: "Enter username",
                 referralLink: "Copy & Paste from Maxima Invite link",
                 referralId: "E.g 66128169",
                 email: "Enter your email"
@@ -525,7 +521,7 @@ export default function AffiliatePage() {
                                         </span>
                                     }
                                     name="username"
-                                    rules={[{ required: true, message: `Please input your ${content?.title_form_1.toLowerCase()}!` }]}
+                                    rules={[{ required: true, message: `${content?.title_form_1} !!!` }]}
                                     className="mb-6"
                                 >
                                     <Input
@@ -546,7 +542,7 @@ export default function AffiliatePage() {
                                         </span>
                                     }
                                     name="referralLink"
-                                    rules={[{ required: true, message: `Please input your ${content?.title_form_2.toLowerCase()}!` }]}
+                                    rules={[{ required: true, message: ` ${content?.title_form_2} !!!` }]}
                                     className="mb-6"
                                 >
                                     <Input
@@ -567,7 +563,7 @@ export default function AffiliatePage() {
                                         </span>
                                     }
                                     name="referralId"
-                                    rules={[{ required: true, message: `Please input your ${content?.title_form_3.toLowerCase()}!` }]}
+                                    rules={[{ required: true, message: ` ${content?.title_form_3} !!!` }]}
                                     className="mb-6"
                                 >
                                     <Input
@@ -589,7 +585,7 @@ export default function AffiliatePage() {
                                     }
                                     name="email"
                                     rules={[
-                                        { required: true, message: `Please input your ${content?.title_form_4.toLowerCase()}!` },
+                                        { required: true, message: ` ${content?.title_form_4} !!!` },
                                         { type: 'email', message: locale === 'vi' ? 'Vui lòng nhập một email hợp lệ!' : locale === 'zh' ? '请输入有效的电子邮件！' : 'Please enter a valid email!' }
                                     ]}
                                     className="mb-6"

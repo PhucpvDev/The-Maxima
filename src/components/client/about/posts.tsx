@@ -11,72 +11,37 @@ import Image from "next/image";
 
 interface Translation {
   id: number;
-  title: string;
-  subtitle: string;
-  category: string;
-  posts_id: number;
+  post_slug: string;
   languages_code: string;
-  post_title_1: string;
-  post_description_1: string;
-  post_content_1: string;
-  post_image_1: string;
-  post_title_2: string;
-  post_description_2: string;
-  post_content_2: string;
-  post_image_2: string;
-  post_title_3: string;
-  post_description_3: string;
-  post_content_3: string;
-  post_image_3: string;
-  post_title_4: string;
-  post_description_4: string;
-  post_content_4: string;
-  post_image_4: string;
-  post_title_5: string;
-  post_description_5: string;
-  post_content_5: string;
-  post_image_5: string;
-  post_title_6: string;
-  post_description_6: string;
-  post_content_6: string;
-  post_image_6: string;
-  author_1: string;
-  author_2: string;
-  author_3: string;
-  author_4: string;
-  author_5: string;
-  author_6: string;
-  category_1: string;
-  category_2: string;
-  category_3: string;
-  category_4: string;
-  category_5: string;
-  category_6: string;
+  title: string;
+  description: string;
+  content: string;
+  image: string;
+  categories: number[];
 }
 
 interface Post {
-  id: string;
+  slug: string;
   title: string;
   description: string;
-  published: boolean;
-  media: { url: string }[];
-  author: string;
+  content: string;
+  image: string;
+  categories: number[];
 }
 
 interface ApiResponse {
-  id: number;
-  status: string;
+  slug: string;
+  title: string;
   translations: Translation[];
-  category: string;
 }
 
 interface FallbackPost {
-  id: string;
+  slug: string;
   title: string;
   description: string;
-  published: boolean;
-  media: { url: string }[];
-  author: string;
+  content: string;
+  image: string;
+  categories: number[];
 }
 
 const buttonTranslations: Record<
@@ -97,14 +62,18 @@ const buttonTranslations: Record<
   },
 };
 
-const translationFallbacks: Record<string, FallbackPost[]> = {};
+const translationFallbacks: Record<string, FallbackPost[]> = {
+  "en-US": [],
+  "vi-VN": [],
+  "zh-CN": [],
+};
 
 async function getPosts(
   locale: string
 ): Promise<{ posts: Post[]; title: string }> {
   const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
   const fallback = translationFallbacks[lang] || translationFallbacks["en-US"];
-  let title =
+  const title =
     lang === "vi-VN"
       ? "Tin tức & Blog"
       : lang === "zh-CN"
@@ -113,7 +82,7 @@ async function getPosts(
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/posts?lang=${lang}&fields=*,translations.*,category`,
+      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/post?lang=${lang}&fields=*,translations.*`,
       {
         headers: {
           Accept: "application/json",
@@ -126,54 +95,34 @@ async function getPosts(
     }
 
     const result = await response.json();
-
     const data: ApiResponse[] = Array.isArray(result.data)
       ? result.data
       : [result.data];
 
-    const posts: Post[] = data.flatMap((item) => {
-      const translation = item.translations.find(
-        (t) => t.languages_code === lang
-      );
-      if (!translation) {
-        return [];
-      }
+    const posts: Post[] = data
+      .map((item) => {
+        const translation = item.translations.find(
+          (t) => t.languages_code === lang
+        );
+        if (!translation) {
+          return null;
+        }
 
-      title = translation.title || title;
-
-      const postIndices = [1, 2, 3, 4, 5, 6];
-
-      return postIndices.map((index) => {
-        const titleKey = `post_title_${index}` as keyof Translation;
-        const descriptionKey = `post_description_${index}` as keyof Translation;
-        const imageKey = `post_image_${index}` as keyof Translation;
-        const authorKey = `author_${index}` as keyof Translation;
-
-        const post = {
-          id: `${item.id}-${index}`,
-          title: translation[titleKey] as string,
-          description: translation[descriptionKey] as string,
-          published: item.status === "published",
-          media: translation[imageKey]
-            ? [
-                {
-                  url: `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${translation[imageKey]}`,
-                },
-              ]
-            : [{ url: "/placeholder.jpg" }],
-          author: (translation[authorKey] as string) || "Unknown Author",
+        return {
+          slug: item.slug,
+          title: translation.title,
+          description: translation.description,
+          content: translation.content,
+          image: translation.image
+            ? `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${translation.image}`
+            : "/placeholder.jpg",
+          categories: translation.categories,
         };
-
-        return post;
-      });
-    });
-
-    const filteredPosts = posts.filter(
-      (post) => post.title && post.description
-    );
+      })
+      .filter((post): post is Post => post !== null);
 
     return {
-      posts: filteredPosts.slice(0, 6),
+      posts: posts.slice(0, 6),
       title,
     };
   } catch (error) {
@@ -228,8 +177,8 @@ export default function Posts() {
       mytheme === "dark" ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
   };
 
-  const handleViewDetails = (postId: string) => {
-    router.push(`/posts/${postId}`);
+  const handleViewDetails = (slug: string) => {
+    router.push(`/posts/${slug}`);
   };
 
   if (loading) {
@@ -237,7 +186,8 @@ export default function Posts() {
       <div
         className={`flex justify-center items-center h-screen ${
           mytheme === "light" ? "text-gray-800" : "text-gray-200"
-        }`}>
+        }`}
+      >
         Loading...
       </div>
     );
@@ -248,7 +198,8 @@ export default function Posts() {
       <div
         className={`flex justify-center items-center h-screen ${
           mytheme === "light" ? "text-red-500" : "text-red-400"
-        }`}>
+        }`}
+      >
         Error: {error}
       </div>
     );
@@ -295,11 +246,7 @@ export default function Posts() {
   };
 
   const getImageUrl = (post: Post): string => {
-    if (!post || !post.media) return "/placeholder.jpg";
-    if (Array.isArray(post.media) && post.media.length > 0) {
-      return post.media[0].url;
-    }
-    return "/placeholder.jpg";
+    return post.image || "/placeholder.jpg";
   };
 
   return (
@@ -313,7 +260,8 @@ export default function Posts() {
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}>
+        viewport={{ once: true, amount: 0.2 }}
+      >
         <div className="max-w-7xl mx-auto z-10 relative px-4">
           <motion.div className="mb-8 relative overflow-hidden">
             <motion.div
@@ -329,7 +277,8 @@ export default function Posts() {
                   : "bg-gradient-to-r from-white to-[#FFC800]"
               }`}
               variants={textVariants}
-              custom={0}>
+              custom={0}
+            >
               {title}
             </motion.p>
             <div className="flex justify-center items-center gap-3 -mt-6 mb-3">
@@ -358,7 +307,8 @@ export default function Posts() {
             <div
               className={`flex justify-center items-center h-64 ${
                 mytheme === "light" ? "text-gray-800" : "text-gray-200"
-              }`}>
+              }`}
+            >
               No posts available.
             </div>
           ) : (
@@ -367,7 +317,8 @@ export default function Posts() {
                 <motion.div
                   className="md:col-span-1 overflow-hidden cursor-pointer"
                   variants={childVariants}
-                  onClick={() => handleViewDetails(posts[0].id)}>
+                  onClick={() => handleViewDetails(posts[0].slug)}
+                >
                   <Image
                     src={getImageUrl(posts[0])}
                     alt={posts[0]?.title || ""}
@@ -381,7 +332,8 @@ export default function Posts() {
                         mytheme === "light" ? "text-gray-900" : "text-gray-100"
                       } mb-2`}
                       variants={textVariants}
-                      custom={1}>
+                      custom={1}
+                    >
                       {posts[0]?.title}
                     </motion.h2>
                     <motion.p
@@ -389,16 +341,9 @@ export default function Posts() {
                         mytheme === "light" ? "text-gray-700" : "text-gray-300"
                       } mb-2`}
                       variants={textVariants}
-                      custom={2}>
+                      custom={2}
+                    >
                       {posts[0]?.description?.substring(0, 100)}...
-                    </motion.p>
-                    <motion.p
-                      className={`text-[14px] ${
-                        mytheme === "light" ? "text-gray-500" : "text-gray-400"
-                      }`}
-                      variants={textVariants}
-                      custom={3}>
-                      {posts[0]?.author}
                     </motion.p>
                     <div className="p-1 rounded-lg text-white">
                       <motion.button
@@ -412,7 +357,8 @@ export default function Posts() {
                           boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                         }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => handleViewDetails(posts[0].id)}>
+                        onClick={() => handleViewDetails(posts[0].slug)}
+                      >
                         <span className="text-white">{viewDetails}</span>
                         <motion.svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -424,7 +370,8 @@ export default function Posts() {
                             type: "spring",
                             stiffness: 300,
                             damping: 10,
-                          }}>
+                          }}
+                        >
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -440,10 +387,10 @@ export default function Posts() {
 
               {posts[1] && (
                 <motion.div
-                  className="md:col-span-1 overflow-hidden cursor-pointer"  
+                  className="md:col-span-1 overflow-hidden cursor-pointer"
                   variants={childVariants}
-                  onClick={() => handleViewDetails(posts[1].id)}
-                  >
+                  onClick={() => handleViewDetails(posts[1].slug)}
+                >
                   <Image
                     src={getImageUrl(posts[1])}
                     alt={posts[1]?.title || ""}
@@ -457,7 +404,8 @@ export default function Posts() {
                         mytheme === "light" ? "text-gray-900" : "text-gray-100"
                       } mb-2`}
                       variants={textVariants}
-                      custom={1}>
+                      custom={1}
+                    >
                       {posts[1]?.title}
                     </motion.p>
                     <motion.p
@@ -465,16 +413,9 @@ export default function Posts() {
                         mytheme === "light" ? "text-gray-700" : "text-gray-300"
                       } mb-2`}
                       variants={textVariants}
-                      custom={2}>
+                      custom={2}
+                    >
                       {posts[1]?.description?.substring(0, 100)}...
-                    </motion.p>
-                    <motion.p
-                      className={`text-[14px] ${
-                        mytheme === "light" ? "text-gray-500" : "text-gray-400"
-                      }`}
-                      variants={textVariants}
-                      custom={3}>
-                      {posts[1]?.author}
                     </motion.p>
                     <div className="p-1 rounded-lg text-white">
                       <motion.button
@@ -488,7 +429,8 @@ export default function Posts() {
                           boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                         }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => handleViewDetails(posts[1].id)}>
+                        onClick={() => handleViewDetails(posts[1].slug)}
+                      >
                         <span>{viewDetails}</span>
                         <motion.svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -500,7 +442,8 @@ export default function Posts() {
                             type: "spring",
                             stiffness: 300,
                             damping: 10,
-                          }}>
+                          }}
+                        >
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -518,10 +461,11 @@ export default function Posts() {
                 <motion.div className="md:col-span-1" variants={childVariants}>
                   {posts.slice(2, 6).map((post, index) => (
                     <motion.div
-                      key={post.id || index}
+                      key={post.slug || index}
                       className="rounded overflow-hidden mb-4 flex gap-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 p-2 transition-colors rounded-lg"
                       variants={childVariants}
-                      onClick={() => handleViewDetails(post.id)}>
+                      onClick={() => handleViewDetails(post.slug)}
+                    >
                       <div className="w-4/6">
                         <Image
                           src={getImageUrl(post)}
@@ -539,7 +483,8 @@ export default function Posts() {
                               : "text-gray-200"
                           }`}
                           variants={textVariants}
-                          custom={1}>
+                          custom={1}
+                        >
                           {post.title}
                         </motion.p>
                       </div>
@@ -563,7 +508,8 @@ export default function Posts() {
                   boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => router.push(`/${locale}/posts`)}>
+                onClick={() => router.push(`/${locale}/posts`)}
+              >
                 <span>{viewMore}</span>
               </motion.button>
             </div>
