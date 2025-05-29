@@ -3,12 +3,12 @@
 import { IMAGES } from "@/constants/client/theme";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocale } from "next-intl";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { ConfigProvider, theme as antdTheme } from "antd";
-import Cookies from "js-cookie"; 
+import Cookies from "js-cookie";
 
 const fontStyle = `
   <style>
@@ -75,7 +75,8 @@ interface RawWhyJoinMaximaData {
 
 async function getWhyJoin(locale: string): Promise<WhyJoinMaximaData> {
   try {
-    const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
+    const lang =
+      locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/items/why_join_maxima?lang=${lang}&fields=*,translations.*`,
       {
@@ -90,7 +91,9 @@ async function getWhyJoin(locale: string): Promise<WhyJoinMaximaData> {
     }
 
     const result = await response.json();
-    const data: RawWhyJoinMaximaData = Array.isArray(result.data) ? result.data[0] : result.data;
+    const data: RawWhyJoinMaximaData = Array.isArray(result.data)
+      ? result.data[0]
+      : result.data;
 
     const translation = data.translations.find(
       (t: Translation) => t.languages_code === lang
@@ -127,7 +130,8 @@ async function getWhyJoin(locale: string): Promise<WhyJoinMaximaData> {
           image: source.conclusion_image_3 || "",
         },
         {
-          section_title: source.conclusion_title_4 || "So you should choose Maxima",
+          section_title:
+            source.conclusion_title_4 || "So you should choose Maxima",
           description:
             source.conclusion_description_4 ||
             "We value our words. Our words are backed up by concrete actions.",
@@ -179,6 +183,7 @@ export default function WhyJoinMaxima() {
   const locale = useLocale();
   const { mytheme } = useSelector((state: RootState) => state.theme);
   const [data, setData] = useState<WhyJoinMaximaData | null>(null);
+    const [affCode, setAffCode] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -196,12 +201,35 @@ export default function WhyJoinMaxima() {
     token: {
       colorPrimary: "#FFC800",
     },
-    algorithm: mytheme === "dark" ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+    algorithm:
+      mytheme === "dark" ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
   };
 
-  const affCodeFromCookie = Cookies.get("aff_code");
-  const registrationUrl = `https://agreement.maximadao.com/#/register?code=${affCodeFromCookie}`
-  
+useEffect(() => {
+    const checkAffCode = () => {
+      const code = Cookies.get("aff_code");
+      setAffCode(code || null);
+    };
+    
+    checkAffCode();
+    
+    const interval = setInterval(checkAffCode, 500);
+    
+    const timeout = setTimeout(() => {
+      clearInterval(interval);
+    }, 10000);
+    
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, []);
+
+  const registrationUrl = useMemo(() => {
+    const baseUrl = "https://agreement.maximadao.com/#/register";
+    return affCode ? `${baseUrl}?code=${encodeURIComponent(affCode)}` : baseUrl;
+  }, [affCode]);
+
 
   const containerVariants = {
     hidden: { opacity: 0, y: 50 },
@@ -241,11 +269,13 @@ export default function WhyJoinMaxima() {
   return (
     <ConfigProvider theme={themeConfig}>
       <div dangerouslySetInnerHTML={{ __html: fontStyle }} />
-      <div id="how"
-        className={`relative overflow-hidden py-10 md:py-18 ${mytheme === "light"
+      <div
+        id="how"
+        className={`relative overflow-hidden py-10 md:py-18 ${
+          mytheme === "light"
             ? "bg-gradient-to-b from-slate-50 to-gray-100"
             : "bg-gradient-to-b from-gray-900 to-gray-950"
-          }`}
+        }`}
       >
         <motion.div
           className="text-center mb-14"
@@ -255,15 +285,17 @@ export default function WhyJoinMaxima() {
           viewport={{ once: true, amount: 0.2 }}
         >
           <motion.p
-            className={`text-2xl md:text-4xl font-bold uppercase ${mytheme === "light" ? "text-gray-800" : "text-white"
-              }`}
+            className={`text-2xl md:text-4xl font-bold uppercase ${
+              mytheme === "light" ? "text-gray-800" : "text-white"
+            }`}
             variants={childVariants}
           >
             {title}
           </motion.p>
           <motion.p
-            className={`text-2xl md:text-3xl font-semibold mt-3 italic ${mytheme === "light" ? "text-gray-700" : "text-gray-400"
-              }`}
+            className={`text-2xl md:text-3xl font-semibold mt-3 italic ${
+              mytheme === "light" ? "text-gray-700" : "text-gray-400"
+            }`}
             variants={childVariants}
           >
             {subtitle}
@@ -277,16 +309,17 @@ export default function WhyJoinMaxima() {
               index === 0
                 ? IMAGES.Whyjoin1
                 : index === 1
-                  ? IMAGES.Whyjoin2
-                  : index === 2
-                    ? IMAGES.Whyjoin3
-                    : IMAGES.Whyjoin4;
+                ? IMAGES.Whyjoin2
+                : index === 2
+                ? IMAGES.Whyjoin3
+                : IMAGES.Whyjoin4;
 
             return (
               <motion.div
                 key={index}
-                className={`flex flex-col ${isReverse ? "md:flex-row-reverse" : "md:flex-row"
-                  } items-center gap-8`}
+                className={`flex flex-col ${
+                  isReverse ? "md:flex-row-reverse" : "md:flex-row"
+                } items-center gap-8`}
                 variants={containerVariants}
                 initial="hidden"
                 whileInView="visible"
@@ -294,14 +327,16 @@ export default function WhyJoinMaxima() {
               >
                 <motion.div className="md:w-1/2" variants={childVariants}>
                   <p
-                    className={`md:text-3xl text-2xl font-bold mb-3 ${mytheme === "light" ? "text-gray-700" : "text-gray-200"
-                      }`}
+                    className={`md:text-3xl text-2xl font-bold mb-3 ${
+                      mytheme === "light" ? "text-gray-700" : "text-gray-200"
+                    }`}
                   >
                     {section.section_title}
                   </p>
                   <p
-                    className={`text-lg ${mytheme === "light" ? "text-gray-700" : "text-gray-300"
-                      } mb-4`}
+                    className={`text-lg ${
+                      mytheme === "light" ? "text-gray-700" : "text-gray-300"
+                    } mb-4`}
                   >
                     {section.description}
                   </p>
@@ -309,10 +344,11 @@ export default function WhyJoinMaxima() {
                     <div className="font-medium text-white pt-2">
                       <motion.a
                         href={registrationUrl}
-                        className={`px-8 sm:px-16 py-1.5 rounded-full text-lg font-semibold transition-all duration-300 inline-block ${mytheme === "light"
+                        className={`px-8 sm:px-16 py-1.5 rounded-full text-lg font-semibold transition-all duration-300 inline-block ${
+                          mytheme === "light"
                             ? "bg-orange-400 hover:bg-orange-500 text-white"
                             : "bg-orange-400 hover:bg-orange-500 text-white"
-                          }`}
+                        }`}
                         variants={childVariants}
                       >
                         {section.button_text}
@@ -324,12 +360,11 @@ export default function WhyJoinMaxima() {
                   className="md:w-1/2 relative"
                   variants={childVariants}
                 >
-                  <div
-                    className={`absolute inset-0 rounded-lg`}
-                  ></div>
+                  <div className={`absolute inset-0 rounded-lg`}></div>
                   <Image
                     src={
-                      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${section.image}` || fallbackImage.src
+                      `${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${section.image}` ||
+                      fallbackImage.src
                     }
                     alt={section.section_title}
                     width={280}
