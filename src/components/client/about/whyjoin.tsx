@@ -200,9 +200,8 @@ export default function WhyJoinMaxima() {
   };
 
   const affCodeFromCookie = Cookies.get("aff_code");
-  const registrationUrl = affCodeFromCookie
-    ? `https://agreement.maximadao.com/#/register?code=${encodeURIComponent(affCodeFromCookie)}`
-    : `https://agreement.maximadao.com/#/register`;
+  const registrationUrl = `https://agreement.maximadao.com/#/register?code=${affCodeFromCookie}`
+  
 
   const containerVariants = {
     hidden: { opacity: 0, y: 50 },

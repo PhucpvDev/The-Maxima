@@ -53,7 +53,7 @@ export default function LanguageSwitcher() {
                   width={16}
                   height={16}
                   priority
-                  className="rounded-full w-5 h-5"
+                  className="rounded-full w-5 h-5 coverage-image object-cover aspect-square"
                 />
                 <span>{lang.name}</span>
               </div>
