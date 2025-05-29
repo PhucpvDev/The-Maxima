@@ -178,7 +178,7 @@ export default function Posts() {
   };
 
   const handleViewDetails = (slug: string) => {
-    router.push(`/posts/${slug}`);
+    router.push(`/${[locale]}/posts/${slug}`);
   };
 
   if (loading) {

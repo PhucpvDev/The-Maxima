@@ -11,12 +11,20 @@ import Image from "next/image";
 
 const { Title, Paragraph } = Typography;
 
+interface Translation {
+  id: number;
+  post_categories_slug: string;
+  languages_code: string;
+  title: string;
+}
+
 interface Category {
   slug: string;
-  title: string;
   parent: string | null;
+  translations: Translation[];
 }
-interface Translation {
+
+interface PostTranslation {
   title: string;
   description: string;
   content: string;
@@ -24,6 +32,7 @@ interface Translation {
   categories: { id: number; post_translations_id: number; post_categories_slug: string }[];
   languages_code: string;
 }
+
 interface Post {
   slug: string;
   title: string;
@@ -33,15 +42,12 @@ interface Post {
   author: string;
   featured?: boolean;
 }
+
 interface PostApiResponse {
   slug: string;
-  translations: Translation[];
+  translations: PostTranslation[];
 }
-interface CategoryApiResponse {
-  slug: string;
-  title: string;
-  parent: string | null;
-}
+
 interface RootState {
   theme: { mytheme: string };
 }
@@ -54,21 +60,17 @@ async function getPosts(locale: string): Promise<{ posts: Post[]; title: string;
   const title = lang === "vi-VN" ? "Tin tức & Blog" : lang === "zh-CN" ? "新闻与博客" : "Blog & News";
   const subtitle = lang === "vi-VN" ? "Khám phá các bài viết mới nhất của The Maxima" : lang === "zh-CN" ? "探索 Maxima 的最新文章" : "Explore The Maxima's latest articles";
 
-  let categories: Category[] = [
-    { slug: "updates", title: lang === "vi-VN" ? "Cập nhật" : lang === "zh-CN" ? "更新" : "Updates", parent: null },
-    { slug: "virtual-currency", title: lang === "vi-VN" ? "Tiền ảo" : lang === "zh-CN" ? "虚拟货币" : "Virtual Currency", parent: "updates" },
-    { slug: "financial-investment", title: lang === "vi-VN" ? "Đầu tư tài chính" : lang === "zh-CN" ? "金融投资" : "Financial Investment", parent: "updates" },
-  ];
+  let categories: Category[] = [];
 
   try {
-    const categoriesResponse = await fetch(`https://admin.maximagoldhedging.com/items/post_categories`, { cache: "no-store" });
+    const categoriesResponse = await fetch(`https://admin.maximagoldhedging.com/items/post_categories?lang=${lang}&fields=*,translations.*`, { cache: "no-store" });
     if (categoriesResponse.ok) {
       const categoriesData = await categoriesResponse.json();
       if (categoriesData.data && Array.isArray(categoriesData.data)) {
-        categories = categoriesData.data.map((cat: CategoryApiResponse) => ({
+        categories = categoriesData.data.map((cat: { slug: string; parent: string | null; translations: Translation[] }) => ({
           slug: cat.slug,
-          title: cat.title,
           parent: cat.parent,
+          translations: cat.translations,
         }));
       } else {
         console.warn("Categories data is not in expected format, using default categories:", categoriesData);
@@ -94,9 +96,7 @@ async function getPosts(locale: string): Promise<{ posts: Post[]; title: string;
       let categoriesList: string[] = [];
       if (translation.categories && Array.isArray(translation.categories)) {
         categoriesList = translation.categories
-          .map((cat) => {
-            return cat.post_categories_slug;
-          })
+          .map((cat) => cat.post_categories_slug)
           .filter((slug): slug is string => !!slug);
       }
 
@@ -136,7 +136,7 @@ export default function Posts() {
   const [currentPage, setCurrentPage] = useState(1);
   const [title, setTitle] = useState("Blog & News");
   const [subtitle, setSubtitle] = useState("Explore the latest articles...");
-  const pageSize = 6; 
+  const pageSize = 6;
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", mytheme || "light");
@@ -184,7 +184,7 @@ export default function Posts() {
   }, []);
 
   const handlePageChange = useCallback((page: number) => setCurrentPage(page), []);
-  const handleReadMore = useCallback((postSlug: string) => router.push(`/posts/${postSlug}`), [router]);
+  const handleReadMore = useCallback((postSlug: string) => router.push(`/${[locale]}/posts/${postSlug}`), [router]);
 
   const themeConfig = {
     token: {
@@ -198,7 +198,13 @@ export default function Posts() {
   };
 
   const getImageUrl = (post: Post) => post.image || "https://via.placeholder.com/300";
-  const getLocalizedText = (en: string, vi: string, zh: string) => (locale.startsWith("vi") ? vi : locale.startsWith("zh") ? zh : en)
+  const getLocalizedText = (en: string, vi: string, zh: string) => (locale.startsWith("vi") ? vi : locale.startsWith("zh") ? zh : en);
+
+  const getCategoryTitle = (category: Category) => {
+    const lang = locale.startsWith("vi") ? "vi-VN" : locale.startsWith("zh") ? "zh-CN" : "en-US";
+    const translation = category.translations.find((t) => t.languages_code === lang);
+    return translation ? translation.title : getLocalizedText("Uncategorized", "Không phân loại", "未分类");
+  };
 
   const tabItems = categories
     .filter((c) => c.parent === null)
@@ -206,7 +212,7 @@ export default function Posts() {
       key: parent.slug,
       label: (
         <span className={`px-5 py-2 transition-all duration-300 ${mytheme === "light" ? "text-gray-700 hover:bg-gray-100" : "text-gray-200 hover:bg-gray-700"}`}>
-          {parent.title}
+          {getCategoryTitle(parent)}
         </span>
       ),
       children: (
@@ -224,7 +230,7 @@ export default function Posts() {
                 } whitespace-nowrap`}
                 onClick={() => handleCategoryChange("all")}
               >
-                All
+                {getLocalizedText("All", "Tất cả", "全部")}
               </Button>
             </motion.div>
             {categories
@@ -242,7 +248,7 @@ export default function Posts() {
                     } whitespace-nowrap`}
                     onClick={() => handleCategoryChange(category.slug)}
                   >
-                    {category.title}
+                    {getCategoryTitle(category)}
                   </Button>
                 </motion.div>
               ))}
@@ -275,7 +281,7 @@ export default function Posts() {
           </Col>
         </>
       ) : (
-        [...Array(3)].map((_, i) => ( 
+        [...Array(3)].map((_, i) => (
           <Col xs={24} sm={12} md={8} key={i}>
             <Card className="shadow-lg h-full">
               <Skeleton.Image active className="w-full h-40 rounded-lg" />
@@ -299,7 +305,7 @@ export default function Posts() {
             <div className="absolute top-3 left-3 flex flex-wrap gap-2 tags-container">
               {post.categories.map((catSlug) => {
                 const category = categories.find((c) => c.slug === catSlug);
-                const displayTitle = category ? category.title : getLocalizedText("Uncategorized", "Không phân loại", "未分类");
+                const displayTitle = category ? getCategoryTitle(category) : getLocalizedText("Uncategorized", "Không phân loại", "未分类");
                 if (!category) {
                   console.warn(`Category slug ${catSlug} not found in categories for post ${post.slug}`);
                 }

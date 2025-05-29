@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { ConfigProvider, theme as antdTheme } from "antd";
 import { motion, AnimatePresence } from "framer-motion";
-import { getFaqs, FaqItem } from "@/lib/directus/faqs";
+import { getFaqs, FaqItem, TransformedFaqData } from "@/lib/directus/faqs";
 import Image from "next/image";
 
 interface FAQSectionProps {
@@ -17,7 +17,6 @@ export default function FAQSection({ id }: FAQSectionProps) {
   const locale = useLocale();
   const { mytheme } = useSelector((state: RootState) => state.theme);
   const [faqData, setFaqData] = useState<FaqItem[]>([]);
-  const [title, setTitle] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -26,16 +25,11 @@ export default function FAQSection({ id }: FAQSectionProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const result = await getFaqs(locale);
-        if (result && result.length > 0) {
-          if (result[0].faqs && result[0].faqs.length > 0) {
-            setFaqData(result[0].faqs);
-            setFilteredFaqs(result[0].faqs);
-          }
-          if (result[0].title) {
-            setTitle(result[0].title);
-          }
-        }
+        const result: TransformedFaqData[] = await getFaqs(locale);
+        // Flatten the faqs arrays from all TransformedFaqData objects
+        const flattenedFaqs = result.flatMap((item) => item.faqs);
+        setFaqData(flattenedFaqs);
+        setFilteredFaqs(flattenedFaqs);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching FAQs:", error);
@@ -58,7 +52,7 @@ export default function FAQSection({ id }: FAQSectionProps) {
       const filtered = faqData.filter(
         (item) =>
           item.question.toLowerCase().includes(query) ||
-          item.answer.toLowerCase().includes(query)
+          (item.answer && item.answer.toLowerCase().includes(query))
       );
       setFilteredFaqs(filtered);
     }
@@ -163,7 +157,11 @@ export default function FAQSection({ id }: FAQSectionProps) {
                         mytheme === "light" ? "text-gray-900" : "text-white"
                       }`}
                     >
-                      {title}
+                    {  locale === "en"
+                          ? "Frequently Asked Questions"
+                          : locale === "vi"
+                          ? "Câu hỏi thường gặp"
+                          : "常见问题解答"}
                     </h2>
                   </div>
 
@@ -185,9 +183,9 @@ export default function FAQSection({ id }: FAQSectionProps) {
                       placeholder={`${
                         locale === "en"
                           ? "Search FAQs..."
-                          : locale === "zh"
-                          ? "搜索常见问题解答..."
-                          : "Tìm kiếm câu hỏi thường gặp..."
+                          : locale === "vi"
+                          ? "Tìm kiếm câu hỏi thường gặp..."
+                          : "搜索常见问题解答..."
                       }`}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
@@ -233,7 +231,7 @@ export default function FAQSection({ id }: FAQSectionProps) {
                 </div>
               ) : (
                 <div
-                  className="max-h-[70vh] overflow-y-auto pr-4" // Scrollable container
+                  className="max-h-[70vh] overflow-y-auto pr-4"
                   style={{
                     scrollbarWidth: "thin",
                     scrollbarColor: `${
@@ -309,11 +307,9 @@ export default function FAQSection({ id }: FAQSectionProps) {
                                   : "text-gray-300"
                               }`}
                             >
-                              {item.answer.match(
-                                /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-                              ) ? (
+                              {item.answer_image ? (
                                 <Image
-                                  src={`${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${item.answer}`}
+                                  src={`${process.env.NEXT_PUBLIC_API_URL_DIRECTUS}/assets/${item.answer_image}`}
                                   alt={item.question}
                                   width={900}
                                   height={300}
@@ -341,62 +337,6 @@ export default function FAQSection({ id }: FAQSectionProps) {
             </div>
           </div>
         </div>
-
-        <style jsx global>{`
-          @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
-          @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0");
-
-          .font-inter {
-            font-family: "Inter", Arial, sans-serif;
-          }
-
-          /* Animation for the loader */
-          @keyframes spin {
-            to {
-              transform: rotate(360deg);
-            }
-          }
-          .animate-spin {
-            animation: spin 1s linear infinite;
-          }
-
-          /* Custom scrollbar for Webkit browsers */
-          .overflow-y-auto::-webkit-scrollbar {
-            width: 10px;
-          }
-
-          .overflow-y-auto::-webkit-scrollbar-track {
-            background: ${mytheme === "light"
-              ? "rgba(229, 231, 235, 0.5)"
-              : "rgba(55, 65, 81, 0.5)"};
-            border-radius: 8px;
-            box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
-            margin-top: 8px;
-            margin-bottom: 8px;
-          }
-
-          .overflow-y-auto::-webkit-scrollbar-thumb {
-            background: ${mytheme === "light"
-              ? "linear-gradient(180deg, #6b7280 0%, #4b5563 100%)"
-              : "linear-gradient(180deg, #9ca3af 0%, #6b7280 100%)"};
-            border-radius: 8px;
-            border: 2px solid transparent;
-            background-clip: content-box;
-            transition: background 0.3s ease, transform 0.2s ease;
-          }
-
-          .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-            background: ${mytheme === "light"
-              ? "linear-gradient(180deg, #4b5563 0%, #374151 100%)"
-              : "linear-gradient(180deg, #d1d5db 0%, #9ca3af 100%)"};
-            transform: scale(1.05);
-          }
-
-          /* Ensure the scrollbar track has some spacing */
-          .overflow-y-auto {
-            padding-right: 16px; /* Increased padding for better spacing */
-          }
-        `}</style>
       </section>
     </ConfigProvider>
   );

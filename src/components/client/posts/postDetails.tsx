@@ -27,6 +27,8 @@ import { useLocale } from "next-intl";
 import { IMAGES } from "@/constants/client/theme";
 import { NextPage } from "next";
 import Head from "next/head";
+import parse from "html-react-parser";
+import DOMPurify from "dompurify";
 import Posts from "@/components/client/about/posts";
 
 const { Text } = Typography;
@@ -39,7 +41,7 @@ interface Translation {
   description: string;
   content: string;
   image: string;
-  categories?: number[];
+  categories: { id: number; post_translations_id: number; post_categories_slug: string }[];
 }
 
 interface Post {
@@ -50,6 +52,7 @@ interface Post {
   published: boolean;
   media: { url: string }[];
   category: string[];
+  categoryTitles: string[]; 
   author: string;
   authorAvatar?: string;
   readTime: number;
@@ -69,13 +72,15 @@ interface RelatedPost {
 }
 
 interface CategoryTranslation {
+  id: number;
+  post_categories_slug: string;
   languages_code: string;
   title: string;
 }
 
 interface Category {
-  key: string; // slug from post_categories
-  name: string; // translated title from post_categories
+  slug: string;
+  translations: CategoryTranslation[];
 }
 
 interface ApiResponse {
@@ -83,12 +88,6 @@ interface ApiResponse {
   title: string;
   translations: Translation[];
   status?: string;
-}
-
-interface PostCategory {
-  slug: string;
-  title: string;
-  translations: CategoryTranslation[];
 }
 
 interface RootState {
@@ -123,12 +122,10 @@ const itemVariants = {
   },
 };
 
-// Fetch categories from post_categories with translations
 async function fetchCategories(locale: string): Promise<Category[]> {
   try {
-    const lang = locale === "vi" ? "vi-VN" : locale === "zh" ? "zh-CN" : "en-US";
     const response = await fetch(
-      `https://admin.maximagoldhedging.com/items/post_categories?lang=${locale}&fields=slug,title,translations.*`,
+      `https://admin.maximagoldhedging.com/items/post_categories?fields=*,translations.*`,
       {
         headers: { Accept: "application/json" },
         cache: "no-store",
@@ -138,21 +135,15 @@ async function fetchCategories(locale: string): Promise<Category[]> {
       throw new Error(`Failed to fetch categories: ${response.statusText}`);
     }
     const result = await response.json();
-    return result.data.map((cat: PostCategory) => {
-      const translation = cat.translations?.find(
-        (t: CategoryTranslation) => t.languages_code === lang
-      );
-      return {
-        key: cat.slug,
-        name: translation?.title || cat.title, // Use translated title if available, otherwise fallback to default title
-      };
-    });
+    return Array.isArray(result.data)
+      ? result.data.map((cat: { slug: string; translations: CategoryTranslation[] }) => ({
+          slug: cat.slug,
+          translations: cat.translations,
+        }))
+      : [];
   } catch (error) {
-    console.error("Error fetching categories:", error);
+    console.error("Error fetching categories:", error, locale);
     return [
-      { key: "updates", name: "Updates" },
-      { key: "virtual-currency", name: "Virtual Currency" },
-      { key: "financial-investment", name: "Financial Investment" },
     ];
   }
 }
@@ -166,7 +157,7 @@ async function getPostDetail(
 
   try {
     const response = await fetch(
-      `https://admin.maximagoldhedging.com/items/post?filter[slug][_eq]=${postSlug}&fields=*,translations.*&lang=${lang}`,
+      `https://admin.maximagoldhedging.com/items/post?filter[slug][_eq]=${postSlug}&fields=*,translations.*,translations.categories.*&lang=${lang}`,
       {
         headers: { Accept: "application/json" },
         cache: "no-store",
@@ -178,7 +169,6 @@ async function getPostDetail(
     }
 
     const result = await response.json();
-
     const data: ApiResponse[] = Array.isArray(result.data)
       ? result.data
       : [result.data].filter(Boolean);
@@ -196,20 +186,29 @@ async function getPostDetail(
         continue;
       }
 
-      const categoryKeys = Array.isArray(translation.categories)
-        ? [...new Set(translation.categories.map((catId) => {
-            switch (catId) {
-              case 8:
-                return "updates";
-              case 7:
-                return "virtual-currency";
-              case 6:
-                return "financial-investment";
-              default:
-                return "updates";
-            }
-          }))] 
+      const categorySlugs = Array.isArray(translation.categories)
+        ? [...new Set(translation.categories.map((cat) => cat.post_categories_slug))]
         : ["updates"];
+
+      const categoryTitles = categorySlugs
+        .map((slug) => {
+          const category = categories.find((cat) => cat.slug === slug);
+          if (!category) {
+            console.warn(`Category slug ${slug} not found for post ${postSlug}`);
+            return lang === "vi-VN" ? "Không phân loại" : lang === "zh-CN" ? "未分类" : "Uncategorized";
+          }
+          const catTranslation = category.translations.find(
+            (t) => t.languages_code === lang
+          );
+          return catTranslation
+            ? catTranslation.title
+            : lang === "vi-VN"
+            ? "Không phân loại"
+            : lang === "zh-CN"
+            ? "未分类"
+            : "Uncategorized";
+        })
+        .filter((title) => title);
 
       selectedPost = {
         id: item.slug,
@@ -224,7 +223,8 @@ async function getPostDetail(
               },
             ]
           : [{ url: "/placeholder.jpg" }],
-        category: categoryKeys,
+        category: categorySlugs,
+        categoryTitles,
         author: "The Maxima",
         authorAvatar: IMAGES.LogoMaxima.src,
         readTime: 8,
@@ -302,7 +302,7 @@ const BlogPostDetail: NextPage<PostPageProps> = ({ params }) => {
   const router = useRouter();
   const { mytheme } = useSelector((state: RootState) => state.theme);
   const [post, setPost] = useState<Post | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
+  // Removed unused categories state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -337,10 +337,9 @@ const BlogPostDetail: NextPage<PostPageProps> = ({ params }) => {
     const fetchPostDetail = async () => {
       setLoading(true);
       try {
-        const { post, categories } = await getPostDetail(locale, postId);
+        const { post } = await getPostDetail(locale, postId);
         if (post) {
           setPost(post);
-          setCategories(categories);
         } else {
           setError("Post not found");
         }
@@ -517,8 +516,9 @@ const BlogPostDetail: NextPage<PostPageProps> = ({ params }) => {
                           mytheme === "dark" ? "prose-invert" : ""
                         }`}
                         style={{ lineHeight: "1.8", fontSize: "1.05rem" }}
-                        dangerouslySetInnerHTML={{ __html: post.content }}
-                      />
+                      >
+                        {post.content ? parse(DOMPurify.sanitize(post.content)) : ""}
+                      </div>
                       <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div className="flex flex-wrap items-center gap-4">
@@ -582,23 +582,18 @@ const BlogPostDetail: NextPage<PostPageProps> = ({ params }) => {
                       styles={{ body: { padding: "24px" } }}>
                       <div className="flex items-center flex-wrap gap-2">
                         <TagsOutlined className="mr-2 text-lg" />
-                        {post.category.map((categorySlug, index) => {
-                          const category = categories.find(
-                            (cat) => cat.key === categorySlug
-                          );
-                          return category ? (
-                            <Tag
-                              key={`category-${index}`}
-                              className={`rounded-full px-3 py-1 capitalize cursor-pointer transition-all ${
-                                mytheme === "light"
-                                  ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                  : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                              }`}
-                            >
-                              {category.name}
-                            </Tag>
-                          ) : null;
-                        })}
+                        {post.categoryTitles.map((categoryTitle, index) => (
+                          <Tag
+                            key={`category-${index}`}
+                            className={`rounded-full px-3 py-1 capitalize cursor-pointer transition-all ${
+                              mytheme === "light"
+                                ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                            }`}
+                          >
+                            {categoryTitle}
+                          </Tag>
+                        ))}
                       </div>
                     </Card>
                   </div>
